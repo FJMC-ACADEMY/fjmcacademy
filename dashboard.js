@@ -570,57 +570,83 @@ async function renderPDFPage(pdf, pageNumber, container) {
 
     const page = await pdf.getPage(pageNumber);
 
-    /* Page wrapper */
+    /* ===============================
+       PAGE WRAPPER
+       =============================== */
+
     const wrapper = document.createElement("div");
+
     wrapper.className = "pdf-page-wrapper";
 
     wrapper.style.position = "relative";
+    wrapper.style.width = "100%";
+    wrapper.style.display = "flex";
+    wrapper.style.justifyContent = "center";
+    wrapper.style.alignItems = "flex-start";
 
-    /* Canvas */
-    const canvas = document.createElement("canvas");
-    canvas.className = "pdf-page";
-
-    wrapper.appendChild(canvas);
 
     /* ===============================
-       WATERMARK
+       CANVAS
        =============================== */
 
-    const watermark = document.createElement("div");
+    const canvas = document.createElement("canvas");
 
-    watermark.className = "pdf-page-watermark";
+    canvas.className = "pdf-page";
 
-    watermark.innerHTML = `
-        <div>FJMC Academy</div>
-        <div>${loggedInEmail}</div>
-    `;
+    canvas.style.display = "block";
+    canvas.style.margin = "0 auto";
 
-    wrapper.appendChild(watermark);
+
+    wrapper.appendChild(canvas);
 
     container.appendChild(wrapper);
 
 
-    /* Original PDF size */
-    const viewportOriginal = page.getViewport({
+    /* ===============================
+       ORIGINAL PDF SIZE
+       =============================== */
+
+    const originalViewport = page.getViewport({
         scale: 1
     });
 
 
-    /* Available screen width */
-    const availableWidth =
-        Math.min(
-            window.innerWidth - 20,
-            1000
-        );
+    /* ===============================
+       SCREEN WIDTH
+       =============================== */
+
+    const screenWidth = window.innerWidth;
 
 
-    let scale =
-        availableWidth / viewportOriginal.width;
+    /*
+       Mobile:
+       Keep small side margin.
+
+       Laptop:
+       Maximum 1000px.
+    */
+
+    let availableWidth;
 
 
-    /* High quality */
-    const devicePixelRatio =
-        Math.min(window.devicePixelRatio || 1, 2);
+    if (screenWidth <= 600) {
+
+        availableWidth = screenWidth - 20;
+
+    } else {
+
+        availableWidth =
+            Math.min(screenWidth - 30, 1000);
+
+    }
+
+
+    /* ===============================
+       SCALE
+       =============================== */
+
+    const scale =
+        availableWidth / originalViewport.width;
 
 
     const viewport = page.getViewport({
@@ -628,21 +654,36 @@ async function renderPDFPage(pdf, pageNumber, container) {
     });
 
 
+    /* ===============================
+       HIGH DPI
+       =============================== */
+
+    const devicePixelRatio =
+        Math.min(window.devicePixelRatio || 1, 2);
+
+
     canvas.width =
-        Math.floor(viewport.width * devicePixelRatio);
+        Math.round(viewport.width * devicePixelRatio);
 
     canvas.height =
-        Math.floor(viewport.height * devicePixelRatio);
+        Math.round(viewport.height * devicePixelRatio);
 
+
+    /* CSS DISPLAY SIZE */
 
     canvas.style.width =
-        Math.floor(viewport.width) + "px";
+        Math.round(viewport.width) + "px";
 
     canvas.style.height =
-        Math.floor(viewport.height) + "px";
+        Math.round(viewport.height) + "px";
 
 
-    const context = canvas.getContext("2d");
+    /* ===============================
+       RENDER
+       =============================== */
+
+    const context =
+        canvas.getContext("2d");
 
 
     const renderContext = {
@@ -667,7 +708,6 @@ async function renderPDFPage(pdf, pageNumber, container) {
 
     await page.render(renderContext).promise;
 }
-
 /* =========================================================
    CLOSE PDF
    ========================================================= */
