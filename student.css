@@ -701,3 +701,80 @@ video::-webkit-media-controls-enclosure {
     }
 
 }
+/* =========================================================
+   WATERMARK ON EVERY PDF PAGE
+   ========================================================= */
+
+.pdf-page-wrapper {
+    position: relative !important;
+
+    display: flex;
+
+    justify-content: center;
+
+    width: 100%;
+}
+
+
+/* Watermark layer */
+
+.pdf-page-watermark {
+
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform:
+        translate(-50%, -50%)
+        rotate(-30deg);
+
+    z-index: 20;
+
+    pointer-events: none;
+
+    user-select: none;
+    -webkit-user-select: none;
+
+    text-align: center;
+
+    white-space: nowrap;
+
+    font-family: Arial, sans-serif;
+
+    font-size: 28px;
+
+    font-weight: bold;
+
+    line-height: 1.7;
+
+    letter-spacing: 2px;
+
+    color: rgba(255, 255, 255, 0.32);
+
+    text-shadow:
+        1px 1px 3px rgba(0, 0, 0, 0.85),
+        -1px -1px 3px rgba(0, 0, 0, 0.85);
+}
+
+
+.pdf-page-watermark div {
+    display: block;
+}
+
+
+/* Mobile */
+
+@media (max-width: 600px) {
+
+    .pdf-page-watermark {
+
+        font-size: 19px;
+
+        letter-spacing: 1px;
+
+        color: rgba(255, 255, 255, 0.30);
+
+    }
+
+}
