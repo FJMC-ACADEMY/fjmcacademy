@@ -323,6 +323,63 @@ function createLocalVideo(videoURL, title) {
         </div>
     `;
 }
+// =====================================================
+// PROTECTED PDF VIEWER - PDF.JS
+// WEBSITE ONLY / NO NATIVE PDF VIEWER
+// =====================================================
+
+let pdfViewerLoaded = false;
+let pdfjsLibGlobal = null;
+
+
+// =====================================================
+// LOAD PDF.JS
+// =====================================================
+
+async function loadPDFJS() {
+
+    if (pdfViewerLoaded && pdfjsLibGlobal) {
+        return pdfjsLibGlobal;
+    }
+
+    if (!window.pdfjsLib) {
+
+        await new Promise(function(resolve, reject) {
+
+            const script = document.createElement("script");
+
+            script.src =
+                "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs";
+
+            script.type = "module";
+
+            script.onload = resolve;
+
+            script.onerror = reject;
+
+            document.head.appendChild(script);
+
+        });
+
+    }
+
+    pdfjsLibGlobal = window.pdfjsLib;
+
+    if (!pdfjsLibGlobal) {
+
+        throw new Error(
+            "PDF viewer could not be loaded."
+        );
+
+    }
+
+    pdfjsLibGlobal.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
+
+    pdfViewerLoaded = true;
+
+    return pdfjsLibGlobal;
+}
 
 
 // =====================================================
@@ -331,16 +388,25 @@ function createLocalVideo(videoURL, title) {
 
 function createProtectedPDF(pdfURL, title) {
 
+    const safeURL =
+        encodeURIComponent(pdfURL);
+
+    const safeTitle =
+        encodeURIComponent(title);
+
     return `
+
         <div class="protected-pdf">
 
-            <h4>📕 ${title}</h4>
+            <h4>
+                📕 ${title}
+            </h4>
 
             <button
                 class="pdf-open-btn"
                 onclick="openPDFViewer(
-                    '${pdfURL}',
-                    '${title.replace(/'/g, "\\'")}'
+                    decodeURIComponent('${safeURL}'),
+                    decodeURIComponent('${safeTitle}')
                 )">
 
                 📄 Open PDF
@@ -348,16 +414,18 @@ function createProtectedPDF(pdfURL, title) {
             </button>
 
         </div>
+
     `;
 }
 
 
 // =====================================================
-// FULL SCREEN PDF VIEWER
+// OPEN PDF VIEWER
 // =====================================================
 
-function openPDFViewer(pdfURL, title) {
+async function openPDFViewer(pdfURL, title) {
 
+    // Remove old viewer
     const oldViewer =
         document.getElementById("pdfFullscreen");
 
@@ -366,10 +434,16 @@ function openPDFViewer(pdfURL, title) {
     }
 
 
+    // Prevent body scrolling
+    document.body.classList.add("pdf-viewer-open");
+
+
+    // Create viewer
     const overlay =
         document.createElement("div");
 
-    overlay.id = "pdfFullscreen";
+    overlay.id =
+        "pdfFullscreen";
 
 
     overlay.innerHTML = `
@@ -380,10 +454,9 @@ function openPDFViewer(pdfURL, title) {
                 📕 ${title}
             </span>
 
-
             <button
                 class="pdf-close-btn"
-                onclick="closePDFViewer()">
+                id="pdfCloseButton">
 
                 ✕ Close
 
@@ -392,15 +465,26 @@ function openPDFViewer(pdfURL, title) {
         </div>
 
 
-        <iframe
+        <div
+            class="pdf-scroll-area"
+            id="pdfScrollArea"
+        >
 
-            src="${pdfURL}#toolbar=0&navpanes=0&scrollbar=1"
+            <div
+                class="pdf-loading"
+                id="pdfLoading"
+            >
 
-            title="${title}"
+                Loading PDF...
 
-            oncontextmenu="return false;">
+            </div>
 
-        </iframe>
+            <div
+                class="pdf-pages"
+                id="pdfPages"
+            ></div>
+
+        </div>
 
     `;
 
@@ -408,13 +492,242 @@ function openPDFViewer(pdfURL, title) {
     document.body.appendChild(overlay);
 
 
-    // Try browser fullscreen
-    if (overlay.requestFullscreen) {
+    // Close button
+    document
+        .getElementById("pdfCloseButton")
+        .addEventListener(
+            "click",
+            closePDFViewer
+        );
 
-        overlay.requestFullscreen()
-            .catch(function() {});
+
+    // Disable right click inside PDF
+    overlay.addEventListener(
+        "contextmenu",
+        function(e) {
+            e.preventDefault();
+        }
+    );
+
+
+    // Disable copy
+    overlay.addEventListener(
+        "copy",
+        function(e) {
+            e.preventDefault();
+        }
+    );
+
+
+    // Disable text selection
+    overlay.addEventListener(
+        "selectstart",
+        function(e) {
+            e.preventDefault();
+        }
+    );
+
+
+    try {
+
+        const pdfjsLib =
+            await loadPDFJS();
+
+
+        const loadingTask =
+            pdfjsLib.getDocument({
+                url: pdfURL
+            });
+
+
+        const pdf =
+            await loadingTask.promise;
+
+
+        const pagesContainer =
+            document.getElementById("pdfPages");
+
+        const loading =
+            document.getElementById("pdfLoading");
+
+
+        if (loading) {
+            loading.remove();
+        }
+
+
+        // Render every page
+        for (
+            let pageNumber = 1;
+            pageNumber <= pdf.numPages;
+            pageNumber++
+        ) {
+
+            await renderPDFPage(
+                pdf,
+                pageNumber,
+                pagesContainer
+            );
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "PDF ERROR:",
+            error
+        );
+
+
+        const loading =
+            document.getElementById("pdfLoading");
+
+
+        if (loading) {
+
+            loading.innerHTML = `
+
+                <div class="pdf-error">
+
+                    ❌ PDF could not be opened.
+
+                    <br><br>
+
+                    Please check the PDF URL.
+
+                </div>
+
+            `;
+
+        }
 
     }
+
+}
+
+
+// =====================================================
+// RENDER ONE PDF PAGE
+// =====================================================
+
+async function renderPDFPage(
+    pdf,
+    pageNumber,
+    container
+) {
+
+    const page =
+        await pdf.getPage(pageNumber);
+
+
+    const pageWrapper =
+        document.createElement("div");
+
+    pageWrapper.className =
+        "pdf-page-wrapper";
+
+
+    const canvas =
+        document.createElement("canvas");
+
+    canvas.className =
+        "pdf-page";
+
+
+    const context =
+        canvas.getContext("2d");
+
+
+    // Get available width
+    const scrollArea =
+        document.getElementById(
+            "pdfScrollArea"
+        );
+
+
+    const availableWidth =
+        Math.min(
+            scrollArea.clientWidth - 24,
+            1000
+        );
+
+
+    const originalViewport =
+        page.getViewport({
+            scale: 1
+        });
+
+
+    const scale =
+        availableWidth /
+        originalViewport.width;
+
+
+    const viewport =
+        page.getViewport({
+            scale: scale
+        });
+
+
+    // High quality on mobile
+    const deviceScale =
+        Math.min(
+            window.devicePixelRatio || 1,
+            2
+        );
+
+
+    canvas.width =
+        Math.floor(
+            viewport.width *
+            deviceScale
+        );
+
+
+    canvas.height =
+        Math.floor(
+            viewport.height *
+            deviceScale
+        );
+
+
+    canvas.style.width =
+        viewport.width + "px";
+
+
+    canvas.style.height =
+        viewport.height + "px";
+
+
+    context.setTransform(
+        deviceScale,
+        0,
+        0,
+        deviceScale,
+        0,
+        0
+    );
+
+
+    pageWrapper.appendChild(
+        canvas
+    );
+
+
+    container.appendChild(
+        pageWrapper
+    );
+
+
+    await page.render({
+
+        canvasContext: context,
+
+        viewport: viewport
+
+    }).promise;
+
 }
 
 
@@ -425,15 +738,9 @@ function openPDFViewer(pdfURL, title) {
 function closePDFViewer() {
 
     const viewer =
-        document.getElementById("pdfFullscreen");
-
-
-    if (document.fullscreenElement) {
-
-        document.exitFullscreen()
-            .catch(function() {});
-
-    }
+        document.getElementById(
+            "pdfFullscreen"
+        );
 
 
     if (viewer) {
@@ -441,28 +748,77 @@ function closePDFViewer() {
         viewer.remove();
 
     }
+
+
+    document.body.classList.remove(
+        "pdf-viewer-open"
+    );
+
 }
 
 
 // =====================================================
-// CLOSE PDF WHEN ESCAPE IS PRESSED
+// ESCAPE KEY
 // =====================================================
 
-document.addEventListener("fullscreenchange", function() {
-
-    if (
-        !document.fullscreenElement &&
-        document.getElementById("pdfFullscreen")
-    ) {
+document.addEventListener(
+    "keydown",
+    function(e) {
 
         const viewer =
-            document.getElementById("pdfFullscreen");
+            document.getElementById(
+                "pdfFullscreen"
+            );
 
-        viewer.remove();
+
+        if (
+            e.key === "Escape" &&
+            viewer
+        ) {
+
+            closePDFViewer();
+
+        }
+
+
+        // Block printing
+        if (
+            e.ctrlKey &&
+            e.key.toLowerCase() === "p"
+        ) {
+
+            e.preventDefault();
+
+        }
+
+
+        // Block save
+        if (
+            e.ctrlKey &&
+            e.key.toLowerCase() === "s"
+        ) {
+
+            e.preventDefault();
+
+        }
 
     }
+);
 
-});
+
+// =====================================================
+// PRINT BLOCK
+// =====================================================
+
+window.addEventListener(
+    "beforeprint",
+    function(e) {
+
+        e.preventDefault();
+
+    }
+);
+
 
 
 // ================= SHOW COURSES =================
