@@ -466,36 +466,36 @@ async function openPDFViewer(pdfURL, title) {
     overlay.id = "pdfFullscreen";
 
 
-    overlay.innerHTML = `
+  overlay.innerHTML = `
 
-        <div class="pdf-header">
+    <div class="pdf-header">
 
-            <div class="pdf-title">
-                ${title}
-            </div>
-
-            <button id="closePDF">
-                ✕ Close
-            </button>
-
+        <div class="pdf-title">
+            ${title}
         </div>
 
-        <div class="pdf-watermark">
-                     <span>FJMC Academy</span>
-                     <span>${loggedInEmail}</span>
+        <button id="closePDF">
+            ✕ Close
+        </button>
+
+    </div>
+
+    <!-- SCREEN WATERMARK -->
+    <div class="pdf-screen-watermark">
+        <div>FJMC Academy</div>
+        <div>${loggedInEmail}</div>
+    </div>
+
+    <div id="pdfScrollArea" class="pdf-scroll-area">
+
+        <div id="pdfLoading" class="pdf-loading">
+            Loading PDF...
         </div>
 
-        <div id="pdfScrollArea" class="pdf-scroll-area">
+        <div id="pdfPages" class="pdf-pages"></div>
 
-            <div id="pdfLoading" class="pdf-loading">
-                Loading PDF...
-            </div>
-
-            <div id="pdfPages" class="pdf-pages"></div>
-
-        </div>
-
-    `;
+    </div>
+`;
 
 
     document.body.appendChild(overlay);
