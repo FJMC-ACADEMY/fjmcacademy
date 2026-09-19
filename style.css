@@ -18,46 +18,29 @@ body {
     background: #ffffff;
     line-height: 1.6;
 }
-
-
-/* =========================
-   NAVBAR
-========================= */
+/* ================= NAVBAR ================= */
 
 .navbar {
     height: 75px;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
-
     padding: 0 7%;
-
     background: white;
-
     position: sticky;
     top: 0;
-
-    z-index: 1000;
-
+    z-index: 10000;
     box-shadow: 0 2px 15px rgba(0,0,0,0.08);
 }
-
-
-/* LOGO */
 
 .logo {
     font-size: 25px;
     font-weight: 800;
-    white-space: nowrap;
 }
 
 .logo span {
     color: #e63946;
 }
-
-
-/* DESKTOP NAV */
 
 .navbar nav {
     display: flex;
@@ -69,36 +52,24 @@ body {
     text-decoration: none;
     color: #182033;
     font-weight: 600;
-    transition: 0.3s;
 }
 
 .navbar nav a:hover {
     color: #e63946;
 }
 
-
-/* MOBILE MENU BUTTON */
-
 .menu-btn {
     display: none;
-
     border: none;
     background: transparent;
-
     font-size: 30px;
-    line-height: 1;
-
     cursor: pointer;
-
     color: #182033;
-
     padding: 5px;
 }
 
 
-/* =========================
-   MOBILE NAVBAR
-========================= */
+/* ================= MOBILE NAVBAR ================= */
 
 @media (max-width: 900px) {
 
@@ -106,8 +77,10 @@ body {
         padding: 0 5%;
     }
 
-
-    /* HIDE NAVIGATION INITIALLY */
+    .menu-btn {
+        display: block;
+        z-index: 10001;
+    }
 
     .navbar nav {
         display: none;
@@ -119,52 +92,51 @@ body {
 
         width: 100%;
 
+        background: white;
+
         flex-direction: column;
+
         align-items: stretch;
 
         gap: 0;
 
         padding: 10px 0;
 
-        background: white;
-
-        box-shadow: 0 8px 15px rgba(0,0,0,0.10);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     }
-
-
-    /* OPEN MENU */
 
     .navbar nav.active {
-        display: flex;
+        display: flex !important;
     }
-
-
-    /* MOBILE LINKS */
 
     .navbar nav a {
         display: block;
-
         width: 100%;
-
-        padding: 15px 7%;
+        padding: 16px 7%;
 
         border-bottom: 1px solid #eeeeee;
 
-        font-size: 16px;
-    }
-
-
-    .navbar nav a:last-child {
-        border-bottom: none;
-    }
-
-
-    /* MENU BUTTON */
-
-    .menu-btn {
-        display: block;
+        font-size: 17px;
     }
 }
+
+
+@media (max-width: 600px) {
+
+    .navbar {
+        height: 65px;
+    }
+
+    .navbar nav {
+        top: 65px;
+    }
+
+    .logo {
+        font-size: 22px;
+    }
+
+}
+
 
 
 /* =========================
