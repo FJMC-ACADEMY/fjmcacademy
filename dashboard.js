@@ -570,27 +570,43 @@ async function renderPDFPage(pdf, pageNumber, container) {
 
     const page = await pdf.getPage(pageNumber);
 
-
+    /* Page wrapper */
     const wrapper = document.createElement("div");
-
     wrapper.className = "pdf-page-wrapper";
 
+    wrapper.style.position = "relative";
 
+    /* Canvas */
     const canvas = document.createElement("canvas");
-
     canvas.className = "pdf-page";
 
-
     wrapper.appendChild(canvas);
+
+    /* ===============================
+       WATERMARK
+       =============================== */
+
+    const watermark = document.createElement("div");
+
+    watermark.className = "pdf-page-watermark";
+
+    watermark.innerHTML = `
+        <div>FJMC Academy</div>
+        <div>${loggedInEmail}</div>
+    `;
+
+    wrapper.appendChild(watermark);
 
     container.appendChild(wrapper);
 
 
+    /* Original PDF size */
     const viewportOriginal = page.getViewport({
         scale: 1
     });
 
 
+    /* Available screen width */
     const availableWidth =
         Math.min(
             window.innerWidth - 20,
@@ -602,8 +618,7 @@ async function renderPDFPage(pdf, pageNumber, container) {
         availableWidth / viewportOriginal.width;
 
 
-    /* Good quality on mobile/laptop */
-
+    /* High quality */
     const devicePixelRatio =
         Math.min(window.devicePixelRatio || 1, 2);
 
@@ -647,14 +662,11 @@ async function renderPDFPage(pdf, pageNumber, container) {
                     0
                 ]
                 : null
-
     };
 
 
     await page.render(renderContext).promise;
-
 }
-
 
 /* =========================================================
    CLOSE PDF
