@@ -480,6 +480,10 @@ async function openPDFViewer(pdfURL, title) {
 
         </div>
 
+        <div class="pdf-watermark">
+    <span>FJMC Academy</span>
+    <span>${loggedInEmail}</span>
+</div>
 
         <div id="pdfScrollArea" class="pdf-scroll-area">
 
