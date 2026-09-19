@@ -50,7 +50,7 @@ const COURSES = {
             {
                 title: "Real Analysis Notes",
                 type: "pdf",
-                url: "./321581555.pdf"
+                url: "321581555.PDF"
             },
 
             {
