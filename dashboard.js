@@ -1,210 +1,396 @@
+// =====================================================
+// FJMC ACADEMY - STUDENT DASHBOARD
+// =====================================================
+
+
+// =====================================================
+// STUDENTS
+// =====================================================
+
 const STUDENTS = {
+
     "rahul@gmail.com": {
+
         password: "Rahul@123",
+
         name: "Rahul",
-        courses: ["real-analysis"]
+
+        courses: [
+            "real-analysis"
+        ]
+
     },
+
 
     "amit@gmail.com": {
+
         password: "Amit@456",
+
         name: "Amit",
-        courses: ["linear-algebra", "calculus"]
+
+        courses: [
+            "linear-algebra",
+            "calculus"
+        ]
+
     },
 
+
     "neha@gmail.com": {
+
         password: "Neha@789",
+
         name: "Neha",
-        courses: ["real-analysis", "calculus"]
+
+        courses: [
+            "real-analysis",
+            "calculus"
+        ]
+
     }
+
 };
 
 
-// ================= COURSE DATA =================
+// =====================================================
+// COURSE DATA
+// =====================================================
 
 const COURSES = {
 
+
     "real-analysis": {
+
         title: "Real Analysis",
-        description: "Complete Real Analysis Course",
+
+        description:
+            "Complete Real Analysis Course",
 
         lessons: [
 
             {
                 title: "Lecture 1 - Introduction",
+
                 type: "video",
-                url: "https://www.youtube.com/embed/hhjuLjGMxgw?rel=0"
+
+                url:
+                    "https://www.youtube.com/embed/hhjuLjGMxgw?rel=0"
             },
+
 
             {
                 title: "Lecture 2 - Sequences",
+
                 type: "video",
-                url: "https://www.youtube.com/embed/rkKZIMPecRA"
+
+                url:
+                    "https://www.youtube.com/embed/rkKZIMPecRA"
             },
+
 
             {
                 title: "Lecture 3 - Local Video",
+
                 type: "mp4",
-                url: "real-analysis-lecture-3.mp4"
+
+                url:
+                    "real-analysis-lecture-3.mp4"
             },
+
+
+            // IMPORTANT:
+            // These PDFs must exist in the same folder
+            // as dashboard.html.
 
             {
                 title: "Real Analysis Notes",
+
                 type: "pdf",
-                url: "/fjmcacademy/321581555.PDF"
+
+                url:
+                    "./321581555.PDF"
             },
+
 
             {
                 title: "Lecture 2",
+
                 type: "pdf",
-                url: "/fjmcacademy/ch03.pdf"
+
+                url:
+                    "./ch03.pdf"
             },
+
 
             {
                 title: "Live Class - Real Analysis",
+
                 type: "live",
-                url: "https://meet.google.com/YOUR-LIVE-CLASS-LINK"
+
+                url:
+                    "https://meet.google.com/YOUR-LIVE-CLASS-LINK"
             }
+
         ]
+
     },
 
 
+    // =================================================
+    // LINEAR ALGEBRA
+    // =================================================
+
     "linear-algebra": {
+
         title: "Linear Algebra",
-        description: "Complete Linear Algebra Course",
+
+        description:
+            "Complete Linear Algebra Course",
 
         lessons: [
 
             {
                 title: "Lecture 1",
+
                 type: "video",
-                url: "https://www.youtube.com/embed/YOUR_VIDEO_ID"
+
+                url:
+                    "https://www.youtube.com/embed/YOUR_VIDEO_ID"
             },
+
 
             {
                 title: "Linear Algebra Notes",
+
                 type: "pdf",
-                url: "pdf/linear-algebra-notes.pdf"
+
+                url:
+                    "./pdf/linear-algebra-notes.pdf"
             },
+
 
             {
                 title: "Live Class - Linear Algebra",
+
                 type: "live",
-                url: "https://meet.google.com/YOUR-LIVE-CLASS-LINK"
+
+                url:
+                    "https://meet.google.com/YOUR-LIVE-CLASS-LINK"
             }
+
         ]
+
     },
 
 
+    // =================================================
+    // CALCULUS
+    // =================================================
+
     "calculus": {
+
         title: "Calculus",
-        description: "Complete Calculus Course",
+
+        description:
+            "Complete Calculus Course",
 
         lessons: [
 
             {
                 title: "Lecture 1",
+
                 type: "video",
-                url: "https://youtube.com/shorts/m7BFuuMqP4I?si=P3wroZUVHHmmuj-8"
+
+                url:
+                    "https://youtube.com/embed/m7BFuuMqP4I"
             },
+
 
             {
                 title: "Lecture 2 - Local Video",
+
                 type: "mp4",
-                url: "videos/calculus-lecture-2.mp4"
+
+                url:
+                    "videos/calculus-lecture-2.mp4"
             },
+
 
             {
                 title: "Calculus Notes",
+
                 type: "pdf",
-                url: "./ch03.pdf"
+
+                url:
+                    "./ch03.pdf"
             },
-            {
-                title: "Calculus Notes",
-                type: "pdf",
-                url: "https://drive.google.com/file/d/1MZNN3vbH7e8x7vupmGMHevUhbx7FlDzq/view?usp=drive_link"
-            },
-            
+
+
+            // Google Drive /view URL removed.
+            // PDF.js needs a direct PDF file URL.
+
             {
                 title: "Live Class - Calculus",
+
                 type: "live",
-                url: "https://meet.google.com/YOUR-LIVE-CLASS-LINK"
+
+                url:
+                    "https://meet.google.com/YOUR-LIVE-CLASS-LINK"
             }
+
         ]
+
     }
+
 };
 
 
-// ================= CHECK LOGIN =================
+// =====================================================
+// CHECK LOGIN
+// =====================================================
 
 const loggedInStudent =
     sessionStorage.getItem("loggedInStudent");
 
+
 if (!loggedInStudent) {
-    window.location.href = "login.html";
+
+    window.location.href =
+        "login.html";
+
+    throw new Error("Not logged in.");
+
 }
 
-const student = STUDENTS[loggedInStudent];
+
+const student =
+    STUDENTS[loggedInStudent];
+
 
 if (!student) {
 
-    sessionStorage.removeItem("loggedInStudent");
+    sessionStorage.removeItem(
+        "loggedInStudent"
+    );
 
-    window.location.href = "login.html";
+    window.location.href =
+        "login.html";
+
+    throw new Error("Invalid student.");
+
 }
 
 
-// ================= STUDENT NAME =================
+// =====================================================
+// STUDENT NAME
+// =====================================================
 
-document.getElementById("studentName").textContent =
-    "Welcome, " + student.name;
+document
+    .getElementById("studentName")
+    .textContent =
+        "Welcome, " + student.name;
 
 
-// ================= COURSE CONTAINER =================
+// =====================================================
+// COURSE CONTAINER
+// =====================================================
 
 const container =
-    document.getElementById("coursesContainer");
+    document.getElementById(
+        "coursesContainer"
+    );
 
 
 // =====================================================
 // BASIC PROTECTION
 // =====================================================
 
-document.addEventListener("contextmenu", function(e) {
-    e.preventDefault();
-});
+document.addEventListener(
+    "contextmenu",
+    function(e) {
 
-document.addEventListener("copy", function(e) {
-    e.preventDefault();
-});
-
-document.addEventListener("cut", function(e) {
-    e.preventDefault();
-});
-
-document.addEventListener("selectstart", function(e) {
-    e.preventDefault();
-});
-
-
-// Keyboard shortcuts
-document.addEventListener("keydown", function(e) {
-
-    if (
-        e.ctrlKey &&
-        (
-            e.key.toLowerCase() === "s" ||
-            e.key.toLowerCase() === "p" ||
-            e.key.toLowerCase() === "u" ||
-            e.key.toLowerCase() === "c"
-        )
-    ) {
         e.preventDefault();
-    }
 
-    if (e.key === "PrintScreen") {
-        e.preventDefault();
     }
-});
+);
+
+
+document.addEventListener(
+    "copy",
+    function(e) {
+
+        e.preventDefault();
+
+    }
+);
+
+
+document.addEventListener(
+    "cut",
+    function(e) {
+
+        e.preventDefault();
+
+    }
+);
+
+
+document.addEventListener(
+    "selectstart",
+    function(e) {
+
+        e.preventDefault();
+
+    }
+);
+
+
+// =====================================================
+// KEYBOARD PROTECTION
+// =====================================================
+
+document.addEventListener(
+    "keydown",
+    function(e) {
+
+        const key =
+            e.key.toLowerCase();
+
+
+        if (
+            e.ctrlKey &&
+            (
+                key === "s" ||
+                key === "p" ||
+                key === "u" ||
+                key === "c"
+            )
+        ) {
+
+            e.preventDefault();
+
+        }
+
+
+        if (
+            e.ctrlKey &&
+            e.shiftKey &&
+            key === "i"
+        ) {
+
+            e.preventDefault();
+
+        }
+
+
+        if (e.key === "PrintScreen") {
+
+            e.preventDefault();
+
+        }
+
+    }
+);
 
 
 // =====================================================
@@ -214,30 +400,42 @@ document.addEventListener("keydown", function(e) {
 function previewLocalVideo(screen) {
 
     const video =
-        screen.querySelector(".local-video");
+        screen.querySelector(
+            ".local-video"
+        );
+
 
     if (!video) return;
 
+
     video.muted = true;
 
-    video.play().catch(function() {});
+    video.play().catch(
+        function() {}
+    );
+
 }
 
 
 // =====================================================
-// STOP PREVIEW
+// STOP LOCAL VIDEO PREVIEW
 // =====================================================
 
 function stopLocalPreview(screen) {
 
     const video =
-        screen.querySelector(".local-video");
+        screen.querySelector(
+            ".local-video"
+        );
+
 
     if (!video) return;
+
 
     video.pause();
 
     video.currentTime = 0;
+
 }
 
 
@@ -248,37 +446,57 @@ function stopLocalPreview(screen) {
 function openLocalVideo(screen) {
 
     const video =
-        screen.querySelector(".local-video");
+        screen.querySelector(
+            ".local-video"
+        );
+
 
     if (!video) return;
 
-    screen.classList.add("local-video-open");
+
+    screen.classList.add(
+        "local-video-open"
+    );
+
 
     video.muted = false;
 
     video.controls = true;
 
-    video.play().catch(function() {});
+    video.play().catch(
+        function() {}
+    );
+
 }
 
 
 // =====================================================
-// LOCAL MP4 VIDEO
+// LOCAL MP4
 // =====================================================
 
-function createLocalVideo(videoURL, title) {
+function createLocalVideo(
+    videoURL,
+    title
+) {
 
     return `
+
         <div class="local-video-player">
 
             <div
                 class="local-video-screen"
 
-                onmouseenter="previewLocalVideo(this)"
+                onmouseenter="
+                    previewLocalVideo(this)
+                "
 
-                onmouseleave="stopLocalPreview(this)"
+                onmouseleave="
+                    stopLocalPreview(this)
+                "
 
-                onclick="openLocalVideo(this)"
+                onclick="
+                    openLocalVideo(this)
+                "
             >
 
                 <video
@@ -292,11 +510,16 @@ function createLocalVideo(videoURL, title) {
 
                     controls
 
-                    controlsList="nodownload noplaybackrate"
+                    controlsList="
+                        nodownload
+                        noplaybackrate
+                    "
 
                     disablePictureInPicture
 
-                    oncontextmenu="return false;"
+                    oncontextmenu="
+                        return false;
+                    "
                 >
 
                     <source
@@ -316,69 +539,14 @@ function createLocalVideo(videoURL, title) {
             </div>
 
 
-            <h4 class="local-video-title">
+            <h4 class="video-title">
                 🎥 ${title}
             </h4>
 
         </div>
+
     `;
-}
-// =====================================================
-// PROTECTED PDF VIEWER - PDF.JS
-// WEBSITE ONLY / NO NATIVE PDF VIEWER
-// =====================================================
 
-let pdfViewerLoaded = false;
-let pdfjsLibGlobal = null;
-
-
-// =====================================================
-// LOAD PDF.JS
-// =====================================================
-
-async function loadPDFJS() {
-
-    if (pdfViewerLoaded && pdfjsLibGlobal) {
-        return pdfjsLibGlobal;
-    }
-
-    if (!window.pdfjsLib) {
-
-        await new Promise(function(resolve, reject) {
-
-            const script = document.createElement("script");
-
-            script.src =
-                "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs";
-
-            script.type = "module";
-
-            script.onload = resolve;
-
-            script.onerror = reject;
-
-            document.head.appendChild(script);
-
-        });
-
-    }
-
-    pdfjsLibGlobal = window.pdfjsLib;
-
-    if (!pdfjsLibGlobal) {
-
-        throw new Error(
-            "PDF viewer could not be loaded."
-        );
-
-    }
-
-    pdfjsLibGlobal.GlobalWorkerOptions.workerSrc =
-        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
-
-    pdfViewerLoaded = true;
-
-    return pdfjsLibGlobal;
 }
 
 
@@ -386,13 +554,18 @@ async function loadPDFJS() {
 // PDF BUTTON
 // =====================================================
 
-function createProtectedPDF(pdfURL, title) {
+function createProtectedPDF(
+    pdfURL,
+    title
+) {
 
-    const safeURL =
+    const encodedURL =
         encodeURIComponent(pdfURL);
 
-    const safeTitle =
+
+    const encodedTitle =
         encodeURIComponent(title);
+
 
     return `
 
@@ -402,12 +575,16 @@ function createProtectedPDF(pdfURL, title) {
                 📕 ${title}
             </h4>
 
+
             <button
+                type="button"
+
                 class="pdf-open-btn"
-                onclick="openPDFViewer(
-                    decodeURIComponent('${safeURL}'),
-                    decodeURIComponent('${safeTitle}')
-                )">
+
+                data-pdf-url="${encodedURL}"
+
+                data-pdf-title="${encodedTitle}"
+            >
 
                 📄 Open PDF
 
@@ -416,37 +593,92 @@ function createProtectedPDF(pdfURL, title) {
         </div>
 
     `;
+
 }
+
+
+// =====================================================
+// PDF BUTTON EVENT
+// =====================================================
+
+document.addEventListener(
+    "click",
+    function(e) {
+
+        const button =
+            e.target.closest(
+                ".pdf-open-btn"
+            );
+
+
+        if (!button) return;
+
+
+        const pdfURL =
+            decodeURIComponent(
+                button.dataset.pdfUrl
+            );
+
+
+        const title =
+            decodeURIComponent(
+                button.dataset.pdfTitle
+            );
+
+
+        openPDFViewer(
+            pdfURL,
+            title
+        );
+
+    }
+);
 
 
 // =====================================================
 // OPEN PDF VIEWER
 // =====================================================
 
-async function openPDFViewer(pdfURL, title) {
+async function openPDFViewer(
+    pdfURL,
+    title
+) {
 
-    // Remove old viewer
+    // Remove previous viewer
+
     const oldViewer =
-        document.getElementById("pdfFullscreen");
+        document.getElementById(
+            "pdfFullscreen"
+        );
+
 
     if (oldViewer) {
+
         oldViewer.remove();
+
     }
 
 
-    // Prevent body scrolling
-    document.body.classList.add("pdf-viewer-open");
+    // Prevent background scrolling
+
+    document.body.classList.add(
+        "pdf-viewer-open"
+    );
 
 
     // Create viewer
-    const overlay =
-        document.createElement("div");
 
-    overlay.id =
+    const viewer =
+        document.createElement(
+            "div"
+        );
+
+
+    viewer.id =
         "pdfFullscreen";
 
 
-    overlay.innerHTML = `
+    viewer.innerHTML = `
 
         <div class="pdf-header">
 
@@ -454,9 +686,14 @@ async function openPDFViewer(pdfURL, title) {
                 📕 ${title}
             </span>
 
+
             <button
+                type="button"
+
                 class="pdf-close-btn"
-                id="pdfCloseButton">
+
+                id="pdfCloseButton"
+            >
 
                 ✕ Close
 
@@ -479,6 +716,7 @@ async function openPDFViewer(pdfURL, title) {
 
             </div>
 
+
             <div
                 class="pdf-pages"
                 id="pdfPages"
@@ -489,50 +727,82 @@ async function openPDFViewer(pdfURL, title) {
     `;
 
 
-    document.body.appendChild(overlay);
+    document.body.appendChild(
+        viewer
+    );
 
 
-    // Close button
+    // Close
+
     document
-        .getElementById("pdfCloseButton")
+        .getElementById(
+            "pdfCloseButton"
+        )
         .addEventListener(
             "click",
             closePDFViewer
         );
 
 
-    // Disable right click inside PDF
-    overlay.addEventListener(
+    // Block context menu
+
+    viewer.addEventListener(
         "contextmenu",
         function(e) {
+
             e.preventDefault();
+
         }
     );
 
 
-    // Disable copy
-    overlay.addEventListener(
+    // Block copy
+
+    viewer.addEventListener(
         "copy",
         function(e) {
+
             e.preventDefault();
+
         }
     );
 
 
-    // Disable text selection
-    overlay.addEventListener(
+    // Block selection
+
+    viewer.addEventListener(
         "selectstart",
         function(e) {
+
             e.preventDefault();
+
         }
     );
 
 
     try {
 
-        const pdfjsLib =
-            await loadPDFJS();
+        // Check PDF.js
 
+        if (
+            typeof pdfjsLib ===
+            "undefined"
+        ) {
+
+            throw new Error(
+                "PDF.js did not load."
+            );
+
+        }
+
+
+        // Set worker
+
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+
+        // Load PDF
 
         const loadingTask =
             pdfjsLib.getDocument({
@@ -545,18 +815,26 @@ async function openPDFViewer(pdfURL, title) {
 
 
         const pagesContainer =
-            document.getElementById("pdfPages");
+            document.getElementById(
+                "pdfPages"
+            );
+
 
         const loading =
-            document.getElementById("pdfLoading");
+            document.getElementById(
+                "pdfLoading"
+            );
 
 
         if (loading) {
+
             loading.remove();
+
         }
 
 
-        // Render every page
+        // Render pages one by one
+
         for (
             let pageNumber = 1;
             pageNumber <= pdf.numPages;
@@ -581,7 +859,9 @@ async function openPDFViewer(pdfURL, title) {
 
 
         const loading =
-            document.getElementById("pdfLoading");
+            document.getElementById(
+                "pdfLoading"
+            );
 
 
         if (loading) {
@@ -594,7 +874,8 @@ async function openPDFViewer(pdfURL, title) {
 
                     <br><br>
 
-                    Please check the PDF URL.
+                    Check that the PDF file exists
+                    at the specified path.
 
                 </div>
 
@@ -608,7 +889,7 @@ async function openPDFViewer(pdfURL, title) {
 
 
 // =====================================================
-// RENDER ONE PDF PAGE
+// RENDER PDF PAGE
 // =====================================================
 
 async function renderPDFPage(
@@ -618,42 +899,53 @@ async function renderPDFPage(
 ) {
 
     const page =
-        await pdf.getPage(pageNumber);
+        await pdf.getPage(
+            pageNumber
+        );
 
 
-    const pageWrapper =
-        document.createElement("div");
+    const wrapper =
+        document.createElement(
+            "div"
+        );
 
-    pageWrapper.className =
+
+    wrapper.className =
         "pdf-page-wrapper";
 
 
     const canvas =
-        document.createElement("canvas");
+        document.createElement(
+            "canvas"
+        );
+
 
     canvas.className =
         "pdf-page";
 
 
     const context =
-        canvas.getContext("2d");
+        canvas.getContext(
+            "2d"
+        );
 
 
-    // Get available width
     const scrollArea =
         document.getElementById(
             "pdfScrollArea"
         );
 
 
+    // Available width
+
     const availableWidth =
-        Math.min(
-            scrollArea.clientWidth - 24,
-            1000
+        Math.max(
+            scrollArea.clientWidth - 20,
+            280
         );
 
 
-    const originalViewport =
+    const baseViewport =
         page.getViewport({
             scale: 1
         });
@@ -661,7 +953,7 @@ async function renderPDFPage(
 
     const scale =
         availableWidth /
-        originalViewport.width;
+        baseViewport.width;
 
 
     const viewport =
@@ -670,7 +962,8 @@ async function renderPDFPage(
         });
 
 
-    // High quality on mobile
+    // Retina/mobile quality
+
     const deviceScale =
         Math.min(
             window.devicePixelRatio || 1,
@@ -710,21 +1003,23 @@ async function renderPDFPage(
     );
 
 
-    pageWrapper.appendChild(
+    wrapper.appendChild(
         canvas
     );
 
 
     container.appendChild(
-        pageWrapper
+        wrapper
     );
 
 
     await page.render({
 
-        canvasContext: context,
+        canvasContext:
+            context,
 
-        viewport: viewport
+        viewport:
+            viewport
 
     }).promise;
 
@@ -758,12 +1053,17 @@ function closePDFViewer() {
 
 
 // =====================================================
-// ESCAPE KEY
+// ESC CLOSE
 // =====================================================
 
 document.addEventListener(
     "keydown",
     function(e) {
+
+        if (e.key !== "Escape") {
+            return;
+        }
+
 
         const viewer =
             document.getElementById(
@@ -771,242 +1071,135 @@ document.addEventListener(
             );
 
 
-        if (
-            e.key === "Escape" &&
-            viewer
-        ) {
+        if (viewer) {
 
             closePDFViewer();
 
         }
 
-
-        // Block printing
-        if (
-            e.ctrlKey &&
-            e.key.toLowerCase() === "p"
-        ) {
-
-            e.preventDefault();
-
-        }
-
-
-        // Block save
-        if (
-            e.ctrlKey &&
-            e.key.toLowerCase() === "s"
-        ) {
-
-            e.preventDefault();
-
-        }
-
     }
 );
 
 
 // =====================================================
-// PRINT BLOCK
+// SHOW COURSES
 // =====================================================
 
-window.addEventListener(
-    "beforeprint",
-    function(e) {
+student.courses.forEach(
+    function(courseId) {
 
-        e.preventDefault();
-
-    }
-);
+        const course =
+            COURSES[courseId];
 
 
-
-// ================= SHOW COURSES =================
-
-student.courses.forEach(function(courseId) {
-
-    const course =
-        COURSES[courseId];
-
-    if (!course) return;
+        if (!course) return;
 
 
-    const card =
-        document.createElement("div");
-
-    card.className =
-        "course-card";
-
-
-    let lessonsHTML = "";
+        const card =
+            document.createElement(
+                "div"
+            );
 
 
-    // ================= LESSONS =================
+        card.className =
+            "course-card";
 
-    course.lessons.forEach(function(lesson) {
+
+        let lessonsHTML = "";
 
 
         // =================================================
-        // YOUTUBE VIDEO
+        // LESSONS
         // =================================================
 
-        if (lesson.type === "video") {
+        course.lessons.forEach(
+            function(lesson) {
 
-            lessonsHTML += `
 
-                <div class="lesson">
+                // ================================
+                // YOUTUBE
+                // ================================
 
-                    <h4>
-                        🎥 ${lesson.title}
-                    </h4>
+                if (
+                    lesson.type ===
+                    "video"
+                ) {
 
+                    lessonsHTML += `
 
-                    <div class="video-box">
+                        <div class="lesson">
 
-                        <iframe
+                            <h4>
+                                🎥 ${lesson.title}
+                            </h4>
 
-                            src="${lesson.url}"
 
-                            title="${lesson.title}"
+                            <div class="video-box">
 
-                            allow="
-                                accelerometer;
-                                autoplay;
-                                encrypted-media;
-                                gyroscope;
-                                picture-in-picture
-                            "
+                                <iframe
 
-                            allowfullscreen>
+                                    src="${lesson.url}"
 
-                        </iframe>
+                                    title="${lesson.title}"
 
-                    </div>
+                                    allow="
+                                        accelerometer;
+                                        autoplay;
+                                        encrypted-media;
+                                        gyroscope;
+                                        picture-in-picture
+                                    "
 
-                </div>
+                                    allowfullscreen>
+                                </iframe>
 
-            `;
-        }
+                            </div>
 
+                        </div>
 
-        // =================================================
-        // LOCAL MP4
-        // =================================================
+                    `;
 
-        else if (lesson.type === "mp4") {
+                }
 
-            lessonsHTML += `
 
-                <div class="lesson">
+                // ================================
+                // MP4
+                // ================================
 
-                    ${createLocalVideo(
-                        lesson.url,
-                        lesson.title
-                    )}
+                else if (
+                    lesson.type ===
+                    "mp4"
+                ) {
 
-                </div>
+                    lessonsHTML += `
 
-            `;
-        }
+                        <div class="lesson">
 
+                            ${createLocalVideo(
+                                lesson.url,
+                                lesson.title
+                            )}
 
-        // =================================================
-        // PDF
-        // =================================================
+                        </div>
 
-        else if (lesson.type === "pdf") {
+                    `;
 
-            lessonsHTML += `
+                }
 
-                <div class="lesson">
 
-                    ${createProtectedPDF(
-                        lesson.url,
-                        lesson.title
-                    )}
+                // ================================
+                // PDF
+                // ================================
 
-                </div>
+                else if (
+                    lesson.type ===
+                    "pdf"
+                ) {
 
-            `;
-        }
+                    lessonsHTML += `
 
+                        <div class="lesson">
 
-        // =================================================
-        // LIVE CLASS
-        // =================================================
-
-        else if (lesson.type === "live") {
-
-            lessonsHTML += `
-
-                <div class="lesson">
-
-                    <h4>
-                        🔴 ${lesson.title}
-                    </h4>
-
-
-                    <a
-
-                        href="${lesson.url}"
-
-                        target="_blank"
-
-                        rel="noopener noreferrer"
-
-                        class="live-btn">
-
-                        🔴 Join Live Class
-
-                    </a>
-
-                </div>
-
-            `;
-        }
-
-    });
-
-
-    // ================= COURSE CARD =================
-
-    card.innerHTML = `
-
-        <div class="course-content">
-
-            <h3>
-                ${course.title}
-            </h3>
-
-
-            <p>
-                ${course.description}
-            </p>
-
-
-            ${lessonsHTML}
-
-        </div>
-
-    `;
-
-
-    container.appendChild(card);
-
-});
-
-
-// ================= LOGOUT =================
-
-document
-    .getElementById("logoutBtn")
-    .addEventListener("click", function() {
-
-        sessionStorage.removeItem(
-            "loggedInStudent"
-        );
-
-        window.location.href =
-            "login.html";
-
-    });
+                            ${createProtectedPDF(
+                                lesson.url,
+                                less
