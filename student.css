@@ -643,84 +643,13 @@ video::-webkit-media-controls-enclosure {
 
 }
 /* =========================================================
-   PDF STUDENT WATERMARK
+   SCREEN FIXED WATERMARK
+   PDF PAGE KE ANDAR KUCH NAHI LIKHEGA
    ========================================================= */
 
-.pdf-watermark {
+.pdf-screen-watermark {
+
     position: fixed;
-
-    top: 50%;
-    left: 50%;
-
-    transform: translate(-50%, -50%) rotate(-32deg);
-
-    z-index: 10001;
-
-    pointer-events: none;
-
-    user-select: none;
-    -webkit-user-select: none;
-
-    text-align: center;
-
-    font-size: 28px;
-
-    font-weight: bold;
-
-    line-height: 1.8;
-
-    letter-spacing: 2px;
-
-    opacity: 0.18;
-
-    color: #ffffff;
-
-    white-space: nowrap;
-
-    text-shadow:
-        1px 1px 2px #000,
-        -1px -1px 2px #000;
-}
-
-
-.pdf-watermark span {
-    display: block;
-}
-
-
-/* Mobile watermark */
-
-@media (max-width: 600px) {
-
-    .pdf-watermark {
-        font-size: 20px;
-
-        opacity: 0.18;
-
-        letter-spacing: 1px;
-    }
-
-}
-/* =========================================================
-   WATERMARK ON EVERY PDF PAGE
-   ========================================================= */
-
-.pdf-page-wrapper {
-    position: relative !important;
-
-    display: flex;
-
-    justify-content: center;
-
-    width: 100%;
-}
-
-
-/* Watermark layer */
-
-.pdf-page-watermark {
-
-    position: absolute;
 
     left: 50%;
     top: 50%;
@@ -729,12 +658,13 @@ video::-webkit-media-controls-enclosure {
         translate(-50%, -50%)
         rotate(-30deg);
 
-    z-index: 20;
+    z-index: 10002;
 
     pointer-events: none;
 
     user-select: none;
     -webkit-user-select: none;
+    -webkit-touch-callout: none;
 
     text-align: center;
 
@@ -750,31 +680,32 @@ video::-webkit-media-controls-enclosure {
 
     letter-spacing: 2px;
 
-    color: rgba(255, 255, 255, 0.32);
+    color: rgba(255, 255, 255, 0.28);
 
     text-shadow:
-        1px 1px 3px rgba(0, 0, 0, 0.85),
-        -1px -1px 3px rgba(0, 0, 0, 0.85);
+        1px 1px 3px rgba(0, 0, 0, 0.9),
+        -1px -1px 3px rgba(0, 0, 0, 0.9);
 }
 
 
-.pdf-page-watermark div {
+.pdf-screen-watermark div {
     display: block;
 }
 
 
-/* Mobile */
+/* =========================================================
+   MOBILE
+   ========================================================= */
 
 @media (max-width: 600px) {
 
-    .pdf-page-watermark {
+    .pdf-screen-watermark {
 
         font-size: 19px;
 
         letter-spacing: 1px;
 
         color: rgba(255, 255, 255, 0.30);
-
     }
 
 }
