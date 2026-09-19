@@ -50,13 +50,13 @@ const COURSES = {
             {
                 title: "Real Analysis Notes",
                 type: "pdf",
-                url: "real-analysis-notes.pdf"
+                url: "./321581555.pdf"
             },
 
             {
                 title: "Lecture 2",
                 type: "pdf",
-                url: "ch03"
+                url: "./ch03.pdf"
             },
 
             {
@@ -116,7 +116,7 @@ const COURSES = {
             {
                 title: "Calculus Notes",
                 type: "pdf",
-                url: "ch03.pdf"
+                url: "./ch03.pdf"
             },
             {
                 title: "Calculus Notes",
