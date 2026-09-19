@@ -501,13 +501,88 @@ video::-webkit-media-controls-enclosure {
 
 
 .pdf-page-wrapper {
-    width: 100%;
 
-    display: flex;
+    width: 100% !important;
 
-    justify-content: center;
+    display: flex !important;
 
-    overflow: visible;
+    justify-content: center !important;
+
+    align-items: flex-start !important;
+
+    position: relative;
+
+    margin: 0 auto;
+
+    padding: 0;
+
+}
+
+
+.pdf-page {
+
+    display: block !important;
+
+    margin-left: auto !important;
+
+    margin-right: auto !important;
+
+    max-width: none !important;
+
+    height: auto;
+
+    background: white;
+
+    box-shadow:
+        0 3px 15px rgba(0, 0, 0, 0.35);
+
+}
+
+
+/* ===============================
+   MOBILE
+   =============================== */
+
+@media (max-width: 600px) {
+
+    .pdf-scroll-area {
+
+        width: 100%;
+
+        padding-left: 0 !important;
+
+        padding-right: 0 !important;
+
+        overflow-x: hidden;
+
+        text-align: center;
+
+    }
+
+
+    .pdf-pages {
+
+        width: 100%;
+
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: center;
+
+        gap: 12px;
+
+    }
+
+
+    .pdf-page-wrapper {
+
+        width: 100% !important;
+
+        justify-content: center !important;
+
+    }
+
 }
 
 
