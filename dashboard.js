@@ -116,7 +116,7 @@ const COURSES = {
             {
                 title: "Calculus Notes",
                 type: "pdf",
-                url: "pdf/calculus-notes.pdf"
+                url: "ch03.pdf"
             },
 
             {
