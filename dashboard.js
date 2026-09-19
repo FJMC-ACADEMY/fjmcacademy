@@ -50,13 +50,13 @@ const COURSES = {
             {
                 title: "Real Analysis Notes",
                 type: "pdf",
-                url: "321581555.PDF"
+                url: "/fjmcacademy/321581555.PDF"
             },
 
             {
                 title: "Lecture 2",
                 type: "pdf",
-                url: "./ch03.pdf"
+                url: "/fjmcacademy/ch03.pdf"
             },
 
             {
