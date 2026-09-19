@@ -1,0 +1,493 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f7f9;
+    color: #222;
+}
+
+
+/* =========================
+   LOGIN
+========================= */
+
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.login-box {
+    width: 100%;
+    max-width: 420px;
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.12);
+}
+
+.logo {
+    color: #e63946;
+    font-size: 25px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.login-box h1 {
+    margin-bottom: 8px;
+}
+
+.login-subtitle {
+    color: #777;
+    margin-bottom: 25px;
+}
+
+.login-box label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 7px;
+    font-weight: bold;
+}
+
+.login-box input {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #ccc;
+    border-radius: 7px;
+    font-size: 15px;
+}
+
+.login-box button {
+    width: 100%;
+    margin-top: 25px;
+    padding: 14px;
+    border: none;
+    border-radius: 7px;
+    background: #e63946;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.login-box button:hover {
+    opacity: 0.9;
+}
+
+#loginMessage {
+    color: #d62828;
+    margin-top: 15px;
+    text-align: center;
+}
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
+.dashboard-header {
+    min-height: 70px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 5%;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+#logoutBtn {
+    background: #222;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.dashboard {
+    width: 90%;
+    max-width: 1200px;
+    margin: 40px auto;
+}
+
+.welcome {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+.welcome p {
+    color: #777;
+    margin-top: 8px;
+}
+
+.dashboard > h2 {
+    margin-bottom: 20px;
+}
+
+
+/* =========================
+   COURSES
+========================= */
+
+.courses-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.course-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
+
+.course-content {
+    padding: 25px;
+}
+
+.course-content h3 {
+    margin-bottom: 10px;
+}
+
+.course-content p {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.course-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.course-buttons a {
+    text-decoration: none;
+    text-align: center;
+    padding: 12px;
+    border-radius: 7px;
+    font-weight: bold;
+}
+
+.video-btn {
+    background: #222;
+    color: white;
+}
+
+.pdf-btn {
+    background: #f1f1f1;
+    color: #222;
+}
+
+.live-btn {
+    background: #e63946;
+    color: white;
+}
+
+
+/* =========================================
+   LOCAL VIDEO PLAYER
+   YOUTUBE-LIKE LIST SIZE
+========================================= */
+
+.local-video-player {
+    width: 100%;
+    max-width: 560px;
+    margin: 12px 0 22px 0;
+}
+
+
+/* =========================================
+   SMALL VIDEO SCREEN
+   SAME 16:9 RATIO
+========================================= */
+
+.local-video-screen {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+
+    background: #000;
+
+    border-radius: 8px;
+    overflow: hidden;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 2px 8px rgba(0,0,0,0.15);
+}
+
+
+/* =========================================
+   LOCAL VIDEO
+========================================= */
+
+.local-video {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    object-fit: contain;
+
+    background: #000;
+}
+
+
+/* =========================================
+   PLAY ICON
+========================================= */
+
+.local-video-play {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
+
+    width: 54px;
+    height: 54px;
+
+    border-radius: 50%;
+
+    background: rgba(0,0,0,0.70);
+
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 23px;
+
+    pointer-events: none;
+
+    transition: opacity 0.2s ease,
+                transform 0.2s ease;
+}
+
+
+/* =========================================
+   HOVER
+========================================= */
+
+.local-video-screen:hover .local-video-play {
+    transform: translate(-50%, -50%) scale(1.08);
+}
+
+
+/* =========================================
+   VIDEO TITLE
+========================================= */
+
+.video-title {
+    margin-top: 8px;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    color: #222;
+
+    line-height: 1.4;
+}
+
+
+/* =========================================
+   CLICKED / LARGE VIDEO
+========================================= */
+
+.local-video-screen.local-video-open {
+    width: 100%;
+
+    aspect-ratio: 16 / 9;
+
+    max-width: 100%;
+
+    border-radius: 8px;
+}
+
+
+/* =========================================
+   HIDE BIG PLAY BUTTON AFTER CLICK
+========================================= */
+
+.local-video-screen.local-video-open .local-video-play {
+    display: none;
+}
+
+
+/* =========================================
+   VIDEO CONTROLS
+========================================= */
+
+.local-video::-webkit-media-controls {
+    display: flex !important;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+
+    .local-video-player {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .local-video-screen {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+    }
+
+    .video-title {
+        font-size: 14px;
+    }
+
+}
+* {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+
+/* ================= PDF BUTTON ================= */
+
+.pdf-open-btn {
+
+    padding: 12px 20px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    cursor: pointer;
+
+    font-size: 16px;
+
+}
+
+
+/* ================= FULL SCREEN PDF ================= */
+
+#pdfFullscreen {
+
+    position: fixed;
+
+    inset: 0;
+
+    width: 100vw;
+
+    height: 100vh;
+
+    background: #111;
+
+    z-index: 999999;
+
+    display: flex;
+
+    flex-direction: column;
+
+}
+
+
+/* PDF HEADER */
+
+.pdf-header {
+
+    height: 55px;
+
+    min-height: 55px;
+
+    background: #123d28;
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 0 15px;
+
+    font-size: 17px;
+
+}
+
+
+/* PDF TITLE */
+
+.pdf-title {
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+}
+
+
+/* CLOSE BUTTON */
+
+.pdf-close-btn {
+
+    background: #b91c1c;
+
+    color: white;
+
+    border: none;
+
+    padding: 8px 14px;
+
+    border-radius: 5px;
+
+    cursor: pointer;
+
+}
+
+
+/* PDF */
+
+#pdfFullscreen iframe {
+
+    width: 100%;
+
+    height: calc(100vh - 55px);
+
+    border: none;
+
+    background: white;
+
+}
+
+
+/* ================= VIDEO ================= */
+
+.local-video video {
+
+    max-width: 100%;
+
+}
+
+
+/* Hide normal download controls */
+
+video::-webkit-media-controls-enclosure {
+
+    overflow: hidden;
+
+}
