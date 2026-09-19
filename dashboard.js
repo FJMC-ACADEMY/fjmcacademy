@@ -56,7 +56,7 @@ const COURSES = {
             {
                 title: "Lecture 2",
                 type: "pdf",
-                url: "321581555.pdf"
+                url: "ch03.pdf"
             },
 
             {
