@@ -1152,42 +1152,71 @@ footer {
 
 }
 /* =====================================================
-   PROTECTED PDF VIEWER
-   ===================================================== */
+   PROTECTED PDF BUTTON
+===================================================== */
+
+.protected-pdf {
+    margin-top: 15px;
+}
+
+.pdf-open-btn {
+    margin-top: 8px;
+    padding: 11px 20px;
+
+    border: none;
+    border-radius: 6px;
+
+    background: #1b4332;
+    color: white;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.pdf-open-btn:hover {
+    background: #143d2b;
+}
+
+
+/* =====================================================
+   PDF FULLSCREEN VIEWER
+===================================================== */
 
 #pdfFullscreen {
-
     position: fixed;
 
     inset: 0;
 
     width: 100vw;
-
     height: 100vh;
 
-    background: #202124;
+    background: #222;
 
-    z-index: 999999;
+    z-index: 999999999;
 
     display: flex;
-
     flex-direction: column;
 
     overflow: hidden;
 
+    margin: 0;
+    padding: 0;
 }
 
 
 /* =====================================================
    PDF HEADER
-   ===================================================== */
+===================================================== */
 
 .pdf-header {
+    width: 100%;
 
-    min-height: 60px;
+    min-height: 58px;
+    height: 58px;
 
-    background: #111827;
-
+    background: #123d28;
     color: white;
 
     display: flex;
@@ -1196,282 +1225,279 @@ footer {
 
     justify-content: space-between;
 
-    padding: 10px 15px;
-
     gap: 10px;
 
-    flex-shrink: 0;
+    padding: 8px 12px;
 
+    box-sizing: border-box;
+
+    flex-shrink: 0;
 }
 
 
-.pdf-title {
+/* =====================================================
+   PDF TITLE
+===================================================== */
 
+.pdf-title {
     font-size: 16px;
 
-    font-weight: bold;
+    font-weight: 600;
+
+    white-space: nowrap;
 
     overflow: hidden;
 
     text-overflow: ellipsis;
 
-    white-space: nowrap;
-
-}
-
-
-.pdf-controls {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 8px;
-
-    flex-shrink: 0;
-
-}
-
-
-.pdf-controls button {
-
-    border: none;
-
-    color: white;
-
-    padding: 9px 13px;
-
-    border-radius: 6px;
-
-    cursor: pointer;
-
-    font-size: 14px;
-
-}
-
-
-.pdf-fullscreen-btn {
-
-    background: #2563eb;
-
-}
-
-
-.pdf-close-btn {
-
-    background: #dc2626;
-
+    min-width: 0;
 }
 
 
 /* =====================================================
-   IMPORTANT PDF SCROLL AREA
-   ===================================================== */
+   PDF CONTROLS
+===================================================== */
+
+.pdf-controls {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    flex-shrink: 0;
+}
+
+
+/* =====================================================
+   FULLSCREEN BUTTON
+===================================================== */
+
+.pdf-fullscreen-btn {
+    border: none;
+
+    background: #2563eb;
+
+    color: white;
+
+    padding: 8px 12px;
+
+    border-radius: 5px;
+
+    font-size: 14px;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+}
+
+
+/* =====================================================
+   CLOSE BUTTON
+===================================================== */
+
+.pdf-close-btn {
+    border: none;
+
+    background: #b91c1c;
+
+    color: white;
+
+    padding: 8px 12px;
+
+    border-radius: 5px;
+
+    font-size: 14px;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+}
+
+
+/* =====================================================
+   PDF SCROLL AREA
+===================================================== */
 
 .pdf-pages {
-
-    flex: 1;
+    flex: 1 1 auto;
 
     width: 100%;
 
-    height: calc(100vh - 60px);
+    min-height: 0;
 
-    overflow-y: auto;
+    box-sizing: border-box;
 
-    overflow-x: hidden;
+    overflow-y: scroll;
+
+    overflow-x: auto;
 
     -webkit-overflow-scrolling: touch;
 
     overscroll-behavior: contain;
 
-    padding: 20px 10px 50px;
+    background: #525659;
 
-    box-sizing: border-box;
+    padding: 12px;
 
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 12px;
+
+    user-select: none;
+    -webkit-user-select: none;
+
+    touch-action: pan-y;
 }
 
 
 /* =====================================================
    EACH PDF PAGE
-   ===================================================== */
+===================================================== */
 
 .pdf-page {
+    background: white;
 
-    width: 100%;
+    display: block;
 
-    display: flex;
+    position: relative;
 
-    justify-content: center;
+    flex: 0 0 auto;
 
-    align-items: flex-start;
+    width: fit-content;
 
-    margin-bottom: 20px;
+    max-width: none;
 
-    flex-shrink: 0;
+    height: auto;
 
+    line-height: 0;
+
+    box-shadow:
+        0 2px 12px rgba(0,0,0,0.35);
+
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 
 /* =====================================================
    PDF CANVAS
-   ===================================================== */
+===================================================== */
 
-.pdf-canvas {
-
+.pdf-page canvas {
     display: block;
 
-    max-width: 100%;
+    margin: 0;
+    padding: 0;
+
+    max-width: none;
 
     height: auto;
 
-    background: white;
-
-    box-shadow:
-        0 2px 12px rgba(0, 0, 0, 0.45);
-
     user-select: none;
-
     -webkit-user-select: none;
 
     -webkit-touch-callout: none;
 
     pointer-events: none;
-
 }
 
 
 /* =====================================================
    LOADING
-   ===================================================== */
+===================================================== */
 
 .pdf-loading {
-
-    width: 100%;
-
-    text-align: center;
-
     color: white;
-
-    padding: 60px 20px;
 
     font-size: 18px;
 
+    padding: 50px 20px;
+
+    text-align: center;
 }
 
 
 /* =====================================================
    ERROR
-   ===================================================== */
+===================================================== */
 
 .pdf-error {
-
-    width: 100%;
+    color: white;
 
     text-align: center;
 
-    color: #ff6b6b;
-
     padding: 60px 20px;
-
-    font-size: 18px;
-
 }
 
 
 /* =====================================================
    MOBILE PDF
-   ===================================================== */
+===================================================== */
 
 @media (max-width: 600px) {
 
-    .pdf-header {
+    #pdfFullscreen {
+        width: 100vw;
+        height: 100dvh;
+    }
 
-        min-height: 55px;
+
+    .pdf-header {
+        min-height: 54px;
+        height: 54px;
 
         padding: 7px 8px;
-
     }
 
 
     .pdf-title {
-
-        font-size: 13px;
-
-        max-width: 40%;
-
+        font-size: 14px;
     }
 
 
     .pdf-controls {
-
         gap: 5px;
-
     }
 
 
-    .pdf-controls button {
+    .pdf-fullscreen-btn,
+    .pdf-close-btn {
+        padding: 7px 9px;
 
-        padding: 8px 9px;
-
-        font-size: 11px;
-
+        font-size: 12px;
     }
 
 
     .pdf-pages {
+        padding: 6px;
 
-        height: calc(100vh - 55px);
-
-        padding: 10px 3px 35px;
+        gap: 8px;
 
         overflow-y: scroll;
+        overflow-x: auto;
 
-        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
 
+        touch-action: pan-y;
     }
 
 
     .pdf-page {
+        flex-shrink: 0;
 
-        margin-bottom: 12px;
+        width: fit-content;
 
+        max-width: none;
     }
 
 
-    .pdf-canvas {
-
-        max-width: 100%;
-
-        width: auto;
-
-        height: auto;
-
-    }
-
-}
-
-
-/* =====================================================
-   VERY SMALL MOBILE
-   ===================================================== */
-
-@media (max-width: 380px) {
-
-    .pdf-title {
-
-        max-width: 32%;
-
-        font-size: 12px;
-
-    }
-
-
-    .pdf-controls button {
-
-        padding: 7px 7px;
-
-        font-size: 10px;
-
+    .pdf-page canvas {
+        max-width: none;
     }
 
 }
