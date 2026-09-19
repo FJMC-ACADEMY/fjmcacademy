@@ -363,7 +363,36 @@ body {
 }
 
 
-/* ================= PDF BUTTON ================= */
+/* =====================================================
+   PROTECTED PDF
+===================================================== */
+
+.protected-pdf {
+
+    margin-top: 15px;
+    padding: 18px;
+
+    background: #f8faf9;
+
+    border: 1px solid #dfe7e2;
+
+    border-radius: 10px;
+
+}
+
+
+.protected-pdf h4 {
+
+    margin-bottom: 12px;
+
+    color: #222;
+
+}
+
+
+/* =====================================================
+   PDF OPEN BUTTON
+===================================================== */
 
 .pdf-open-btn {
 
@@ -371,16 +400,31 @@ body {
 
     border: none;
 
-    border-radius: 6px;
+    border-radius: 7px;
 
     cursor: pointer;
 
     font-size: 16px;
 
+    font-weight: bold;
+
+    background: #123d28;
+
+    color: white;
+
 }
 
 
-/* ================= FULL SCREEN PDF ================= */
+.pdf-open-btn:hover {
+
+    opacity: 0.9;
+
+}
+
+
+/* =====================================================
+   PDF FULLSCREEN VIEWER
+===================================================== */
 
 #pdfFullscreen {
 
@@ -392,7 +436,9 @@ body {
 
     height: 100vh;
 
-    background: #111;
+    height: 100dvh;
+
+    background: #222;
 
     z-index: 999999;
 
@@ -400,10 +446,14 @@ body {
 
     flex-direction: column;
 
+    overflow: hidden;
+
 }
 
 
-/* PDF HEADER */
+/* =====================================================
+   PDF HEADER
+===================================================== */
 
 .pdf-header {
 
@@ -428,7 +478,9 @@ body {
 }
 
 
-/* PDF TITLE */
+/* =====================================================
+   PDF TITLE
+===================================================== */
 
 .pdf-title {
 
@@ -438,12 +490,18 @@ body {
 
     white-space: nowrap;
 
+    padding-right: 15px;
+
 }
 
 
-/* CLOSE BUTTON */
+/* =====================================================
+   CLOSE BUTTON
+===================================================== */
 
 .pdf-close-btn {
+
+    flex-shrink: 0;
 
     background: #b91c1c;
 
@@ -457,24 +515,200 @@ body {
 
     cursor: pointer;
 
+    font-size: 14px;
+
 }
 
 
-/* PDF */
+/* =====================================================
+   PDF SCROLL AREA
+===================================================== */
 
-#pdfFullscreen iframe {
+.pdf-scroll-area {
+
+    flex: 1;
 
     width: 100%;
 
-    height: calc(100vh - 55px);
+    height: calc(100dvh - 55px);
 
-    border: none;
+    overflow-y: auto;
 
-    background: white;
+    overflow-x: hidden;
+
+    -webkit-overflow-scrolling: touch;
+
+    overscroll-behavior: contain;
+
+    padding: 12px 8px 30px;
+
+    background: #333;
 
 }
 
 
+/* =====================================================
+   PDF PAGES
+===================================================== */
+
+.pdf-pages {
+
+    width: 100%;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 14px;
+
+}
+
+
+/* =====================================================
+   INDIVIDUAL PAGE
+===================================================== */
+
+.pdf-page-wrapper {
+
+    width: 100%;
+
+    display: flex;
+
+    justify-content: center;
+
+    background: white;
+
+    box-shadow:
+        0 2px 10px rgba(0,0,0,0.35);
+
+}
+
+
+/* =====================================================
+   PDF CANVAS
+===================================================== */
+
+.pdf-page {
+
+    display: block;
+
+    max-width: 100%;
+
+    height: auto;
+
+    user-select: none;
+
+    -webkit-user-select: none;
+
+    -webkit-touch-callout: none;
+
+}
+
+
+/* =====================================================
+   LOADING
+===================================================== */
+
+.pdf-loading {
+
+    color: white;
+
+    text-align: center;
+
+    padding: 50px 20px;
+
+    font-size: 17px;
+
+}
+
+
+/* =====================================================
+   ERROR
+===================================================== */
+
+.pdf-error {
+
+    color: white;
+
+    background: #8b1e1e;
+
+    padding: 20px;
+
+    border-radius: 8px;
+
+    text-align: center;
+
+}
+
+
+/* =====================================================
+   PREVENT BACKGROUND SCROLL
+===================================================== */
+
+body.pdf-viewer-open {
+
+    overflow: hidden;
+
+    position: fixed;
+
+    width: 100%;
+
+}
+
+
+/* =====================================================
+   MOBILE PDF
+===================================================== */
+
+@media (max-width: 600px) {
+
+    .pdf-header {
+
+        height: 52px;
+
+        min-height: 52px;
+
+        padding: 0 10px;
+
+        font-size: 15px;
+
+    }
+
+
+    .pdf-scroll-area {
+
+        height: calc(100dvh - 52px);
+
+        padding: 8px 4px 25px;
+
+    }
+
+
+    .pdf-pages {
+
+        gap: 10px;
+
+    }
+
+
+    .pdf-page-wrapper {
+
+        width: 100%;
+
+    }
+
+
+    .pdf-close-btn {
+
+        padding: 7px 10px;
+
+        font-size: 13px;
+
+    }
+
+}
 /* ================= VIDEO ================= */
 
 .local-video video {
