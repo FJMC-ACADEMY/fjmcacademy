@@ -1151,3 +1151,327 @@ footer {
     }
 
 }
+/* =====================================================
+   PROTECTED PDF VIEWER
+   ===================================================== */
+
+#pdfFullscreen {
+
+    position: fixed;
+
+    inset: 0;
+
+    width: 100vw;
+
+    height: 100vh;
+
+    background: #202124;
+
+    z-index: 999999;
+
+    display: flex;
+
+    flex-direction: column;
+
+    overflow: hidden;
+
+}
+
+
+/* =====================================================
+   PDF HEADER
+   ===================================================== */
+
+.pdf-header {
+
+    min-height: 60px;
+
+    background: #111827;
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 10px 15px;
+
+    gap: 10px;
+
+    flex-shrink: 0;
+
+}
+
+
+.pdf-title {
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+}
+
+
+.pdf-controls {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    flex-shrink: 0;
+
+}
+
+
+.pdf-controls button {
+
+    border: none;
+
+    color: white;
+
+    padding: 9px 13px;
+
+    border-radius: 6px;
+
+    cursor: pointer;
+
+    font-size: 14px;
+
+}
+
+
+.pdf-fullscreen-btn {
+
+    background: #2563eb;
+
+}
+
+
+.pdf-close-btn {
+
+    background: #dc2626;
+
+}
+
+
+/* =====================================================
+   IMPORTANT PDF SCROLL AREA
+   ===================================================== */
+
+.pdf-pages {
+
+    flex: 1;
+
+    width: 100%;
+
+    height: calc(100vh - 60px);
+
+    overflow-y: auto;
+
+    overflow-x: hidden;
+
+    -webkit-overflow-scrolling: touch;
+
+    overscroll-behavior: contain;
+
+    padding: 20px 10px 50px;
+
+    box-sizing: border-box;
+
+}
+
+
+/* =====================================================
+   EACH PDF PAGE
+   ===================================================== */
+
+.pdf-page {
+
+    width: 100%;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: flex-start;
+
+    margin-bottom: 20px;
+
+    flex-shrink: 0;
+
+}
+
+
+/* =====================================================
+   PDF CANVAS
+   ===================================================== */
+
+.pdf-canvas {
+
+    display: block;
+
+    max-width: 100%;
+
+    height: auto;
+
+    background: white;
+
+    box-shadow:
+        0 2px 12px rgba(0, 0, 0, 0.45);
+
+    user-select: none;
+
+    -webkit-user-select: none;
+
+    -webkit-touch-callout: none;
+
+    pointer-events: none;
+
+}
+
+
+/* =====================================================
+   LOADING
+   ===================================================== */
+
+.pdf-loading {
+
+    width: 100%;
+
+    text-align: center;
+
+    color: white;
+
+    padding: 60px 20px;
+
+    font-size: 18px;
+
+}
+
+
+/* =====================================================
+   ERROR
+   ===================================================== */
+
+.pdf-error {
+
+    width: 100%;
+
+    text-align: center;
+
+    color: #ff6b6b;
+
+    padding: 60px 20px;
+
+    font-size: 18px;
+
+}
+
+
+/* =====================================================
+   MOBILE PDF
+   ===================================================== */
+
+@media (max-width: 600px) {
+
+    .pdf-header {
+
+        min-height: 55px;
+
+        padding: 7px 8px;
+
+    }
+
+
+    .pdf-title {
+
+        font-size: 13px;
+
+        max-width: 40%;
+
+    }
+
+
+    .pdf-controls {
+
+        gap: 5px;
+
+    }
+
+
+    .pdf-controls button {
+
+        padding: 8px 9px;
+
+        font-size: 11px;
+
+    }
+
+
+    .pdf-pages {
+
+        height: calc(100vh - 55px);
+
+        padding: 10px 3px 35px;
+
+        overflow-y: scroll;
+
+        overflow-x: hidden;
+
+    }
+
+
+    .pdf-page {
+
+        margin-bottom: 12px;
+
+    }
+
+
+    .pdf-canvas {
+
+        max-width: 100%;
+
+        width: auto;
+
+        height: auto;
+
+    }
+
+}
+
+
+/* =====================================================
+   VERY SMALL MOBILE
+   ===================================================== */
+
+@media (max-width: 380px) {
+
+    .pdf-title {
+
+        max-width: 32%;
+
+        font-size: 12px;
+
+    }
+
+
+    .pdf-controls button {
+
+        padding: 7px 7px;
+
+        font-size: 10px;
+
+    }
+
+}
