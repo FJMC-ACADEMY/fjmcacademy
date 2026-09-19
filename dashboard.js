@@ -1,4 +1,4 @@
-﻿const STUDENTS = {
+const STUDENTS = {
     "rahul@gmail.com": {
         password: "Rahul@123",
         name: "Rahul",
@@ -118,12 +118,13 @@ const COURSES = {
                 type: "pdf",
                 url: "./ch03.pdf"
             },
+
             {
                 title: "Calculus Notes",
                 type: "pdf",
                 url: "https://drive.google.com/file/d/1MZNN3vbH7e8x7vupmGMHevUhbx7FlDzq/view?usp=drive_link"
             },
-            
+
             {
                 title: "Live Class - Calculus",
                 type: "live",
@@ -201,9 +202,6 @@ document.addEventListener("keydown", function(e) {
         e.preventDefault();
     }
 
-    if (e.key === "PrintScreen") {
-        e.preventDefault();
-    }
 });
 
 
@@ -308,13 +306,11 @@ function createLocalVideo(videoURL, title) {
 
                 </video>
 
-
                 <div class="local-video-play">
                     ▶
                 </div>
 
             </div>
-
 
             <h4 class="local-video-title">
                 🎥 ${title}
@@ -322,6 +318,65 @@ function createLocalVideo(videoURL, title) {
 
         </div>
     `;
+}
+
+
+// =====================================================
+// LOAD PDF.JS
+// =====================================================
+
+let pdfJSLoaded = false;
+
+function loadPDFJS() {
+
+    return new Promise(function(resolve, reject) {
+
+        if (pdfJSLoaded && window.pdfjsLib) {
+            resolve();
+            return;
+        }
+
+        if (window.pdfjsLib) {
+
+            pdfJSLoaded = true;
+
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+                "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+            resolve();
+
+            return;
+        }
+
+
+        const script =
+            document.createElement("script");
+
+        script.src =
+            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+
+        script.onload = function() {
+
+            pdfJSLoaded = true;
+
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+                "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+            resolve();
+
+        };
+
+        script.onerror = function() {
+
+            reject(
+                new Error("PDF viewer could not be loaded.")
+            );
+
+        };
+
+        document.head.appendChild(script);
+
+    });
 }
 
 
@@ -334,7 +389,9 @@ function createProtectedPDF(pdfURL, title) {
     return `
         <div class="protected-pdf">
 
-            <h4>📕 ${title}</h4>
+            <h4>
+                📕 ${title}
+            </h4>
 
             <button
                 class="pdf-open-btn"
@@ -353,10 +410,10 @@ function createProtectedPDF(pdfURL, title) {
 
 
 // =====================================================
-// FULL SCREEN PDF VIEWER
+// OPEN PDF VIEWER
 // =====================================================
 
-function openPDFViewer(pdfURL, title) {
+async function openPDFViewer(pdfURL, title) {
 
     const oldViewer =
         document.getElementById("pdfFullscreen");
@@ -369,38 +426,50 @@ function openPDFViewer(pdfURL, title) {
     const overlay =
         document.createElement("div");
 
-    overlay.id = "pdfFullscreen";
+    overlay.id =
+        "pdfFullscreen";
 
 
     overlay.innerHTML = `
 
         <div class="pdf-header">
 
-            <span class="pdf-title">
+            <div class="pdf-title">
                 📕 ${title}
-            </span>
+            </div>
 
+            <div class="pdf-controls">
 
-            <button
-                class="pdf-close-btn"
-                onclick="closePDFViewer()">
+                <button
+                    onclick="togglePDFFullscreen()"
+                    class="pdf-fullscreen-btn">
 
-                ✕ Close
+                    ⛶ Full Screen
 
-            </button>
+                </button>
+
+                <button
+                    onclick="closePDFViewer()"
+                    class="pdf-close-btn">
+
+                    ✕ Close
+
+                </button>
+
+            </div>
 
         </div>
 
 
-        <iframe
+        <div
+            id="pdfPages"
+            class="pdf-pages">
 
-            src="${pdfURL}#toolbar=0&navpanes=0&scrollbar=1"
+            <div class="pdf-loading">
+                Loading PDF...
+            </div>
 
-            title="${title}"
-
-            oncontextmenu="return false;">
-
-        </iframe>
+        </div>
 
     `;
 
@@ -408,13 +477,205 @@ function openPDFViewer(pdfURL, title) {
     document.body.appendChild(overlay);
 
 
-    // Try browser fullscreen
-    if (overlay.requestFullscreen) {
+    try {
 
-        overlay.requestFullscreen()
-            .catch(function() {});
+        await loadPDFJS();
+
+        const loadingTask =
+            window.pdfjsLib.getDocument({
+                url: pdfURL,
+                disableAutoFetch: false,
+                disableStream: false
+            });
+
+
+        const pdf =
+            await loadingTask.promise;
+
+
+        const pagesContainer =
+            document.getElementById("pdfPages");
+
+
+        pagesContainer.innerHTML = "";
+
+
+        for (
+            let pageNumber = 1;
+            pageNumber <= pdf.numPages;
+            pageNumber++
+        ) {
+
+            await renderPDFPage(
+                pdf,
+                pageNumber,
+                pagesContainer
+            );
+
+        }
 
     }
+
+    catch (error) {
+
+        console.error(error);
+
+
+        const pagesContainer =
+            document.getElementById("pdfPages");
+
+
+        if (pagesContainer) {
+
+            pagesContainer.innerHTML = `
+
+                <div class="pdf-error">
+
+                    <h3>
+                        PDF could not be opened
+                    </h3>
+
+                    <p>
+                        Please check the PDF URL.
+                    </p>
+
+                </div>
+
+            `;
+
+        }
+
+    }
+
+}
+
+
+// =====================================================
+// RENDER ONE PDF PAGE
+// =====================================================
+
+async function renderPDFPage(
+    pdf,
+    pageNumber,
+    container
+) {
+
+    const page =
+        await pdf.getPage(pageNumber);
+
+
+    const originalViewport =
+        page.getViewport({
+            scale: 1
+        });
+
+
+    const availableWidth =
+        Math.min(
+            window.innerWidth - 20,
+            1000
+        );
+
+
+    const scale =
+        availableWidth /
+        originalViewport.width;
+
+
+    const viewport =
+        page.getViewport({
+            scale: Math.max(scale, 0.5)
+        });
+
+
+    const pageBox =
+        document.createElement("div");
+
+    pageBox.className =
+        "pdf-page";
+
+
+    const canvas =
+        document.createElement("canvas");
+
+
+    const context =
+        canvas.getContext("2d");
+
+
+    canvas.width =
+        viewport.width;
+
+
+    canvas.height =
+        viewport.height;
+
+
+    canvas.style.width =
+        viewport.width + "px";
+
+
+    canvas.style.height =
+        viewport.height + "px";
+
+
+    canvas.setAttribute(
+        "draggable",
+        "false"
+    );
+
+
+    pageBox.appendChild(canvas);
+
+    container.appendChild(pageBox);
+
+
+    await page.render({
+
+        canvasContext: context,
+
+        viewport: viewport
+
+    }).promise;
+
+}
+
+
+// =====================================================
+// FULL SCREEN
+// =====================================================
+
+function togglePDFFullscreen() {
+
+    const viewer =
+        document.getElementById("pdfFullscreen");
+
+
+    if (!viewer) return;
+
+
+    if (!document.fullscreenElement) {
+
+        if (viewer.requestFullscreen) {
+
+            viewer.requestFullscreen()
+                .catch(function() {});
+
+        }
+
+    }
+
+    else {
+
+        if (document.exitFullscreen) {
+
+            document.exitFullscreen()
+                .catch(function() {});
+
+        }
+
+    }
+
 }
 
 
@@ -441,31 +702,39 @@ function closePDFViewer() {
         viewer.remove();
 
     }
+
 }
 
 
 // =====================================================
-// CLOSE PDF WHEN ESCAPE IS PRESSED
+// ESCAPE / FULLSCREEN CHANGE
 // =====================================================
 
-document.addEventListener("fullscreenchange", function() {
-
-    if (
-        !document.fullscreenElement &&
-        document.getElementById("pdfFullscreen")
-    ) {
+document.addEventListener(
+    "fullscreenchange",
+    function() {
 
         const viewer =
             document.getElementById("pdfFullscreen");
 
-        viewer.remove();
+
+        if (
+            viewer &&
+            !document.fullscreenElement
+        ) {
+
+            // Do not close viewer automatically.
+            // User can continue reading.
+
+        }
 
     }
+);
 
-});
 
-
-// ================= SHOW COURSES =================
+// =====================================================
+// SHOW ASSIGNED COURSES
+// =====================================================
 
 student.courses.forEach(function(courseId) {
 
@@ -504,7 +773,6 @@ student.courses.forEach(function(courseId) {
                         🎥 ${lesson.title}
                     </h4>
 
-
                     <div class="video-box">
 
                         <iframe
@@ -534,7 +802,7 @@ student.courses.forEach(function(courseId) {
 
 
         // =================================================
-        // LOCAL MP4
+        // LOCAL MP4 VIDEO
         // =================================================
 
         else if (lesson.type === "mp4") {
@@ -589,7 +857,6 @@ student.courses.forEach(function(courseId) {
                         🔴 ${lesson.title}
                     </h4>
 
-
                     <a
 
                         href="${lesson.url}"
@@ -622,11 +889,9 @@ student.courses.forEach(function(courseId) {
                 ${course.title}
             </h3>
 
-
             <p>
                 ${course.description}
             </p>
-
 
             ${lessonsHTML}
 
@@ -644,13 +909,16 @@ student.courses.forEach(function(courseId) {
 
 document
     .getElementById("logoutBtn")
-    .addEventListener("click", function() {
+    .addEventListener(
+        "click",
+        function() {
 
-        sessionStorage.removeItem(
-            "loggedInStudent"
-        );
+            sessionStorage.removeItem(
+                "loggedInStudent"
+            );
 
-        window.location.href =
-            "login.html";
+            window.location.href =
+                "login.html";
 
-    });
+        }
+    );
