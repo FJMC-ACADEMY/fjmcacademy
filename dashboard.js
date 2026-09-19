@@ -38,7 +38,7 @@ const COURSES = {
             {
                 title: "Lecture 2 - Sequences",
                 type: "video",
-                url: "https://www.youtube.com/embed/YOUR_VIDEO_ID"
+                url: "https://youtube.com/shorts/m7BFuuMqP4I?si=8xTUr02QTY1Lif6Q"
             },
 
             {
