@@ -846,7 +846,7 @@ footer {
 
 }
 /* =====================================================
-   PROTECTED PDF
+   PROTECTED PDF BUTTON
 ===================================================== */
 
 .protected-pdf {
@@ -855,14 +855,12 @@ footer {
 
 .pdf-open-btn {
     margin-top: 8px;
-
     padding: 11px 20px;
 
     border: none;
     border-radius: 6px;
 
     background: #1b4332;
-
     color: white;
 
     font-size: 15px;
@@ -877,7 +875,7 @@ footer {
 
 
 /* =====================================================
-   PDF VIEWER
+   PDF FULLSCREEN VIEWER
 ===================================================== */
 
 #pdfFullscreen {
@@ -888,12 +886,11 @@ footer {
     width: 100vw;
     height: 100vh;
 
-    background: #525659;
+    background: #222;
 
     z-index: 999999999;
 
     display: flex;
-
     flex-direction: column;
 
     overflow: hidden;
@@ -910,11 +907,10 @@ footer {
 .pdf-header {
     width: 100%;
 
-    height: 58px;
     min-height: 58px;
+    height: 58px;
 
     background: #123d28;
-
     color: white;
 
     display: flex;
@@ -968,7 +964,7 @@ footer {
 
 
 /* =====================================================
-   FULL SCREEN BUTTON
+   FULLSCREEN BUTTON
 ===================================================== */
 
 .pdf-fullscreen-btn {
@@ -1014,10 +1010,30 @@ footer {
 
 
 /* =====================================================
-   PDF SCROLL CONTAINER
+   PDF SCROLL AREA
 ===================================================== */
 
 .pdf-pages {
+    flex: 1 1 auto;
+
+    width: 100%;
+
+    min-height: 0;
+
+    box-sizing: border-box;
+
+    overflow-y: scroll;
+
+    overflow-x: auto;
+
+    -webkit-overflow-scrolling: touch;
+
+    overscroll-behavior: contain;
+
+    background: #525659;
+
+    padding: 12px;
+
     display: flex;
 
     flex-direction: column;
@@ -1026,66 +1042,38 @@ footer {
 
     gap: 12px;
 
-    width: 100%;
-
-    height: calc(100vh - 58px);
-
-    min-height: 0;
-
-    box-sizing: border-box;
-
-    padding: 12px;
-
-    background: #525659;
-
-    overflow-y: scroll;
-
-    overflow-x: auto;
-
-    flex: 1 1 auto;
-
-    -webkit-overflow-scrolling: touch;
-
-    overscroll-behavior: contain;
+    user-select: none;
+    -webkit-user-select: none;
 
     touch-action: pan-y;
-
-    user-select: none;
-
-    -webkit-user-select: none;
 }
 
 
 /* =====================================================
-   EVERY PDF PAGE
+   EACH PDF PAGE
 ===================================================== */
 
 .pdf-page {
-    display: block;
-
     background: white;
 
-    flex: 0 0 auto;
+    display: block;
 
     position: relative;
 
-    line-height: 0;
+    flex: 0 0 auto;
 
     width: fit-content;
 
-    height: auto;
-
     max-width: none;
 
-    margin: 0;
+    height: auto;
 
-    padding: 0;
+    line-height: 0;
 
     box-shadow:
         0 2px 12px rgba(0,0,0,0.35);
 
     user-select: none;
-
     -webkit-user-select: none;
 }
 
@@ -1097,23 +1085,19 @@ footer {
 .pdf-page canvas {
     display: block;
 
-    width: auto;
-
-    height: auto;
+    margin: 0;
+    padding: 0;
 
     max-width: none;
 
-    margin: 0;
-
-    padding: 0;
-
-    pointer-events: none;
+    height: auto;
 
     user-select: none;
-
     -webkit-user-select: none;
 
     -webkit-touch-callout: none;
+
+    pointer-events: none;
 }
 
 
@@ -1146,22 +1130,20 @@ footer {
 
 
 /* =====================================================
-   MOBILE
+   MOBILE PDF
 ===================================================== */
 
 @media (max-width: 600px) {
 
     #pdfFullscreen {
         width: 100vw;
-
         height: 100dvh;
     }
 
 
     .pdf-header {
-        height: 54px;
-
         min-height: 54px;
+        height: 54px;
 
         padding: 7px 8px;
     }
@@ -1186,28 +1168,21 @@ footer {
 
 
     .pdf-pages {
-        height: calc(100dvh - 54px);
-
-        min-height: 0;
-
         padding: 6px;
 
         gap: 8px;
 
         overflow-y: scroll;
-
         overflow-x: auto;
 
         -webkit-overflow-scrolling: touch;
 
         touch-action: pan-y;
-
-        align-items: center;
     }
 
 
     .pdf-page {
-        flex: 0 0 auto;
+        flex-shrink: 0;
 
         width: fit-content;
 
