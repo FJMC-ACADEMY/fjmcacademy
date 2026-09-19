@@ -118,7 +118,12 @@ const COURSES = {
                 type: "pdf",
                 url: "ch03.pdf"
             },
-
+            {
+                title: "Calculus Notes",
+                type: "pdf",
+                url: "https://drive.google.com/file/d/1MZNN3vbH7e8x7vupmGMHevUhbx7FlDzq/view?usp=drive_link"
+            },
+            
             {
                 title: "Live Class - Calculus",
                 type: "live",
