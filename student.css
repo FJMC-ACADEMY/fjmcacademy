@@ -642,3 +642,62 @@ video::-webkit-media-controls-enclosure {
     }
 
 }
+/* =========================================================
+   PDF STUDENT WATERMARK
+   ========================================================= */
+
+.pdf-watermark {
+    position: fixed;
+
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%) rotate(-32deg);
+
+    z-index: 10001;
+
+    pointer-events: none;
+
+    user-select: none;
+    -webkit-user-select: none;
+
+    text-align: center;
+
+    font-size: 28px;
+
+    font-weight: bold;
+
+    line-height: 1.8;
+
+    letter-spacing: 2px;
+
+    opacity: 0.18;
+
+    color: #ffffff;
+
+    white-space: nowrap;
+
+    text-shadow:
+        1px 1px 2px #000,
+        -1px -1px 2px #000;
+}
+
+
+.pdf-watermark span {
+    display: block;
+}
+
+
+/* Mobile watermark */
+
+@media (max-width: 600px) {
+
+    .pdf-watermark {
+        font-size: 20px;
+
+        opacity: 0.18;
+
+        letter-spacing: 1px;
+    }
+
+}
