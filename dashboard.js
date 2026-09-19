@@ -19,7 +19,9 @@ const STUDENTS = {
 };
 
 
-// ================= COURSE DATA =================
+// =====================================================
+// COURSE DATA
+// =====================================================
 
 const COURSES = {
 
@@ -135,7 +137,9 @@ const COURSES = {
 };
 
 
-// ================= CHECK LOGIN =================
+// =====================================================
+// CHECK LOGIN
+// =====================================================
 
 const loggedInStudent =
     sessionStorage.getItem("loggedInStudent");
@@ -144,23 +148,31 @@ if (!loggedInStudent) {
     window.location.href = "login.html";
 }
 
-const student = STUDENTS[loggedInStudent];
+const student =
+    STUDENTS[loggedInStudent];
 
 if (!student) {
 
-    sessionStorage.removeItem("loggedInStudent");
+    sessionStorage.removeItem(
+        "loggedInStudent"
+    );
 
-    window.location.href = "login.html";
+    window.location.href =
+        "login.html";
 }
 
 
-// ================= STUDENT NAME =================
+// =====================================================
+// STUDENT NAME
+// =====================================================
 
 document.getElementById("studentName").textContent =
     "Welcome, " + student.name;
 
 
-// ================= COURSE CONTAINER =================
+// =====================================================
+// COURSE CONTAINER
+// =====================================================
 
 const container =
     document.getElementById("coursesContainer");
@@ -170,40 +182,55 @@ const container =
 // BASIC PROTECTION
 // =====================================================
 
-document.addEventListener("contextmenu", function(e) {
-    e.preventDefault();
-});
+document.addEventListener(
+    "contextmenu",
+    function(e) {
+        e.preventDefault();
+    }
+);
 
-document.addEventListener("copy", function(e) {
-    e.preventDefault();
-});
+document.addEventListener(
+    "copy",
+    function(e) {
+        e.preventDefault();
+    }
+);
 
-document.addEventListener("cut", function(e) {
-    e.preventDefault();
-});
+document.addEventListener(
+    "cut",
+    function(e) {
+        e.preventDefault();
+    }
+);
 
-document.addEventListener("selectstart", function(e) {
-    e.preventDefault();
-});
+document.addEventListener(
+    "selectstart",
+    function(e) {
+        e.preventDefault();
+    }
+);
 
 
 // Keyboard shortcuts
 
-document.addEventListener("keydown", function(e) {
+document.addEventListener(
+    "keydown",
+    function(e) {
 
-    if (
-        e.ctrlKey &&
-        (
-            e.key.toLowerCase() === "s" ||
-            e.key.toLowerCase() === "p" ||
-            e.key.toLowerCase() === "u" ||
-            e.key.toLowerCase() === "c"
-        )
-    ) {
-        e.preventDefault();
+        if (
+            e.ctrlKey &&
+            (
+                e.key.toLowerCase() === "s" ||
+                e.key.toLowerCase() === "p" ||
+                e.key.toLowerCase() === "u" ||
+                e.key.toLowerCase() === "c"
+            )
+        ) {
+            e.preventDefault();
+        }
+
     }
-
-});
+);
 
 
 // =====================================================
@@ -213,24 +240,30 @@ document.addEventListener("keydown", function(e) {
 function previewLocalVideo(screen) {
 
     const video =
-        screen.querySelector(".local-video");
+        screen.querySelector(
+            ".local-video"
+        );
 
     if (!video) return;
 
     video.muted = true;
 
-    video.play().catch(function() {});
+    video.play().catch(
+        function() {}
+    );
 }
 
 
 // =====================================================
-// STOP PREVIEW
+// STOP LOCAL VIDEO PREVIEW
 // =====================================================
 
 function stopLocalPreview(screen) {
 
     const video =
-        screen.querySelector(".local-video");
+        screen.querySelector(
+            ".local-video"
+        );
 
     if (!video) return;
 
@@ -247,17 +280,23 @@ function stopLocalPreview(screen) {
 function openLocalVideo(screen) {
 
     const video =
-        screen.querySelector(".local-video");
+        screen.querySelector(
+            ".local-video"
+        );
 
     if (!video) return;
 
-    screen.classList.add("local-video-open");
+    screen.classList.add(
+        "local-video-open"
+    );
 
     video.muted = false;
 
     video.controls = true;
 
-    video.play().catch(function() {});
+    video.play().catch(
+        function() {}
+    );
 }
 
 
@@ -265,7 +304,10 @@ function openLocalVideo(screen) {
 // LOCAL MP4 VIDEO
 // =====================================================
 
-function createLocalVideo(videoURL, title) {
+function createLocalVideo(
+    videoURL,
+    title
+) {
 
     return `
         <div class="local-video-player">
@@ -330,53 +372,78 @@ let pdfJSLoaded = false;
 
 function loadPDFJS() {
 
-    return new Promise(function(resolve, reject) {
+    return new Promise(
+        function(resolve, reject) {
 
-        if (pdfJSLoaded && window.pdfjsLib) {
-            resolve();
-            return;
-        }
+            if (
+                pdfJSLoaded &&
+                window.pdfjsLib
+            ) {
 
-        if (window.pdfjsLib) {
+                resolve();
 
-            pdfJSLoaded = true;
+                return;
+            }
 
-            window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-                "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-            resolve();
+            if (window.pdfjsLib) {
 
-            return;
-        }
+                pdfJSLoaded = true;
 
-        const script =
-            document.createElement("script");
+                window.pdfjsLib
+                    .GlobalWorkerOptions
+                    .workerSrc =
+                    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-        script.src =
-            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+                resolve();
 
-        script.onload = function() {
+                return;
+            }
 
-            pdfJSLoaded = true;
 
-            window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-                "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+            const script =
+                document.createElement(
+                    "script"
+                );
 
-            resolve();
 
-        };
+            script.src =
+                "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
 
-        script.onerror = function() {
 
-            reject(
-                new Error("PDF.js could not be loaded.")
+            script.onload =
+                function() {
+
+                    pdfJSLoaded = true;
+
+                    window.pdfjsLib
+                        .GlobalWorkerOptions
+                        .workerSrc =
+                        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+                    resolve();
+
+                };
+
+
+            script.onerror =
+                function() {
+
+                    reject(
+                        new Error(
+                            "PDF.js could not be loaded."
+                        )
+                    );
+
+                };
+
+
+            document.head.appendChild(
+                script
             );
 
-        };
-
-        document.head.appendChild(script);
-
-    });
+        }
+    );
 }
 
 
@@ -384,13 +451,24 @@ function loadPDFJS() {
 // PDF BUTTON
 // =====================================================
 
-function createProtectedPDF(pdfURL, title) {
+function createProtectedPDF(
+    pdfURL,
+    title
+) {
 
     const safeURL =
-        pdfURL.replace(/'/g, "\\'");
+        pdfURL.replace(
+            /'/g,
+            "\\'"
+        );
+
 
     const safeTitle =
-        title.replace(/'/g, "\\'");
+        title.replace(
+            /'/g,
+            "\\'"
+        );
+
 
     return `
         <div class="protected-pdf">
@@ -401,10 +479,12 @@ function createProtectedPDF(pdfURL, title) {
 
             <button
                 class="pdf-open-btn"
+
                 onclick="openPDFViewer(
                     '${safeURL}',
                     '${safeTitle}'
-                )">
+                )"
+            >
 
                 📄 Open PDF
 
@@ -419,10 +499,16 @@ function createProtectedPDF(pdfURL, title) {
 // OPEN PDF VIEWER
 // =====================================================
 
-async function openPDFViewer(pdfURL, title) {
+async function openPDFViewer(
+    pdfURL,
+    title
+) {
 
     const oldViewer =
-        document.getElementById("pdfFullscreen");
+        document.getElementById(
+            "pdfFullscreen"
+        );
+
 
     if (oldViewer) {
         oldViewer.remove();
@@ -430,7 +516,10 @@ async function openPDFViewer(pdfURL, title) {
 
 
     const overlay =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     overlay.id =
         "pdfFullscreen";
@@ -448,7 +537,8 @@ async function openPDFViewer(pdfURL, title) {
 
                 <button
                     class="pdf-fullscreen-btn"
-                    onclick="togglePDFFullscreen()">
+                    onclick="togglePDFFullscreen()"
+                >
 
                     ⛶ Full Screen
 
@@ -456,7 +546,8 @@ async function openPDFViewer(pdfURL, title) {
 
                 <button
                     class="pdf-close-btn"
-                    onclick="closePDFViewer()">
+                    onclick="closePDFViewer()"
+                >
 
                     ✕ Close
 
@@ -469,7 +560,8 @@ async function openPDFViewer(pdfURL, title) {
 
         <div
             id="pdfPages"
-            class="pdf-pages">
+            class="pdf-pages"
+        >
 
             <div class="pdf-loading">
                 Loading PDF...
@@ -480,7 +572,9 @@ async function openPDFViewer(pdfURL, title) {
     `;
 
 
-    document.body.appendChild(overlay);
+    document.body.appendChild(
+        overlay
+    );
 
 
     try {
@@ -491,7 +585,9 @@ async function openPDFViewer(pdfURL, title) {
         const loadingTask =
             window.pdfjsLib.getDocument({
                 url: pdfURL,
+
                 disableAutoFetch: false,
+
                 disableStream: false
             });
 
@@ -501,14 +597,23 @@ async function openPDFViewer(pdfURL, title) {
 
 
         const pagesContainer =
-            document.getElementById("pdfPages");
+            document.getElementById(
+                "pdfPages"
+            );
 
 
-        if (!pagesContainer) return;
+        if (!pagesContainer) {
+            return;
+        }
 
 
-        pagesContainer.innerHTML = "";
+        pagesContainer.innerHTML =
+            "";
 
+
+        // ==========================================
+        // RENDER ALL PAGES
+        // ==========================================
 
         for (
             let pageNumber = 1;
@@ -524,7 +629,19 @@ async function openPDFViewer(pdfURL, title) {
 
         }
 
+
+        // ==========================================
+        // MAKE SURE SCROLL IS ENABLED
+        // ==========================================
+
+        pagesContainer.style.overflowY =
+            "scroll";
+
+        pagesContainer.style.overflowX =
+            "auto";
+
     }
+
 
     catch (error) {
 
@@ -535,7 +652,9 @@ async function openPDFViewer(pdfURL, title) {
 
 
         const pagesContainer =
-            document.getElementById("pdfPages");
+            document.getElementById(
+                "pdfPages"
+            );
 
 
         if (pagesContainer) {
@@ -573,7 +692,9 @@ async function renderPDFPage(
 ) {
 
     const page =
-        await pdf.getPage(pageNumber);
+        await pdf.getPage(
+            pageNumber
+        );
 
 
     const originalViewport =
@@ -582,62 +703,101 @@ async function renderPDFPage(
         });
 
 
-    const viewerWidth =
+    // Width available for PDF
+
+    const containerWidth =
         container.clientWidth;
 
 
-    const padding =
-        window.innerWidth <= 600 ? 12 : 24;
-
-
     const availableWidth =
-        Math.min(
-            viewerWidth - padding,
-            1000
+        Math.max(
+            containerWidth - 24,
+            280
         );
 
 
-    const scale =
+    // Calculate scale
+
+    let scale =
         availableWidth /
         originalViewport.width;
 
 
+    // Maximum scale
+
+    scale =
+        Math.min(
+            scale,
+            2
+        );
+
+
     const viewport =
         page.getViewport({
-            scale: Math.max(scale, 0.5)
+            scale: scale
         });
 
 
+    // ==========================================
+    // PAGE CONTAINER
+    // ==========================================
+
     const pageBox =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     pageBox.className =
         "pdf-page";
 
 
+    pageBox.style.width =
+        viewport.width + "px";
+
+
+    pageBox.style.height =
+        viewport.height + "px";
+
+
+    pageBox.style.flex =
+        "0 0 auto";
+
+
+    // ==========================================
+    // CANVAS
+    // ==========================================
+
     const canvas =
-        document.createElement("canvas");
+        document.createElement(
+            "canvas"
+        );
 
 
     const context =
-        canvas.getContext("2d");
+        canvas.getContext(
+            "2d"
+        );
 
 
-    const deviceScale =
-        window.devicePixelRatio || 1;
+    const pixelRatio =
+        Math.max(
+            window.devicePixelRatio || 1,
+            1
+        );
 
 
     canvas.width =
         Math.floor(
             viewport.width *
-            deviceScale
+            pixelRatio
         );
 
 
     canvas.height =
         Math.floor(
             viewport.height *
-            deviceScale
+            pixelRatio
         );
 
 
@@ -649,24 +809,53 @@ async function renderPDFPage(
         viewport.height + "px";
 
 
-    pageBox.appendChild(canvas);
+    canvas.style.display =
+        "block";
 
-    container.appendChild(pageBox);
 
+    canvas.style.maxWidth =
+        "none";
+
+
+    canvas.style.pointerEvents =
+        "none";
+
+
+    canvas.setAttribute(
+        "draggable",
+        "false"
+    );
+
+
+    pageBox.appendChild(
+        canvas
+    );
+
+
+    container.appendChild(
+        pageBox
+    );
+
+
+    // ==========================================
+    // RENDER PAGE
+    // ==========================================
 
     await page.render({
 
-        canvasContext: context,
+        canvasContext:
+            context,
 
-        viewport: viewport,
+        viewport:
+            viewport,
 
         transform:
-            deviceScale !== 1
+            pixelRatio !== 1
                 ? [
-                    deviceScale,
+                    pixelRatio,
                     0,
                     0,
-                    deviceScale,
+                    pixelRatio,
                     0,
                     0
                 ]
@@ -678,23 +867,30 @@ async function renderPDFPage(
 
 
 // =====================================================
-// FULL SCREEN
+// PDF FULL SCREEN
 // =====================================================
 
 function togglePDFFullscreen() {
 
     const viewer =
-        document.getElementById("pdfFullscreen");
+        document.getElementById(
+            "pdfFullscreen"
+        );
+
 
     if (!viewer) return;
 
 
     if (!document.fullscreenElement) {
 
-        if (viewer.requestFullscreen) {
+        if (
+            viewer.requestFullscreen
+        ) {
 
             viewer.requestFullscreen()
-                .catch(function() {});
+                .catch(
+                    function() {}
+                );
 
         }
 
@@ -702,10 +898,14 @@ function togglePDFFullscreen() {
 
     else {
 
-        if (document.exitFullscreen) {
+        if (
+            document.exitFullscreen
+        ) {
 
             document.exitFullscreen()
-                .catch(function() {});
+                .catch(
+                    function() {}
+                );
 
         }
 
@@ -721,13 +921,19 @@ function togglePDFFullscreen() {
 function closePDFViewer() {
 
     const viewer =
-        document.getElementById("pdfFullscreen");
+        document.getElementById(
+            "pdfFullscreen"
+        );
 
 
-    if (document.fullscreenElement) {
+    if (
+        document.fullscreenElement
+    ) {
 
         document.exitFullscreen()
-            .catch(function() {});
+            .catch(
+                function() {}
+            );
 
     }
 
@@ -742,188 +948,118 @@ function closePDFViewer() {
 
 
 // =====================================================
-// FULLSCREEN CHANGE
-// =====================================================
-
-document.addEventListener(
-    "fullscreenchange",
-    function() {
-
-        // Viewer ko automatically close nahi karna.
-
-    }
-);
-
-
-// =====================================================
 // SHOW ASSIGNED COURSES
 // =====================================================
 
-student.courses.forEach(function(courseId) {
+student.courses.forEach(
+    function(courseId) {
 
-    const course =
-        COURSES[courseId];
+        const course =
+            COURSES[courseId];
 
-    if (!course) return;
 
+        if (!course) return;
 
-    const card =
-        document.createElement("div");
 
-    card.className =
-        "course-card";
-
-
-    let lessonsHTML = "";
-
-
-    course.lessons.forEach(function(lesson) {
-
-
-        // ================= YOUTUBE =================
-
-        if (lesson.type === "video") {
-
-            lessonsHTML += `
-
-                <div class="lesson">
-
-                    <h4>
-                        🎥 ${lesson.title}
-                    </h4>
-
-                    <div class="video-box">
-
-                        <iframe
-                            src="${lesson.url}"
-                            title="${lesson.title}"
-
-                            allow="
-                                accelerometer;
-                                autoplay;
-                                encrypted-media;
-                                gyroscope;
-                                picture-in-picture
-                            "
-
-                            allowfullscreen>
-
-                        </iframe>
-
-                    </div>
-
-                </div>
-
-            `;
-        }
-
-
-        // ================= LOCAL MP4 =================
-
-        else if (lesson.type === "mp4") {
-
-            lessonsHTML += `
-
-                <div class="lesson">
-
-                    ${createLocalVideo(
-                        lesson.url,
-                        lesson.title
-                    )}
-
-                </div>
-
-            `;
-        }
-
-
-        // ================= PDF =================
-
-        else if (lesson.type === "pdf") {
-
-            lessonsHTML += `
-
-                <div class="lesson">
-
-                    ${createProtectedPDF(
-                        lesson.url,
-                        lesson.title
-                    )}
-
-                </div>
-
-            `;
-        }
-
-
-        // ================= LIVE CLASS =================
-
-        else if (lesson.type === "live") {
-
-            lessonsHTML += `
-
-                <div class="lesson">
-
-                    <h4>
-                        🔴 ${lesson.title}
-                    </h4>
-
-                    <a
-                        href="${lesson.url}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="live-btn">
-
-                        🔴 Join Live Class
-
-                    </a>
-
-                </div>
-
-            `;
-        }
-
-    });
-
-
-    card.innerHTML = `
-
-        <div class="course-content">
-
-            <h3>
-                ${course.title}
-            </h3>
-
-            <p>
-                ${course.description}
-            </p>
-
-            ${lessonsHTML}
-
-        </div>
-
-    `;
-
-
-    container.appendChild(card);
-
-});
-
-
-// ================= LOGOUT =================
-
-document
-    .getElementById("logoutBtn")
-    .addEventListener(
-        "click",
-        function() {
-
-            sessionStorage.removeItem(
-                "loggedInStudent"
+        const card =
+            document.createElement(
+                "div"
             );
 
-            window.location.href =
-                "login.html";
 
-        }
-    );
+        card.className =
+            "course-card";
+
+
+        let lessonsHTML =
+            "";
+
+
+        course.lessons.forEach(
+            function(lesson) {
+
+
+                // ======================================
+                // YOUTUBE
+                // ======================================
+
+                if (
+                    lesson.type ===
+                    "video"
+                ) {
+
+                    lessonsHTML += `
+
+                        <div class="lesson">
+
+                            <h4>
+                                🎥 ${lesson.title}
+                            </h4>
+
+                            <div class="video-box">
+
+                                <iframe
+
+                                    src="${lesson.url}"
+
+                                    title="${lesson.title}"
+
+                                    allow="
+                                        accelerometer;
+                                        autoplay;
+                                        encrypted-media;
+                                        gyroscope;
+                                        picture-in-picture
+                                    "
+
+                                    allowfullscreen>
+
+                                </iframe>
+
+                            </div>
+
+                        </div>
+
+                    `;
+                }
+
+
+                // ======================================
+                // LOCAL MP4
+                // ======================================
+
+                else if (
+                    lesson.type ===
+                    "mp4"
+                ) {
+
+                    lessonsHTML += `
+
+                        <div class="lesson">
+
+                            ${createLocalVideo(
+                                lesson.url,
+                                lesson.title
+                            )}
+
+                        </div>
+
+                    `;
+                }
+
+
+                // ======================================
+                // PDF
+                // ======================================
+
+                else if (
+                    lesson.type ===
+                    "pdf"
+                ) {
+
+                    lessonsHTML += `
+
+                        <div class="lesson">
+
+                            ${createProtectedPDF(
+                                less
