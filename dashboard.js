@@ -1,350 +1,656 @@
-/* =====================================================
-   PROTECTED PDF BUTTON
-===================================================== */
+const STUDENTS = {
+    "rahul@gmail.com": {
+        password: "Rahul@123",
+        name: "Rahul",
+        courses: ["real-analysis"]
+    },
 
-.protected-pdf {
-    margin-top: 15px;
+    "amit@gmail.com": {
+        password: "Amit@456",
+        name: "Amit",
+        courses: ["linear-algebra", "calculus"]
+    },
+
+    "neha@gmail.com": {
+        password: "Neha@789",
+        name: "Neha",
+        courses: ["real-analysis", "calculus"]
+    }
+};
+
+
+// ================= COURSE DATA =================
+
+const COURSES = {
+
+    "real-analysis": {
+        title: "Real Analysis",
+        description: "Complete Real Analysis Course",
+
+        lessons: [
+
+            {
+                title: "Lecture 1 - Introduction",
+                type: "video",
+                url: "https://www.youtube.com/embed/hhjuLjGMxgw?rel=0"
+            },
+
+            {
+                title: "Lecture 2 - Sequences",
+                type: "video",
+                url: "https://www.youtube.com/embed/rkKZIMPecRA"
+            },
+
+            {
+                title: "Lecture 3 - Local Video",
+                type: "mp4",
+                url: "real-analysis-lecture-3.mp4"
+            },
+
+            {
+                title: "Real Analysis Notes",
+                type: "pdf",
+                url: "/fjmcacademy/321581555.PDF"
+            },
+
+            {
+                title: "Lecture 2",
+                type: "pdf",
+                url: "/fjmcacademy/ch03.pdf"
+            },
+
+            {
+                title: "Live Class - Real Analysis",
+                type: "live",
+                url: "https://meet.google.com/YOUR-LIVE-CLASS-LINK"
+            }
+        ]
+    },
+
+
+    "linear-algebra": {
+        title: "Linear Algebra",
+        description: "Complete Linear Algebra Course",
+
+        lessons: [
+
+            {
+                title: "Lecture 1",
+                type: "video",
+                url: "https://www.youtube.com/embed/YOUR_VIDEO_ID"
+            },
+
+            {
+                title: "Linear Algebra Notes",
+                type: "pdf",
+                url: "pdf/linear-algebra-notes.pdf"
+            },
+
+            {
+                title: "Live Class - Linear Algebra",
+                type: "live",
+                url: "https://meet.google.com/YOUR-LIVE-CLASS-LINK"
+            }
+        ]
+    },
+
+
+    "calculus": {
+        title: "Calculus",
+        description: "Complete Calculus Course",
+
+        lessons: [
+
+            {
+                title: "Lecture 1",
+                type: "video",
+                url: "https://youtube.com/shorts/m7BFuuMqP4I?si=P3wroZUVHHmmuj-8"
+            },
+
+            {
+                title: "Lecture 2 - Local Video",
+                type: "mp4",
+                url: "videos/calculus-lecture-2.mp4"
+            },
+
+            {
+                title: "Calculus Notes",
+                type: "pdf",
+                url: "./ch03.pdf"
+            },
+            {
+                title: "Calculus Notes",
+                type: "pdf",
+                url: "https://drive.google.com/file/d/1MZNN3vbH7e8x7vupmGMHevUhbx7FlDzq/view?usp=drive_link"
+            },
+            
+            {
+                title: "Live Class - Calculus",
+                type: "live",
+                url: "https://meet.google.com/YOUR-LIVE-CLASS-LINK"
+            }
+        ]
+    }
+};
+
+
+// ================= CHECK LOGIN =================
+
+const loggedInStudent =
+    sessionStorage.getItem("loggedInStudent");
+
+if (!loggedInStudent) {
+    window.location.href = "login.html";
 }
 
-.pdf-open-btn {
-    margin-top: 8px;
-    padding: 11px 20px;
+const student = STUDENTS[loggedInStudent];
 
-    border: none;
-    border-radius: 6px;
+if (!student) {
 
-    background: #1b4332;
-    color: white;
+    sessionStorage.removeItem("loggedInStudent");
 
-    font-size: 15px;
-    font-weight: 600;
-
-    cursor: pointer;
-}
-
-.pdf-open-btn:hover {
-    background: #143d2b;
-}
-
-
-/* =====================================================
-   PDF FULLSCREEN VIEWER
-===================================================== */
-
-#pdfFullscreen {
-    position: fixed;
-
-    inset: 0;
-
-    width: 100vw;
-    height: 100vh;
-
-    background: #222;
-
-    z-index: 999999999;
-
-    display: flex;
-    flex-direction: column;
-
-    overflow: hidden;
-
-    margin: 0;
-    padding: 0;
-}
-
-
-/* =====================================================
-   PDF HEADER
-===================================================== */
-
-.pdf-header {
-    width: 100%;
-
-    min-height: 58px;
-    height: 58px;
-
-    background: #123d28;
-    color: white;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 10px;
-
-    padding: 8px 12px;
-
-    box-sizing: border-box;
-
-    flex-shrink: 0;
-}
-
-
-/* =====================================================
-   PDF TITLE
-===================================================== */
-
-.pdf-title {
-    font-size: 16px;
-
-    font-weight: 600;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
-    min-width: 0;
-}
-
-
-/* =====================================================
-   PDF CONTROLS
-===================================================== */
-
-.pdf-controls {
-    display: flex;
-
-    align-items: center;
-
-    gap: 7px;
-
-    flex-shrink: 0;
-}
-
-
-/* =====================================================
-   FULLSCREEN BUTTON
-===================================================== */
-
-.pdf-fullscreen-btn {
-    border: none;
-
-    background: #2563eb;
-
-    color: white;
-
-    padding: 8px 12px;
-
-    border-radius: 5px;
-
-    font-size: 14px;
-
-    cursor: pointer;
-
-    white-space: nowrap;
-}
-
-
-/* =====================================================
-   CLOSE BUTTON
-===================================================== */
-
-.pdf-close-btn {
-    border: none;
-
-    background: #b91c1c;
-
-    color: white;
-
-    padding: 8px 12px;
-
-    border-radius: 5px;
-
-    font-size: 14px;
-
-    cursor: pointer;
-
-    white-space: nowrap;
+    window.location.href = "login.html";
 }
 
 
-/* =====================================================
-   PDF SCROLL AREA
-===================================================== */
+// ================= STUDENT NAME =================
 
-.pdf-pages {
-    flex: 1 1 auto;
+document.getElementById("studentName").textContent =
+    "Welcome, " + student.name;
 
-    width: 100%;
 
-    min-height: 0;
+// ================= COURSE CONTAINER =================
 
-    box-sizing: border-box;
+const container =
+    document.getElementById("coursesContainer");
 
-    overflow-y: scroll;
 
-    overflow-x: auto;
+// =====================================================
+// BASIC PROTECTION
+// =====================================================
 
-    -webkit-overflow-scrolling: touch;
+document.addEventListener("contextmenu", function(e) {
+    e.preventDefault();
+});
 
-    overscroll-behavior: contain;
+document.addEventListener("copy", function(e) {
+    e.preventDefault();
+});
 
-    background: #525659;
+document.addEventListener("cut", function(e) {
+    e.preventDefault();
+});
 
-    padding: 12px;
+document.addEventListener("selectstart", function(e) {
+    e.preventDefault();
+});
 
-    display: flex;
 
-    flex-direction: column;
+// Keyboard shortcuts
+document.addEventListener("keydown", function(e) {
 
-    align-items: center;
+    if (
+        e.ctrlKey &&
+        (
+            e.key.toLowerCase() === "s" ||
+            e.key.toLowerCase() === "p" ||
+            e.key.toLowerCase() === "u" ||
+            e.key.toLowerCase() === "c"
+        )
+    ) {
+        e.preventDefault();
+    }
 
-    gap: 12px;
+    if (e.key === "PrintScreen") {
+        e.preventDefault();
+    }
+});
 
-    user-select: none;
-    -webkit-user-select: none;
 
-    touch-action: pan-y;
+// =====================================================
+// LOCAL VIDEO PREVIEW
+// =====================================================
+
+function previewLocalVideo(screen) {
+
+    const video =
+        screen.querySelector(".local-video");
+
+    if (!video) return;
+
+    video.muted = true;
+
+    video.play().catch(function() {});
 }
 
 
-/* =====================================================
-   EACH PDF PAGE
-===================================================== */
+// =====================================================
+// STOP PREVIEW
+// =====================================================
 
-.pdf-page {
-    background: white;
+function stopLocalPreview(screen) {
 
-    display: block;
+    const video =
+        screen.querySelector(".local-video");
 
-    position: relative;
+    if (!video) return;
 
-    flex: 0 0 auto;
+    video.pause();
 
-    width: fit-content;
-
-    max-width: none;
-
-    height: auto;
-
-    line-height: 0;
-
-    box-shadow:
-        0 2px 12px rgba(0,0,0,0.35);
-
-    user-select: none;
-    -webkit-user-select: none;
+    video.currentTime = 0;
 }
 
 
-/* =====================================================
-   PDF CANVAS
-===================================================== */
+// =====================================================
+// OPEN LOCAL VIDEO
+// =====================================================
 
-.pdf-page canvas {
-    display: block;
+function openLocalVideo(screen) {
 
-    margin: 0;
-    padding: 0;
+    const video =
+        screen.querySelector(".local-video");
 
-    max-width: none;
+    if (!video) return;
 
-    height: auto;
+    screen.classList.add("local-video-open");
 
-    user-select: none;
-    -webkit-user-select: none;
+    video.muted = false;
 
-    -webkit-touch-callout: none;
+    video.controls = true;
 
-    pointer-events: none;
+    video.play().catch(function() {});
 }
 
 
-/* =====================================================
-   LOADING
-===================================================== */
+// =====================================================
+// LOCAL MP4 VIDEO
+// =====================================================
 
-.pdf-loading {
-    color: white;
+function createLocalVideo(videoURL, title) {
 
-    font-size: 18px;
+    return `
+        <div class="local-video-player">
 
-    padding: 50px 20px;
+            <div
+                class="local-video-screen"
 
-    text-align: center;
+                onmouseenter="previewLocalVideo(this)"
+
+                onmouseleave="stopLocalPreview(this)"
+
+                onclick="openLocalVideo(this)"
+            >
+
+                <video
+                    class="local-video"
+
+                    preload="metadata"
+
+                    muted
+
+                    playsinline
+
+                    controls
+
+                    controlsList="nodownload noplaybackrate"
+
+                    disablePictureInPicture
+
+                    oncontextmenu="return false;"
+                >
+
+                    <source
+                        src="${videoURL}"
+                        type="video/mp4"
+                    >
+
+                    Your browser does not support MP4 video.
+
+                </video>
+
+
+                <div class="local-video-play">
+                    ▶
+                </div>
+
+            </div>
+
+
+            <h4 class="local-video-title">
+                🎥 ${title}
+            </h4>
+
+        </div>
+    `;
 }
 
 
-/* =====================================================
-   ERROR
-===================================================== */
+// =====================================================
+// PDF BUTTON
+// =====================================================
 
-.pdf-error {
-    color: white;
+function createProtectedPDF(pdfURL, title) {
 
-    text-align: center;
+    return `
+        <div class="protected-pdf">
 
-    padding: 60px 20px;
+            <h4>📕 ${title}</h4>
+
+            <button
+                class="pdf-open-btn"
+                onclick="openPDFViewer(
+                    '${pdfURL}',
+                    '${title.replace(/'/g, "\\'")}'
+                )">
+
+                📄 Open PDF
+
+            </button>
+
+        </div>
+    `;
 }
 
 
-/* =====================================================
-   MOBILE PDF
-===================================================== */
+// =====================================================
+// FULL SCREEN PDF VIEWER
+// =====================================================
 
-@media (max-width: 600px) {
+function openPDFViewer(pdfURL, title) {
 
-    #pdfFullscreen {
-        width: 100vw;
-        height: 100dvh;
+    const oldViewer =
+        document.getElementById("pdfFullscreen");
+
+    if (oldViewer) {
+        oldViewer.remove();
     }
 
 
-    .pdf-header {
-        min-height: 54px;
-        height: 54px;
+    const overlay =
+        document.createElement("div");
 
-        padding: 7px 8px;
+    overlay.id = "pdfFullscreen";
+
+
+    overlay.innerHTML = `
+
+        <div class="pdf-header">
+
+            <span class="pdf-title">
+                📕 ${title}
+            </span>
+
+
+            <button
+                class="pdf-close-btn"
+                onclick="closePDFViewer()">
+
+                ✕ Close
+
+            </button>
+
+        </div>
+
+
+        <iframe
+
+            src="${pdfURL}#toolbar=0&navpanes=0&scrollbar=1"
+
+            title="${title}"
+
+            oncontextmenu="return false;">
+
+        </iframe>
+
+    `;
+
+
+    document.body.appendChild(overlay);
+
+
+    // Try browser fullscreen
+    if (overlay.requestFullscreen) {
+
+        overlay.requestFullscreen()
+            .catch(function() {});
+
     }
-
-
-    .pdf-title {
-        font-size: 14px;
-    }
-
-
-    .pdf-controls {
-        gap: 5px;
-    }
-
-
-    .pdf-fullscreen-btn,
-    .pdf-close-btn {
-        padding: 7px 9px;
-
-        font-size: 12px;
-    }
-
-
-    .pdf-pages {
-        padding: 6px;
-
-        gap: 8px;
-
-        overflow-y: scroll;
-        overflow-x: auto;
-
-        -webkit-overflow-scrolling: touch;
-
-        touch-action: pan-y;
-    }
-
-
-    .pdf-page {
-        flex-shrink: 0;
-
-        width: fit-content;
-
-        max-width: none;
-    }
-
-
-    .pdf-page canvas {
-        max-width: none;
-    }
-
 }
+
+
+// =====================================================
+// CLOSE PDF
+// =====================================================
+
+function closePDFViewer() {
+
+    const viewer =
+        document.getElementById("pdfFullscreen");
+
+
+    if (document.fullscreenElement) {
+
+        document.exitFullscreen()
+            .catch(function() {});
+
+    }
+
+
+    if (viewer) {
+
+        viewer.remove();
+
+    }
+}
+
+
+// =====================================================
+// CLOSE PDF WHEN ESCAPE IS PRESSED
+// =====================================================
+
+document.addEventListener("fullscreenchange", function() {
+
+    if (
+        !document.fullscreenElement &&
+        document.getElementById("pdfFullscreen")
+    ) {
+
+        const viewer =
+            document.getElementById("pdfFullscreen");
+
+        viewer.remove();
+
+    }
+
+});
+
+
+// ================= SHOW COURSES =================
+
+student.courses.forEach(function(courseId) {
+
+    const course =
+        COURSES[courseId];
+
+    if (!course) return;
+
+
+    const card =
+        document.createElement("div");
+
+    card.className =
+        "course-card";
+
+
+    let lessonsHTML = "";
+
+
+    // ================= LESSONS =================
+
+    course.lessons.forEach(function(lesson) {
+
+
+        // =================================================
+        // YOUTUBE VIDEO
+        // =================================================
+
+        if (lesson.type === "video") {
+
+            lessonsHTML += `
+
+                <div class="lesson">
+
+                    <h4>
+                        🎥 ${lesson.title}
+                    </h4>
+
+
+                    <div class="video-box">
+
+                        <iframe
+
+                            src="${lesson.url}"
+
+                            title="${lesson.title}"
+
+                            allow="
+                                accelerometer;
+                                autoplay;
+                                encrypted-media;
+                                gyroscope;
+                                picture-in-picture
+                            "
+
+                            allowfullscreen>
+
+                        </iframe>
+
+                    </div>
+
+                </div>
+
+            `;
+        }
+
+
+        // =================================================
+        // LOCAL MP4
+        // =================================================
+
+        else if (lesson.type === "mp4") {
+
+            lessonsHTML += `
+
+                <div class="lesson">
+
+                    ${createLocalVideo(
+                        lesson.url,
+                        lesson.title
+                    )}
+
+                </div>
+
+            `;
+        }
+
+
+        // =================================================
+        // PDF
+        // =================================================
+
+        else if (lesson.type === "pdf") {
+
+            lessonsHTML += `
+
+                <div class="lesson">
+
+                    ${createProtectedPDF(
+                        lesson.url,
+                        lesson.title
+                    )}
+
+                </div>
+
+            `;
+        }
+
+
+        // =================================================
+        // LIVE CLASS
+        // =================================================
+
+        else if (lesson.type === "live") {
+
+            lessonsHTML += `
+
+                <div class="lesson">
+
+                    <h4>
+                        🔴 ${lesson.title}
+                    </h4>
+
+
+                    <a
+
+                        href="${lesson.url}"
+
+                        target="_blank"
+
+                        rel="noopener noreferrer"
+
+                        class="live-btn">
+
+                        🔴 Join Live Class
+
+                    </a>
+
+                </div>
+
+            `;
+        }
+
+    });
+
+
+    // ================= COURSE CARD =================
+
+    card.innerHTML = `
+
+        <div class="course-content">
+
+            <h3>
+                ${course.title}
+            </h3>
+
+
+            <p>
+                ${course.description}
+            </p>
+
+
+            ${lessonsHTML}
+
+        </div>
+
+    `;
+
+
+    container.appendChild(card);
+
+});
+
+
+// ================= LOGOUT =================
+
+document
+    .getElementById("logoutBtn")
+    .addEventListener("click", function() {
+
+        sessionStorage.removeItem(
+            "loggedInStudent"
+        );
+
+        window.location.href =
+            "login.html";
+
+    });
