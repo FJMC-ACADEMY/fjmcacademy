@@ -155,3 +155,283 @@ window.addEventListener("resize", updateLifeVisible);
 updateLifeVisible();
 
 </script>
+<script>
+
+/* ================= TOP RANKER DATA ================= */
+
+const rankerData = {
+
+    "net-june-25": [
+
+        {
+            image: "top-rankers/net-june-25/1.jpg",
+            name: "Madhumita Raj",
+            rank: "Rank-34"
+        },
+
+        {
+            image: "top-rankers/net-june-25/2.jpg",
+            name: "Poornima",
+            rank: "Rank-38"
+        },
+
+        {
+            image: "top-rankers/net-june-25/3.jpg",
+            name: "Nimesh Bhatt",
+            rank: "Rank-46"
+        },
+
+        {
+            image: "top-rankers/net-june-25/4.jpg",
+            name: "Ritik Agarwal",
+            rank: "Rank-47"
+        },
+
+        {
+            image: "top-rankers/net-june-25/5.jpg",
+            name: "Nisha Yadav",
+            rank: "Rank-66"
+        }
+
+    ],
+
+
+    "net-dec-24": [
+
+        {
+            image: "top-rankers/net-dec-24/1.jpg",
+            name: "Student 1",
+            rank: "Rank-12"
+        },
+
+        {
+            image: "top-rankers/net-dec-24/2.jpg",
+            name: "Student 2",
+            rank: "Rank-25"
+        }
+
+    ],
+
+
+    "jam-25": [
+
+        {
+            image: "top-rankers/jam-25/1.jpg",
+            name: "Student 1",
+            rank: "Rank-10"
+        },
+
+        {
+            image: "top-rankers/jam-25/2.jpg",
+            name: "Student 2",
+            rank: "Rank-20"
+        }
+
+    ],
+
+
+    "gate-25": [
+
+        {
+            image: "top-rankers/gate-25/1.jpg",
+            name: "Student 1",
+            rank: "Rank-15"
+        },
+
+        {
+            image: "top-rankers/gate-25/2.jpg",
+            name: "Student 2",
+            rank: "Rank-30"
+        }
+
+    ],
+
+
+    "net-june-24": [
+
+        {
+            image: "top-rankers/net-june-24/1.jpg",
+            name: "Student 1",
+            rank: "Rank-20"
+        }
+
+    ],
+
+
+    "jam-24": [
+
+        {
+            image: "top-rankers/jam-24/1.jpg",
+            name: "Student 1",
+            rank: "Rank-18"
+        }
+
+    ],
+
+
+    "gate-24": [
+
+        {
+            image: "top-rankers/gate-24/1.jpg",
+            name: "Student 1",
+            rank: "Rank-22"
+        }
+
+    ]
+
+};
+
+
+/* ================= SLIDER ================= */
+
+let currentRankers = [];
+let rankerIndex = 0;
+
+const rankerTrack =
+    document.getElementById("rankerTrack");
+
+
+function showRankers(category, button) {
+
+    currentRankers = rankerData[category] || [];
+
+    rankerIndex = 0;
+
+    rankerTrack.innerHTML = "";
+
+
+    /* ACTIVE TAB */
+
+    document
+        .querySelectorAll(".ranker-tab")
+        .forEach(tab => {
+            tab.classList.remove("active");
+        });
+
+    button.classList.add("active");
+
+
+    /* CREATE CARDS */
+
+    currentRankers.forEach(student => {
+
+        const card = document.createElement("div");
+
+        card.className = "ranker-card";
+
+        card.innerHTML = `
+
+            <img src="${student.image}"
+                 alt="${student.name}">
+
+            <div class="ranker-info">
+
+                ${student.name}<br>
+
+                ${student.rank}
+
+            </div>
+
+        `;
+
+        rankerTrack.appendChild(card);
+
+    });
+
+    updateRankerSlider();
+}
+
+
+function updateRankerSlider() {
+
+    const card =
+        rankerTrack.querySelector(".ranker-card");
+
+    if (!card) return;
+
+    const cardWidth =
+        card.getBoundingClientRect().width + 35;
+
+    rankerTrack.style.transform =
+        `translateX(-${rankerIndex * cardWidth}px)`;
+}
+
+
+function rankerNext() {
+
+    if (currentRankers.length === 0)
+        return;
+
+    const visible =
+        window.innerWidth <= 600 ? 2 : 5;
+
+    rankerIndex++;
+
+    if (rankerIndex >
+        currentRankers.length - visible) {
+
+        rankerIndex = 0;
+    }
+
+    updateRankerSlider();
+}
+
+
+function rankerPrev() {
+
+    if (currentRankers.length === 0)
+        return;
+
+    const visible =
+        window.innerWidth <= 600 ? 2 : 5;
+
+    rankerIndex--;
+
+    if (rankerIndex < 0) {
+
+        rankerIndex =
+            Math.max(0,
+            currentRankers.length - visible);
+    }
+
+    updateRankerSlider();
+}
+
+
+/* FIRST TAB */
+
+const firstTab =
+    document.querySelector(".ranker-tab");
+
+showRankers("net-june-25", firstTab);
+
+
+/* AUTO SLIDE */
+
+let rankerAutoSlide =
+    setInterval(rankerNext, 4000);
+
+
+/* PAUSE WHEN MOUSE IS ON SLIDER */
+
+const rankerArea =
+    document.querySelector(".ranker-slider-area");
+
+rankerArea.addEventListener("mouseenter", () => {
+
+    clearInterval(rankerAutoSlide);
+
+});
+
+rankerArea.addEventListener("mouseleave", () => {
+
+    rankerAutoSlide =
+        setInterval(rankerNext, 4000);
+
+});
+
+
+window.addEventListener("resize",
+    updateRankerSlider);
+
+</script>
