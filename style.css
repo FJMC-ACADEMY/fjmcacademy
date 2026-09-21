@@ -845,3 +845,177 @@ footer {
     }
 
 }
+/* ================= LIFE AT DIPS ================= */
+
+.life-dips-section {
+    position: relative;
+    width: 100%;
+    min-height: 420px;
+
+    background-image: url("life-at-dips/background.jpg");
+    background-size: cover;
+    background-position: center;
+
+    overflow: hidden;
+    color: white;
+}
+
+.life-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.70);
+}
+
+.life-dips-container {
+    position: relative;
+    z-index: 2;
+
+    max-width: 1250px;
+    margin: auto;
+
+    padding: 35px 20px 30px;
+}
+
+.life-dips-container h2 {
+    font-size: 24px;
+    font-weight: 500;
+    margin: 0 0 8px;
+}
+
+.life-title-line {
+    width: 35px;
+    height: 3px;
+    background: #f4c400;
+    margin-bottom: 45px;
+}
+
+/* SLIDER */
+
+.life-slider-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.life-slider {
+    width: 100%;
+    overflow: hidden;
+}
+
+.life-track {
+    display: flex;
+    gap: 28px;
+
+    transition: transform 0.7s ease;
+}
+
+.life-slide {
+    flex: 0 0 calc((100% - 84px) / 4);
+
+    height: 215px;
+
+    overflow: hidden;
+    background: #111;
+}
+
+.life-slide img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+    display: block;
+
+    transition: transform 0.4s ease;
+}
+
+.life-slide:hover img {
+    transform: scale(1.03);
+}
+
+/* BUTTONS */
+
+.life-btn {
+    position: absolute;
+    z-index: 5;
+
+    width: 38px;
+    height: 55px;
+
+    border: none;
+    background: rgba(0,0,0,0.55);
+
+    color: white;
+    font-size: 22px;
+
+    cursor: pointer;
+
+    opacity: 0;
+    transition: 0.3s;
+}
+
+.life-slider-wrapper:hover .life-btn {
+    opacity: 1;
+}
+
+.life-prev {
+    left: 0;
+}
+
+.life-next {
+    right: 0;
+}
+
+/* GALLERY BUTTON */
+
+.life-gallery-btn {
+    display: block;
+
+    margin: 25px auto 0;
+
+    border: none;
+
+    background: #f28c00;
+    color: white;
+
+    padding: 10px 22px;
+
+    font-size: 14px;
+
+    cursor: pointer;
+}
+
+.life-gallery-btn:hover {
+    background: #d97700;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 900px) {
+
+    .life-slide {
+        flex: 0 0 calc((100% - 28px) / 2);
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .life-dips-container {
+        padding: 25px 12px;
+    }
+
+    .life-slide {
+        flex: 0 0 100%;
+        height: 220px;
+    }
+
+    .life-track {
+        gap: 0;
+    }
+
+    .life-btn {
+        opacity: 1;
+    }
+
+}
