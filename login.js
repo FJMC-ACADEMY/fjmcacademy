@@ -1,19 +1,34 @@
+// =========================================================
+// FJMC ACADEMY - STUDENT LOGIN
+// Firebase Authentication Version
+// =========================================================
+
+import {
+    signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+import {
+    auth
+} from "./firebase.js";
+
+
+// =========================================================
+// STUDENT DATA
+// =========================================================
+
 const STUDENTS = {
 
     "rahul@gmail.com": {
-        password: "Rahul@123",
         name: "Rahul",
         courses: ["real-analysis"]
     },
 
     "amit@gmail.com": {
-        password: "Amit@456",
         name: "Amit",
         courses: ["linear-algebra", "calculus"]
     },
 
     "fogatjagmohan@gmail.com": {
-        password: "Neha@789",
         name: "Neha",
         courses: ["real-analysis", "calculus"]
     }
@@ -21,38 +36,147 @@ const STUDENTS = {
 };
 
 
-const loginForm = document.getElementById("loginForm");
-const message = document.getElementById("loginMessage");
+// =========================================================
+// LOGIN ELEMENTS
+// =========================================================
+
+const loginForm =
+    document.getElementById("loginForm");
+
+const message =
+    document.getElementById("loginMessage");
 
 
-loginForm.addEventListener("submit", function(event) {
+// =========================================================
+// LOGIN
+// =========================================================
+
+loginForm.addEventListener("submit", async function (event) {
 
     event.preventDefault();
 
-    const email = document.getElementById("email").value.trim().toLowerCase();
-    const password = document.getElementById("password").value;
 
-    const student = STUDENTS[email];
+    const email =
+        document
+            .getElementById("email")
+            .value
+            .trim()
+            .toLowerCase();
 
 
-    if (!student) {
+    const password =
+        document.getElementById("password").value;
 
-        message.textContent = "Email not found.";
+
+    // Clear previous message
+
+    message.textContent = "";
+
+
+    // Check student profile
+
+    if (!STUDENTS[email]) {
+
+        message.textContent =
+            "This student account is not registered.";
+
         return;
-
     }
 
 
-    if (student.password !== password) {
+    try {
 
-        message.textContent = "Incorrect password.";
-        return;
+        // Firebase Authentication
+
+        const userCredential =
+            await signInWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
+
+
+        const user =
+            userCredential.user;
+
+
+        // Save Firebase UID
+
+        sessionStorage.setItem(
+            "firebaseUID",
+            user.uid
+        );
+
+
+        // Save email
+
+        sessionStorage.setItem(
+            "loggedInStudent",
+            user.email
+        );
+
+
+        // Go to dashboard
+
+        window.location.href =
+            "dashboard.html";
+
+
+    } catch (error) {
+
+        console.error(
+            "Firebase Login Error:",
+            error
+        );
+
+
+        if (
+            error.code ===
+            "auth/invalid-credential"
+        ) {
+
+            message.textContent =
+                "Incorrect email or password.";
+
+        }
+
+        else if (
+            error.code ===
+            "auth/user-not-found"
+        ) {
+
+            message.textContent =
+                "Account not found.";
+
+        }
+
+        else if (
+            error.code ===
+            "auth/wrong-password"
+        ) {
+
+            message.textContent =
+                "Incorrect password.";
+
+        }
+
+        else if (
+            error.code ===
+            "auth/too-many-requests"
+        ) {
+
+            message.textContent =
+                "Too many login attempts. Please try again later.";
+
+        }
+
+        else {
+
+            message.textContent =
+                "Login failed. Please try again.";
+
+        }
 
     }
-
-
-    sessionStorage.setItem("loggedInStudent", email);
-
-    window.location.href = "dashboard.html";
 
 });
