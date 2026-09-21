@@ -845,4 +845,514 @@ footer {
     }
 
 }
+/* =====================================================
+   LIFE AT DIPS
+===================================================== */
 
+.life-dips-section {
+    position: relative;
+    width: 100%;
+    min-height: 430px;
+
+    overflow: hidden;
+
+    color: white;
+
+    background: #111;
+}
+
+
+/* ================= BACKGROUND ================= */
+
+.life-background {
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    z-index: 0;
+}
+
+
+/* DARK OVERLAY */
+
+.life-overlay {
+    position: absolute;
+
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.68);
+
+    z-index: 1;
+}
+
+
+/* ================= CONTAINER ================= */
+
+.life-dips-container {
+    position: relative;
+
+    z-index: 2;
+
+    width: 100%;
+    max-width: 1250px;
+
+    margin: auto;
+
+    padding: 40px 20px 35px;
+}
+
+
+.life-dips-container h2 {
+    margin: 0 0 8px;
+
+    font-size: 25px;
+
+    font-weight: 500;
+
+    color: white;
+}
+
+
+/* YELLOW LINE */
+
+.life-title-line {
+    width: 38px;
+
+    height: 3px;
+
+    background: #f4c400;
+
+    margin-bottom: 38px;
+}
+
+
+/* =====================================================
+   SLIDER
+===================================================== */
+
+.life-slider-wrapper {
+    position: relative;
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+}
+
+
+.life-slider {
+    width: 100%;
+
+    overflow: hidden;
+
+    position: relative;
+}
+
+
+.life-track {
+    display: flex;
+
+    gap: 25px;
+
+    width: max-content;
+
+    transition: transform 0.6s ease;
+
+    will-change: transform;
+}
+
+
+.life-slide {
+    flex: 0 0 280px;
+
+    height: 215px;
+
+    overflow: hidden;
+
+    background: #222;
+
+    border-radius: 2px;
+
+    cursor: pointer;
+
+    position: relative;
+}
+
+
+.life-slide img {
+    width: 100%;
+
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+
+    user-select: none;
+
+    -webkit-user-drag: none;
+
+    transition: transform 0.35s ease;
+}
+
+
+.life-slide:hover img {
+    transform: scale(1.04);
+}
+
+
+/* =====================================================
+   NEXT / PREVIOUS
+===================================================== */
+
+.life-btn {
+    position: absolute;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    z-index: 10;
+
+    width: 42px;
+
+    height: 58px;
+
+    border: none;
+
+    background: rgba(0, 0, 0, 0.65);
+
+    color: white;
+
+    font-size: 25px;
+
+    cursor: pointer;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    transition: background 0.25s ease;
+}
+
+
+.life-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+
+.life-prev {
+    left: 0;
+}
+
+
+.life-next {
+    right: 0;
+}
+
+
+/* =====================================================
+   GALLERY BUTTON
+===================================================== */
+
+.life-gallery-btn {
+    display: block;
+
+    margin: 28px auto 0;
+
+    padding: 11px 24px;
+
+    border: none;
+
+    border-radius: 2px;
+
+    background: #f28c00;
+
+    color: white;
+
+    font-size: 14px;
+
+    cursor: pointer;
+
+    transition: background 0.25s ease;
+}
+
+
+.life-gallery-btn:hover {
+    background: #d97700;
+}
+
+
+/* =====================================================
+   LARGE GALLERY POPUP
+===================================================== */
+
+.life-gallery-popup {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 99999;
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: rgba(0, 0, 0, 0.94);
+
+    padding: 20px;
+}
+
+
+.life-gallery-popup.active {
+    display: flex;
+}
+
+
+/* POPUP CONTENT */
+
+.life-popup-content {
+    position: relative;
+
+    max-width: 90vw;
+
+    max-height: 90vh;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+}
+
+
+.life-popup-content img {
+    display: block;
+
+    max-width: 88vw;
+
+    max-height: 82vh;
+
+    width: auto;
+
+    height: auto;
+
+    object-fit: contain;
+
+    user-select: none;
+
+    -webkit-user-drag: none;
+}
+
+
+/* CLOSE */
+
+.life-popup-close {
+    position: absolute;
+
+    top: 15px;
+
+    right: 22px;
+
+    z-index: 20;
+
+    width: 45px;
+
+    height: 45px;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: rgba(255,255,255,0.15);
+
+    color: white;
+
+    font-size: 34px;
+
+    line-height: 40px;
+
+    cursor: pointer;
+}
+
+
+.life-popup-close:hover {
+    background: rgba(255,255,255,0.30);
+}
+
+
+/* POPUP ARROWS */
+
+.life-popup-arrow {
+    position: absolute;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    z-index: 20;
+
+    width: 52px;
+
+    height: 70px;
+
+    border: none;
+
+    background: rgba(255,255,255,0.12);
+
+    color: white;
+
+    font-size: 32px;
+
+    cursor: pointer;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+}
+
+
+.life-popup-arrow:hover {
+    background: rgba(255,255,255,0.25);
+}
+
+
+.life-popup-prev {
+    left: 20px;
+}
+
+
+.life-popup-next {
+    right: 20px;
+}
+
+
+/* COUNTER */
+
+.life-popup-counter {
+    position: absolute;
+
+    bottom: -35px;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    color: white;
+
+    font-size: 14px;
+
+    white-space: nowrap;
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media (max-width: 1000px) {
+
+    .life-slide {
+        flex-basis: 300px;
+    }
+
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 700px) {
+
+    .life-dips-section {
+        min-height: 360px;
+    }
+
+
+    .life-dips-container {
+        padding: 28px 12px 30px;
+    }
+
+
+    .life-dips-container h2 {
+        font-size: 22px;
+    }
+
+
+    .life-title-line {
+        margin-bottom: 25px;
+    }
+
+
+    .life-slide {
+        flex: 0 0 calc(100vw - 24px);
+
+        height: 220px;
+    }
+
+
+    .life-track {
+        gap: 0;
+    }
+
+
+    .life-btn {
+        width: 38px;
+
+        height: 52px;
+
+        font-size: 22px;
+    }
+
+
+    .life-gallery-btn {
+        margin-top: 22px;
+    }
+
+
+    .life-popup-arrow {
+        width: 42px;
+
+        height: 55px;
+
+        font-size: 25px;
+    }
+
+
+    .life-popup-prev {
+        left: 5px;
+    }
+
+
+    .life-popup-next {
+        right: 5px;
+    }
+
+
+    .life-popup-close {
+        top: 8px;
+
+        right: 8px;
+    }
+
+
+    .life-popup-content img {
+        max-width: 92vw;
+
+        max-height: 78vh;
+    }
+
+}
