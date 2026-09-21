@@ -1240,3 +1240,667 @@ footer {
     }
 
 }
+/* ===============================
+   TOP RANKERS SECTION
+================================ */
+
+.rankers-section {
+  position: relative;
+  min-height: 100vh;
+  padding: 70px 5%;
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      rgba(10, 18, 45, 0.88),
+      rgba(22, 12, 55, 0.92)
+    );
+
+  color: #fff;
+}
+
+
+/* ===============================
+   MOON + STARS BACKGROUND
+================================ */
+
+.sky-background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(91, 103, 180, 0.35),
+      transparent 30%
+    ),
+    linear-gradient(
+      135deg,
+      #071126,
+      #111b3c 45%,
+      #241344
+    );
+}
+
+
+/* Moon */
+
+.moon {
+  position: absolute;
+
+  width: 150px;
+  height: 150px;
+
+  right: 9%;
+  top: 7%;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle at 35% 30%,
+      #ffffff,
+      #e9e8ff 55%,
+      #bfc5e8
+    );
+
+  box-shadow:
+    0 0 25px rgba(255,255,255,.65),
+    0 0 70px rgba(170,180,255,.35);
+}
+
+
+/* Moon shadow */
+
+.moon::after {
+  content: "";
+
+  position: absolute;
+
+  width: 150px;
+  height: 150px;
+
+  border-radius: 50%;
+
+  background: #111b3c;
+
+  left: 42px;
+  top: -12px;
+}
+
+
+/* Stars */
+
+.star {
+  position: absolute;
+
+  color: #fff;
+
+  font-size: 18px;
+
+  opacity: .85;
+
+  text-shadow:
+    0 0 7px #fff,
+    0 0 15px rgba(180,190,255,.9);
+
+  animation: twinkle 2.5s infinite ease-in-out;
+}
+
+
+/* Different star positions */
+
+.star-1 {
+  top: 10%;
+  left: 12%;
+}
+
+.star-2 {
+  top: 18%;
+  left: 30%;
+}
+
+.star-3 {
+  top: 8%;
+  left: 48%;
+}
+
+.star-4 {
+  top: 30%;
+  left: 8%;
+}
+
+.star-5 {
+  top: 42%;
+  left: 18%;
+}
+
+.star-6 {
+  top: 22%;
+  left: 65%;
+}
+
+.star-7 {
+  top: 35%;
+  left: 82%;
+}
+
+.star-8 {
+  top: 55%;
+  left: 7%;
+}
+
+.star-9 {
+  top: 65%;
+  left: 27%;
+}
+
+.star-10 {
+  top: 58%;
+  left: 52%;
+}
+
+.star-11 {
+  top: 70%;
+  left: 72%;
+}
+
+.star-12 {
+  top: 82%;
+  left: 14%;
+}
+
+.star-13 {
+  top: 88%;
+  left: 45%;
+}
+
+.star-14 {
+  top: 76%;
+  left: 90%;
+}
+
+.star-15 {
+  top: 45%;
+  left: 94%;
+}
+
+
+/* Twinkle animation */
+
+@keyframes twinkle {
+
+  0%,
+  100% {
+    opacity: .3;
+    transform: scale(.8);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+}
+
+
+/* ===============================
+   CONTENT
+================================ */
+
+.rankers-content {
+  position: relative;
+
+  z-index: 5;
+
+  max-width: 1250px;
+
+  margin: auto;
+
+  text-align: center;
+}
+
+
+.rankers-content h1 {
+  margin: 0;
+
+  font-size: 44px;
+
+  font-weight: 800;
+
+  letter-spacing: .5px;
+
+  color: #fff;
+}
+
+
+.rankers-subtitle {
+  margin: 10px 0 30px;
+
+  color: rgba(255,255,255,.75);
+
+  font-size: 17px;
+}
+
+
+/* ===============================
+   TABS
+================================ */
+
+.exam-tabs {
+  display: flex;
+
+  justify-content: center;
+
+  gap: 12px;
+
+  flex-wrap: wrap;
+
+  margin-bottom: 35px;
+}
+
+
+.exam-tab {
+  border: none;
+
+  padding: 12px 22px;
+
+  border-radius: 30px;
+
+  background: rgba(255,255,255,.13);
+
+  color: #fff;
+
+  cursor: pointer;
+
+  font-weight: 700;
+
+  transition: .25s;
+}
+
+
+.exam-tab:hover {
+  background: rgba(255,255,255,.22);
+}
+
+
+.exam-tab.active {
+  background: #fff;
+
+  color: #182044;
+
+  box-shadow:
+    0 8px 25px rgba(0,0,0,.2);
+}
+
+
+/* ===============================
+   CAROUSEL
+================================ */
+
+.rankers-carousel {
+  display: flex;
+
+  align-items: center;
+
+  gap: 18px;
+}
+
+
+.rankers-viewport {
+  flex: 1;
+
+  overflow: hidden;
+}
+
+
+.rankers-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 20px;
+}
+
+
+/* ===============================
+   RANK CARD
+================================ */
+
+.ranker-card {
+  background: #fff;
+
+  color: #17203a;
+
+  border-radius: 18px;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 15px 40px rgba(0,0,0,.25);
+
+  transition: .3s;
+
+  text-align: left;
+}
+
+
+.ranker-card:hover {
+  transform: translateY(-7px);
+
+  box-shadow:
+    0 20px 45px rgba(0,0,0,.35);
+}
+
+
+.ranker-photo {
+  width: 100%;
+
+  height: 230px;
+
+  object-fit: cover;
+
+  display: block;
+}
+
+
+.ranker-info {
+  padding: 17px;
+}
+
+
+.ranker-info h3 {
+  margin: 0 0 7px;
+
+  font-size: 20px;
+}
+
+
+.ranker-rank {
+  display: inline-block;
+
+  background: #eef1ff;
+
+  color: #3949ab;
+
+  padding: 6px 11px;
+
+  border-radius: 20px;
+
+  font-weight: 800;
+
+  font-size: 14px;
+}
+
+
+.ranker-exam {
+  margin-top: 10px;
+
+  color: #777;
+
+  font-size: 13px;
+}
+
+
+/* ===============================
+   PREVIOUS NEXT
+================================ */
+
+.carousel-btn {
+  flex-shrink: 0;
+
+  width: 48px;
+  height: 48px;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: #fff;
+
+  color: #17203a;
+
+  font-size: 22px;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 8px 25px rgba(0,0,0,.25);
+
+  transition: .25s;
+}
+
+
+.carousel-btn:hover {
+  transform: scale(1.08);
+}
+
+
+.carousel-btn:disabled {
+  opacity: .35;
+
+  cursor: not-allowed;
+}
+
+
+/* ===============================
+   DOTS
+================================ */
+
+.ranker-dots {
+  display: flex;
+
+  justify-content: center;
+
+  gap: 7px;
+
+  margin-top: 22px;
+}
+
+
+.ranker-dot {
+  width: 8px;
+  height: 8px;
+
+  border-radius: 50%;
+
+  background: rgba(255,255,255,.35);
+
+  cursor: pointer;
+
+  transition: .2s;
+}
+
+
+.ranker-dot.active {
+  width: 25px;
+
+  border-radius: 10px;
+
+  background: #fff;
+}
+
+
+/* ===============================
+   VIEW ALL BUTTON
+================================ */
+
+.view-all-btn {
+  margin-top: 28px;
+
+  border: none;
+
+  padding: 14px 27px;
+
+  border-radius: 30px;
+
+  background: #fff;
+
+  color: #182044;
+
+  font-weight: 800;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.25);
+
+  transition: .25s;
+}
+
+
+.view-all-btn:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 15px 35px rgba(0,0,0,.35);
+}
+
+
+/* ===============================
+   MODAL
+================================ */
+
+.rankers-modal {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 100;
+
+  display: none;
+
+  padding: 25px;
+
+  background: rgba(0,0,0,.7);
+
+  overflow-y: auto;
+}
+
+
+.rankers-modal.show {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+}
+
+
+.rankers-modal-box {
+  position: relative;
+
+  width: min(1200px, 100%);
+
+  max-height: 90vh;
+
+  overflow-y: auto;
+
+  background: #fff;
+
+  color: #182044;
+
+  border-radius: 20px;
+
+  padding: 30px;
+}
+
+
+.rankers-modal-box h2 {
+  margin-top: 0;
+
+  text-align: center;
+
+  font-size: 30px;
+}
+
+
+.modal-close {
+  position: absolute;
+
+  right: 20px;
+  top: 15px;
+
+  width: 40px;
+  height: 40px;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: #f0f0f0;
+
+  font-size: 28px;
+
+  cursor: pointer;
+}
+
+
+/* All cards */
+
+.all-rankers-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 20px;
+}
+
+
+/* ===============================
+   MOBILE
+================================ */
+
+@media (max-width: 1000px) {
+
+  .rankers-grid,
+  .all-rankers-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .rankers-section {
+    padding: 50px 18px;
+  }
+
+  .rankers-content h1 {
+    font-size: 32px;
+  }
+
+  .rankers-carousel {
+    gap: 8px;
+  }
+
+  .rankers-grid,
+  .all-rankers-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .carousel-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .ranker-photo {
+    height: 260px;
+  }
+
+  .moon {
+    width: 100px;
+    height: 100px;
+  }
+
+  .moon::after {
+    width: 100px;
+    height: 100px;
+  }
+
+}
