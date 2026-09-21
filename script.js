@@ -72,1127 +72,700 @@ setInterval(function () {
     showStudent();
 
 }, 5000);
-/* =====================================================
-   LIFE AT DIPS - FINAL VERSION
-===================================================== */
-
 (function () {
 
-    function startLifeDips() {
-
-        const track =
-            document.getElementById("lifeDipsTrack");
-
-        const viewport =
-            document.getElementById("lifeDipsViewport");
-
-        const photos =
-            Array.from(
-                document.querySelectorAll(".lifeDipsPhoto")
-            );
-
-        const nextButton =
-            document.getElementById("lifeDipsNext");
-
-        const prevButton =
-            document.getElementById("lifeDipsPrev");
-
-        const galleryButton =
-            document.getElementById(
-                "lifeDipsGalleryButton"
-            );
-
-        const gallery =
-            document.getElementById(
-                "lifeDipsGallery"
-            );
-
-        const largeImage =
-            document.getElementById(
-                "lifeDipsLargeImage"
-            );
-
-        const galleryNext =
-            document.getElementById(
-                "lifeDipsGalleryNext"
-            );
-
-        const galleryPrev =
-            document.getElementById(
-                "lifeDipsGalleryPrev"
-            );
-
-        const closeButton =
-            document.getElementById(
-                "lifeDipsClose"
-            );
-
-        const counter =
-            document.getElementById(
-                "lifeDipsCounter"
-            );
-
-
-        if (
-            !track ||
-            !viewport ||
-            !photos.length ||
-            !nextButton ||
-            !prevButton
-        ) {
-            console.log(
-                "Life at DIPS HTML missing"
-            );
-
-            return;
-        }
-
-
-        let sliderIndex = 0;
-
-        let galleryIndex = 0;
-
-        let autoTimer = null;
-
-        let startX = 0;
-
-        let endX = 0;
-
-
-        /* =============================================
-           VISIBLE
-        ============================================= */
-
-        function visible() {
-
-            if (
-                window.innerWidth <= 700
-            ) {
-                return 1;
-            }
-
-            return 4;
-        }
-
-
-        /* =============================================
-           MAX INDEX
-        ============================================= */
-
-        function maxSliderIndex() {
-
-            return Math.max(
-                0,
-                photos.length - visible()
-            );
-
-        }
-
-
-        /* =============================================
-           MOVE
-        ============================================= */
-
-        function moveSlider() {
-
-            const max =
-                maxSliderIndex();
-
-
-            if (sliderIndex > max) {
-                sliderIndex = 0;
-            }
-
-
-            if (sliderIndex < 0) {
-                sliderIndex = max;
-            }
-
-
-            const width =
-                photos[0]
-                .getBoundingClientRect()
-                .width;
-
-
-            const gap =
-                window.innerWidth <= 700
-                    ? 0
-                    : 25;
-
-
-            const distance =
-                sliderIndex *
-                (width + gap);
-
-
-            track.style.transform =
-                "translate3d(-" +
-                distance +
-                "px,0,0)";
-
-        }
-
-
-        /* =============================================
-           NEXT
-        ============================================= */
-
-        function nextSlide() {
-
-            sliderIndex++;
-
-
-            if (
-                sliderIndex >
-                maxSliderIndex()
-            ) {
-
-                sliderIndex = 0;
-
-            }
-
-
-            moveSlider();
-
-        }
-
-
-        /* =============================================
-           PREVIOUS
-        ============================================= */
-
-        function previousSlide() {
-
-            sliderIndex--;
-
-
-            if (sliderIndex < 0) {
-
-                sliderIndex =
-                    maxSliderIndex();
-
-            }
-
-
-            moveSlider();
-
-        }
-
-
-        /* =============================================
-           BUTTONS
-        ============================================= */
-
-        nextButton.addEventListener(
-            "click",
-            function (event) {
-
-                event.preventDefault();
-                event.stopPropagation();
-
-                nextSlide();
-
-                restartAuto();
-
-            }
-        );
-
-
-        prevButton.addEventListener(
-            "click",
-            function (event) {
-
-                event.preventDefault();
-                event.stopPropagation();
-
-                previousSlide();
-
-                restartAuto();
-
-            }
-        );
-
-
-        /* =============================================
-           AUTO 5 SEC
-        ============================================= */
-
-        function startAuto() {
-
-            clearInterval(autoTimer);
-
-
-            autoTimer =
-                setInterval(
-                    function () {
-
-                        nextSlide();
-
-                    },
-                    5000
-                );
-
-        }
-
-
-        function stopAuto() {
-
-            clearInterval(autoTimer);
-
-        }
-
-
-        function restartAuto() {
-
-            stopAuto();
-
-            startAuto();
-
-        }
-
-
-        /* =============================================
-           MOUSE PAUSE
-        ============================================= */
-
-        viewport.addEventListener(
-            "mouseenter",
-            function () {
-
-                stopAuto();
-
-            }
-        );
-
-
-        viewport.addEventListener(
-            "mouseleave",
-            function () {
-
-                startAuto();
-
-            }
-        );
-
-
-        /* =============================================
-           OPEN LARGE IMAGE
-        ============================================= */
-
-        function showGallery(number) {
-
-            if (!gallery || !largeImage) {
-                return;
-            }
-
-
-            if (number < 0) {
-
-                number =
-                    photos.length - 1;
-
-            }
-
-
-            if (number >= photos.length) {
-
-                number = 0;
-
-            }
-
-
-            galleryIndex = number;
-
-
-            const image =
-                photos[galleryIndex]
-                .querySelector("img");
-
-
-            if (!image) {
-                return;
-            }
-
-
-            largeImage.src =
-                image.src;
-
-
-            largeImage.alt =
-                image.alt;
-
-
-            counter.textContent =
-                (galleryIndex + 1) +
-                " / " +
-                photos.length;
-
-
-            gallery.classList.add(
-                "lifeGalleryOpen"
-            );
-
-
-            stopAuto();
-
-        }
-
-
-        /* =============================================
-           VIEW OUR PICTURE GALLERY
-        ============================================= */
-
-        if (galleryButton) {
-
-            galleryButton.addEventListener(
-                "click",
-                function (event) {
-
-                    event.preventDefault();
-                    event.stopPropagation();
-
-                    showGallery(0);
-
-                }
-            );
-
-        }
-
-
-        /* =============================================
-           LARGE NEXT
-        ============================================= */
-
-        galleryNext.addEventListener(
-            "click",
-            function (event) {
-
-                event.preventDefault();
-                event.stopPropagation();
-
-                showGallery(
-                    galleryIndex + 1
-                );
-
-            }
-        );
-
-
-        /* =============================================
-           LARGE PREVIOUS
-        ============================================= */
-
-        galleryPrev.addEventListener(
-            "click",
-            function (event) {
-
-                event.preventDefault();
-                event.stopPropagation();
-
-                showGallery(
-                    galleryIndex - 1
-                );
-
-            }
-        );
-
-
-        /* =============================================
-           CLOSE
-        ============================================= */
-
-        closeButton.addEventListener(
-            "click",
-            function (event) {
-
-                event.preventDefault();
-                event.stopPropagation();
-
-                gallery.classList.remove(
-                    "lifeGalleryOpen"
-                );
-
-                startAuto();
-
-            }
-        );
-
-
-        /* =============================================
-           CLICK OUTSIDE IMAGE
-        ============================================= */
-
-        gallery.addEventListener(
-            "click",
-            function (event) {
-
-                if (
-                    event.target === gallery
-                ) {
-
-                    gallery.classList.remove(
-                        "lifeGalleryOpen"
-                    );
-
-                    startAuto();
-
-                }
-
-            }
-        );
-
-
-        /* =============================================
-           DOUBLE CLICK DESKTOP
-        ============================================= */
-
-        photos.forEach(
-            function (photo, number) {
-
-                const image =
-                    photo.querySelector("img");
-
-
-                image.addEventListener(
-                    "dblclick",
-                    function (event) {
-
-                        event.preventDefault();
-
-                        showGallery(number);
-
-                    }
-                );
-
-            }
-        );
-
-
-        /* =============================================
-           MOBILE SWIPE
-        ============================================= */
-
-        viewport.addEventListener(
-            "touchstart",
-            function (event) {
-
-                startX =
-                    event.touches[0].clientX;
-
-                stopAuto();
-
-            },
-            {
-                passive: true
-            }
-        );
-
-
-        viewport.addEventListener(
-            "touchend",
-            function (event) {
-
-                endX =
-                    event.changedTouches[0].clientX;
-
-
-                const difference =
-                    startX - endX;
-
-
-                if (
-                    Math.abs(difference) > 50
-                ) {
-
-                    if (difference > 0) {
-
-                        nextSlide();
-
-                    } else {
-
-                        previousSlide();
-
-                    }
-
-                }
-
-
-                startAuto();
-
-            },
-            {
-                passive: true
-            }
-        );
-
-
-        /* =============================================
-           KEYBOARD
-        ============================================= */
-
-        document.addEventListener(
-            "keydown",
-            function (event) {
-
-                if (
-                    !gallery.classList.contains(
-                        "lifeGalleryOpen"
-                    )
-                ) {
-                    return;
-                }
-
-
-                if (
-                    event.key === "ArrowRight"
-                ) {
-
-                    showGallery(
-                        galleryIndex + 1
-                    );
-
-                }
-
-
-                if (
-                    event.key === "ArrowLeft"
-                ) {
-
-                    showGallery(
-                        galleryIndex - 1
-                    );
-
-                }
-
-
-                if (
-                    event.key === "Escape"
-                ) {
-
-                    gallery.classList.remove(
-                        "lifeGalleryOpen"
-                    );
-
-                    startAuto();
-
-                }
-
-            }
-        );
-
-
-        /* =============================================
-           RESIZE
-        ============================================= */
-
-        window.addEventListener(
-            "resize",
-            function () {
-
-                moveSlider();
-
-            }
-        );
-
-
-        /* =============================================
-           START
-        ============================================= */
-
-        moveSlider();
-
-        startAuto();
-
-
-        console.log(
-            "LIFE AT DIPS FINAL SYSTEM READY"
-        );
-
+  const students = [
+
+    {
+      name: "Rohit Sharma",
+      rank: "Rank-16",
+      exam: "CSIR NET June 25",
+      image: "1.jpg"
+    },
+
+    {
+      name: "Ankita Rana",
+      rank: "Rank-27",
+      exam: "CSIR NET June 25",
+      image: "2.jpg"
+    },
+
+    {
+      name: "Prakhar Nigam",
+      rank: "Rank-28",
+      exam: "CSIR NET June 25",
+      image: "3.jpg"
+    },
+
+    {
+      name: "Madhumita Raj",
+      rank: "Rank-34",
+      exam: "CSIR NET June 25",
+      image: "4.jpg"
+    },
+
+    {
+      name: "Poornima",
+      rank: "Rank-38",
+      exam: "CSIR NET June 25",
+      image: "5.jpg"
+    },
+
+    {
+      name: "Tanishka Singh",
+      rank: "Rank-28",
+      exam: "CSIR NET Dec 24",
+      image: "6.jpg"
+    },
+
+    {
+      name: "Aaina Dalal",
+      rank: "Rank-30",
+      exam: "CSIR NET Dec 24",
+      image: "7.jpg"
+    },
+
+    {
+      name: "Ananya Tripathi",
+      rank: "Rank-30",
+      exam: "CSIR NET Dec 24",
+      image: "8.jpg"
+    },
+
+    {
+      name: "Gouranga Payra",
+      rank: "Rank-34",
+      exam: "CSIR NET Dec 24",
+      image: "1.jpg"
+    },
+
+    {
+      name: "Harish Kumar",
+      rank: "Rank-13",
+      exam: "IIT JAM 25",
+      image: "2.jpg"
+    },
+
+    {
+      name: "Rahul Maithani",
+      rank: "Rank-18",
+      exam: "IIT JAM 25",
+      image: "3.jpg"
+    },
+
+    {
+      name: "Narendra Kumar",
+      rank: "Rank-30",
+      exam: "IIT JAM 25",
+      image: "4.jpg"
+    },
+
+    {
+      name: "Tushar Daila",
+      rank: "Rank-31",
+      exam: "IIT JAM 25",
+      image: "5.jpg"
     }
 
-
-    if (
-        document.readyState === "loading"
-    ) {
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            startLifeDips
-        );
-
-    } else {
-
-        startLifeDips();
-
-    }
-
-})();
-/* =====================================
-   TOP RANKERS DATA
-===================================== */
-
-const rankers = [
-
-  {
-    name: "Rohit Sharma",
-    rank: "Rank-16",
-    exam: "june",
-    examName: "CSIR NET June 25",
-    photo: "1.jpg"
-  },
-
-  {
-    name: "Ankita Rana",
-    rank: "Rank-27",
-    exam: "june",
-    examName: "CSIR NET June 25",
-    photo: "2.jpg"
-  },
-
-  {
-    name: "Prakhar Nigam",
-    rank: "Rank-28",
-    exam: "june",
-    examName: "CSIR NET June 25",
-    photo: "3.jpg"
-  },
-
-  {
-    name: "Madhumita Raj",
-    rank: "Rank-34",
-    exam: "june",
-    examName: "CSIR NET June 25",
-    photo: "4.jpg"
-  },
-
-  {
-    name: "Poornima",
-    rank: "Rank-38",
-    exam: "june",
-    examName: "CSIR NET June 25",
-    photo: "5.jpg"
-  },
+  ];
 
 
-  {
-    name: "Tanishka Singh",
-    rank: "Rank-28",
-    exam: "dec",
-    examName: "CSIR NET Dec 24",
-    photo: "6.jpg"
-  },
-
-  {
-    name: "Aaina Dalal",
-    rank: "Rank-30",
-    exam: "dec",
-    examName: "CSIR NET Dec 24",
-    photo: "7.jpg"
-  },
-
-  {
-    name: "Ananya Tripathi",
-    rank: "Rank-30",
-    exam: "dec",
-    examName: "CSIR NET Dec 24",
-    photo: "1.jpg"
-  },
-
-  {
-    name: "Gouranga Payra",
-    rank: "Rank-34",
-    exam: "dec",
-    examName: "CSIR NET Dec 24",
-    photo: "2.jpg"
-  },
+  let selectedExam = "CSIR NET June 25";
+  let currentIndex = 0;
 
 
-  {
-    name: "Harish Kumar",
-    rank: "Rank-13",
-    exam: "jam",
-    examName: "IIT JAM 25",
-    photo: "4.jpg"
-  },
+  const cardsContainer =
+    document.getElementById("rankersCards");
 
-  {
-    name: "Rahul Maithani",
-    rank: "Rank-18",
-    exam: "jam",
-    examName: "IIT JAM 25",
-    photo: "8.jpg"
-  },
+  const dotsContainer =
+    document.getElementById("rankersDots");
 
-  {
-    name: "Narendra Kumar",
-    rank: "Rank-30",
-    exam: "jam",
-    examName: "IIT JAM 25",
-    photo: "6.jpg"
-  },
+  const prevButton =
+    document.getElementById("rankerPrev");
 
-  {
-    name: "Tushar Daila",
-    rank: "Rank-31",
-    exam: "jam",
-    examName: "IIT JAM 25",
-    photo: "5r.jpg"
-  }
+  const nextButton =
+    document.getElementById("rankerNext");
 
-];
+  const tabs =
+    document.querySelectorAll(".ranker-tab");
 
+  const modal =
+    document.getElementById("rankersModal");
 
-/* =====================================
-   VARIABLES
-===================================== */
+  const modalClose =
+    document.getElementById("rankersModalClose");
 
-const cardsContainer =
-  document.getElementById("rankersGrid");
+  const modalTitle =
+    document.getElementById("rankersModalTitle");
 
-const dotsContainer =
-  document.getElementById("rankerDots");
+  const allRankers =
+    document.getElementById("allRankers");
 
-const prevButton =
-  document.getElementById("prevRanker");
+  const viewAllButton =
+    document.getElementById("viewAllRankers");
 
-const nextButton =
-  document.getElementById("nextRanker");
+  const photoViewer =
+    document.getElementById("rankerPhotoViewer");
 
-const examTabs =
-  document.querySelectorAll(".exam-tab");
+  const largePhoto =
+    document.getElementById("rankerLargePhoto");
 
-const viewAllButton =
-  document.getElementById("viewAllRankers");
+  const photoClose =
+    document.getElementById("rankerPhotoClose");
 
-const modal =
-  document.getElementById("rankersModal");
+  const background =
+    document.querySelector(".rankers-bg");
 
-const closeModal =
-  document.getElementById("closeRankersModal");
-
-const allRankersGrid =
-  document.getElementById("allRankersGrid");
-
-
-let currentExam = "june";
-
-let currentIndex = 0;
-
-const visibleCards = 4;
-
-
-/* =====================================
-   CREATE CARD
-===================================== */
-
-function createCard(person) {
-
-  return `
-    <article class="ranker-card">
-
-      <img
-        class="ranker-photo"
-        src="${person.photo}"
-        alt="${person.name}"
-        onerror="this.style.display='none'"
-      >
-
-      <div class="ranker-info">
-
-        <h3>${person.name}</h3>
-
-        <span class="ranker-rank">
-          ${person.rank}
-        </span>
-
-        <div class="ranker-exam">
-          ${person.examName}
-        </div>
-
-      </div>
-
-    </article>
-  `;
-}
-
-
-/* =====================================
-   GET CURRENT EXAM RANKERS
-===================================== */
-
-function getCurrentRankers() {
-
-  return rankers.filter(
-    person => person.exam === currentExam
-  );
-
-}
-
-
-/* =====================================
-   RENDER MAIN CARDS
-===================================== */
-
-function renderRankers() {
-
-  const data = getCurrentRankers();
-
-  const maxIndex =
-    Math.max(0, data.length - visibleCards);
-
-  if (currentIndex > maxIndex) {
-    currentIndex = maxIndex;
-  }
-
-
-  const visibleData =
-    data.slice(
-      currentIndex,
-      currentIndex + visibleCards
+  const backgroundButtons =
+    document.querySelectorAll(
+      ".background-buttons button"
     );
 
 
-  cardsContainer.innerHTML =
-    visibleData.map(createCard).join("");
+  function getStudents() {
+
+    return students.filter(function (student) {
+
+      return student.exam === selectedExam;
+
+    });
+
+  }
 
 
-  renderDots(data.length, maxIndex);
+  function getVisibleCount() {
 
-  updateButtons(data.length, maxIndex);
-}
-
-
-/* =====================================
-   DOTS
-===================================== */
-
-function renderDots(total, maxIndex) {
-
-  dotsContainer.innerHTML = "";
-
-
-  for (
-    let i = 0;
-    i <= maxIndex;
-    i++
-  ) {
-
-    const dot =
-      document.createElement("span");
-
-    dot.className = "ranker-dot";
-
-    if (i === currentIndex) {
-      dot.classList.add("active");
+    if (window.innerWidth <= 700) {
+      return 1;
     }
 
+    if (window.innerWidth <= 1000) {
+      return 3;
+    }
 
-    dot.addEventListener(
-      "click",
-      () => {
+    return 4;
 
-        currentIndex = i;
+  }
 
-        renderRankers();
+
+  function createCard(student) {
+
+    const card =
+      document.createElement("div");
+
+    card.className = "ranker-card";
+
+
+    const imageBox =
+      document.createElement("div");
+
+    imageBox.className =
+      "ranker-image-box";
+
+
+    const image =
+      document.createElement("img");
+
+    image.src = student.image;
+
+    image.alt = student.name;
+
+    image.loading = "lazy";
+
+
+    imageBox.appendChild(image);
+
+
+    /*
+      Desktop:
+      Double click = large photo
+
+      Mobile:
+      Single click = large photo
+    */
+
+    imageBox.addEventListener(
+      "dblclick",
+      function () {
+
+        openPhoto(student.image);
 
       }
     );
 
 
-    dotsContainer.appendChild(dot);
+    imageBox.addEventListener(
+      "click",
+      function () {
+
+        if (window.innerWidth <= 700) {
+
+          openPhoto(student.image);
+
+        }
+
+      }
+    );
+
+
+    const info =
+      document.createElement("div");
+
+    info.className = "ranker-info";
+
+
+    const name =
+      document.createElement("div");
+
+    name.className = "ranker-name";
+
+    name.textContent = student.name;
+
+
+    const rank =
+      document.createElement("div");
+
+    rank.className = "ranker-rank";
+
+    rank.textContent = student.rank;
+
+
+    const exam =
+      document.createElement("div");
+
+    exam.className = "ranker-exam";
+
+    exam.textContent = student.exam;
+
+
+    info.appendChild(name);
+    info.appendChild(rank);
+    info.appendChild(exam);
+
+
+    card.appendChild(imageBox);
+    card.appendChild(info);
+
+
+    return card;
 
   }
 
-}
 
+  function renderCards() {
 
-/* =====================================
-   BUTTON STATUS
-===================================== */
+    const list =
+      getStudents();
 
-function updateButtons(total, maxIndex) {
+    const visible =
+      getVisibleCount();
 
-  prevButton.disabled =
-    currentIndex === 0;
-
-  nextButton.disabled =
-    currentIndex >= maxIndex;
-
-}
-
-
-/* =====================================
-   NEXT
-===================================== */
-
-nextButton.addEventListener(
-  "click",
-  () => {
-
-    const data = getCurrentRankers();
 
     const maxIndex =
       Math.max(
         0,
-        data.length - visibleCards
+        list.length - visible
       );
 
 
-    if (currentIndex < maxIndex) {
+    if (currentIndex > maxIndex) {
+      currentIndex = maxIndex;
+    }
 
-      currentIndex++;
 
-      renderRankers();
+    cardsContainer.innerHTML = "";
+
+
+    for (
+      let i = currentIndex;
+      i < currentIndex + visible &&
+      i < list.length;
+      i++
+    ) {
+
+      cardsContainer.appendChild(
+        createCard(list[i])
+      );
+
+    }
+
+
+    renderDots();
+
+    updateArrows();
+
+  }
+
+
+  function renderDots() {
+
+    const list =
+      getStudents();
+
+    const visible =
+      getVisibleCount();
+
+
+    const total =
+      Math.max(
+        1,
+        list.length - visible + 1
+      );
+
+
+    dotsContainer.innerHTML = "";
+
+
+    for (
+      let i = 0;
+      i < total;
+      i++
+    ) {
+
+      const dot =
+        document.createElement("button");
+
+      dot.className =
+        "ranker-dot";
+
+
+      if (i === currentIndex) {
+        dot.classList.add("active");
+      }
+
+
+      dot.addEventListener(
+        "click",
+        function () {
+
+          currentIndex = i;
+
+          renderCards();
+
+        }
+      );
+
+
+      dotsContainer.appendChild(dot);
 
     }
 
   }
-);
 
 
-/* =====================================
-   PREVIOUS
-===================================== */
+  function updateArrows() {
 
-prevButton.addEventListener(
-  "click",
-  () => {
+    const list =
+      getStudents();
 
-    if (currentIndex > 0) {
+    const visible =
+      getVisibleCount();
 
-      currentIndex--;
 
-      renderRankers();
+    const maxIndex =
+      Math.max(
+        0,
+        list.length - visible
+      );
 
-    }
+
+    prevButton.disabled =
+      currentIndex <= 0;
+
+    nextButton.disabled =
+      currentIndex >= maxIndex;
 
   }
-);
 
 
-/* =====================================
-   EXAM TABS
-===================================== */
+  /*
+    NEXT = only 1 photo forward
+  */
 
-examTabs.forEach(tab => {
-
-  tab.addEventListener(
+  nextButton.addEventListener(
     "click",
-    () => {
+    function () {
 
-      examTabs.forEach(t =>
-        t.classList.remove("active")
-      );
+      const list =
+        getStudents();
 
-      tab.classList.add("active");
+      const visible =
+        getVisibleCount();
+
+      const maxIndex =
+        Math.max(
+          0,
+          list.length - visible
+        );
 
 
-      currentExam =
-        tab.dataset.exam;
+      if (currentIndex < maxIndex) {
 
-      currentIndex = 0;
+        currentIndex++;
 
-      renderRankers();
+        renderCards();
+
+      }
 
     }
   );
 
-});
+
+  /*
+    PREVIOUS = only 1 photo backward
+  */
+
+  prevButton.addEventListener(
+    "click",
+    function () {
+
+      if (currentIndex > 0) {
+
+        currentIndex--;
+
+        renderCards();
+
+      }
+
+    }
+  );
 
 
-/* =====================================
-   VIEW ALL
-===================================== */
+  /*
+    EXAM TABS
+  */
 
-viewAllButton.addEventListener(
-  "click",
-  () => {
+  tabs.forEach(function (tab) {
 
-    renderAllRankers();
+    tab.addEventListener(
+      "click",
+      function () {
 
-    modal.classList.add("show");
+        tabs.forEach(function (item) {
+
+          item.classList.remove("active");
+
+        });
+
+
+        tab.classList.add("active");
+
+
+        selectedExam =
+          tab.getAttribute("data-exam");
+
+
+        currentIndex = 0;
+
+
+        renderCards();
+
+      }
+    );
+
+  });
+
+
+  /*
+    VIEW ALL
+  */
+
+  viewAllButton.addEventListener(
+    "click",
+    function () {
+
+      const list =
+        getStudents();
+
+
+      modalTitle.textContent =
+        selectedExam + " - Top Rankers";
+
+
+      allRankers.innerHTML = "";
+
+
+      list.forEach(function (student) {
+
+        allRankers.appendChild(
+          createCard(student)
+        );
+
+      });
+
+
+      modal.classList.add("show");
+
+      document.body.style.overflow =
+        "hidden";
+
+    }
+  );
+
+
+  /*
+    CLOSE MODAL
+  */
+
+  function closeModal() {
+
+    modal.classList.remove("show");
+
+    document.body.style.overflow = "";
+
+  }
+
+
+  modalClose.addEventListener(
+    "click",
+    closeModal
+  );
+
+
+  modal.addEventListener(
+    "click",
+    function (event) {
+
+      if (event.target === modal) {
+
+        closeModal();
+
+      }
+
+    }
+  );
+
+
+  /*
+    LARGE PHOTO
+  */
+
+  function openPhoto(image) {
+
+    largePhoto.src = image;
+
+    photoViewer.classList.add("show");
 
     document.body.style.overflow =
       "hidden";
 
   }
-);
 
 
-/* =====================================
-   RENDER ALL
-===================================== */
+  function closePhoto() {
 
-function renderAllRankers() {
+    photoViewer.classList.remove("show");
 
-  const data =
-    getCurrentRankers();
+    largePhoto.src = "";
 
-
-  allRankersGrid.innerHTML =
-    data.map(createCard).join("");
-
-}
-
-
-/* =====================================
-   CLOSE MODAL
-===================================== */
-
-closeModal.addEventListener(
-  "click",
-  closeRankers
-);
-
-
-modal.addEventListener(
-  "click",
-  event => {
-
-    if (event.target === modal) {
-
-      closeRankers();
-
-    }
+    document.body.style.overflow = "";
 
   }
-);
 
 
-function closeRankers() {
-
-  modal.classList.remove("show");
-
-  document.body.style.overflow =
-    "";
-
-}
+  photoClose.addEventListener(
+    "click",
+    closePhoto
+  );
 
 
-/* =====================================
-   ESC KEY
-===================================== */
+  photoViewer.addEventListener(
+    "click",
+    function (event) {
 
-document.addEventListener(
-  "keydown",
-  event => {
+      if (event.target === photoViewer) {
 
-    if (
-      event.key === "Escape" &&
-      modal.classList.contains("show")
-    ) {
+        closePhoto();
 
-      closeRankers();
+      }
 
     }
-
-  }
-);
+  );
 
 
-/* =====================================
-   INITIAL LOAD
-===================================== */
+  /*
+    ESCAPE
+  */
 
-renderRankers();
+  document.addEventListener(
+    "keydown",
+    function (event) {
+
+      if (event.key === "Escape") {
+
+        closeModal();
+
+        closePhoto();
+
+      }
+
+    }
+  );
+
+
+  /*
+    CHANGE BACKGROUND
+  */
+
+  backgroundButtons.forEach(
+    function (button) {
+
+      button.addEventListener(
+        "click",
+        function () {
+
+          const number =
+            button.getAttribute(
+              "data-background"
+            );
+
+
+          background.style.backgroundImage =
+            'url("' + number + '.jpg")';
+
+
+          backgroundButtons.forEach(
+            function (item) {
+
+              item.classList.remove(
+                "active"
+              );
+
+            }
+          );
+
+
+          button.classList.add("active");
+
+        }
+      );
+
+    }
+  );
+
+
+  /*
+    RESIZE
+  */
+
+  window.addEventListener(
+    "resize",
+    function () {
+
+      renderCards();
+
+    }
+  );
+
+
+  /*
+    INITIAL LOAD
+  */
+
+  renderCards();
+
+  backgroundButtons[0].classList.add(
+    "active"
+  );
+
+})();
