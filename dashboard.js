@@ -1,6 +1,29 @@
 /* =========================================================
    FJMC ACADEMY - STUDENT DASHBOARD
+   FIREBASE + MAXIMUM 2 DEVICES
    ========================================================= */
+
+import {
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+import {
+    collection,
+    doc,
+    getDocs,
+    getDoc,
+    setDoc,
+    deleteDoc,
+    updateDoc,
+    serverTimestamp,
+    runTransaction
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+import {
+    auth,
+    db
+} from "./firebase.js";
 
 
 /* =========================================================
@@ -10,19 +33,16 @@
 const STUDENTS = {
 
     "rahul@gmail.com": {
-        password: "Rahul@123",
         name: "Rahul",
         courses: ["real-analysis"]
     },
 
     "amit@gmail.com": {
-        password: "Amit@456",
         name: "Amit",
         courses: ["linear-algebra", "calculus"]
     },
 
     "fogatjagmohan@gmail.com": {
-        password: "Neha@789",
         name: "Neha",
         courses: ["real-analysis", "calculus"]
     }
@@ -153,27 +173,442 @@ const COURSES = {
 
 
 /* =========================================================
-   CHECK LOGIN
+   SETTINGS
    ========================================================= */
 
-const loggedInEmail = sessionStorage.getItem("loggedInStudent");
+const MAX_DEVICES = 2;
 
-const coursesContainer = document.getElementById("coursesContainer");
-const studentName = document.getElementById("studentName");
-const logoutBtn = document.getElementById("logoutBtn");
+/*
+   Device inactive hone ke baad kitne milliseconds tak
+   usko active maana jayega.
+
+   10 minutes
+*/
+
+const DEVICE_TIMEOUT = 10 * 60 * 1000;
 
 
-if (!loggedInEmail || !STUDENTS[loggedInEmail]) {
+/* =========================================================
+   DEVICE ID
+   ========================================================= */
 
-    window.location.href = "login.html";
+function getDeviceId() {
 
-} else {
+    let deviceId =
+        localStorage.getItem("fjmcDeviceId");
 
-    const student = STUDENTS[loggedInEmail];
 
-    studentName.textContent = "Welcome, " + student.name;
+    if (!deviceId) {
+
+        deviceId =
+            "device-" +
+            crypto.randomUUID();
+
+        localStorage.setItem(
+            "fjmcDeviceId",
+            deviceId
+        );
+
+    }
+
+
+    return deviceId;
+}
+
+
+const deviceId = getDeviceId();
+
+
+/* =========================================================
+   GLOBAL DEVICE STATE
+   ========================================================= */
+
+let currentUser = null;
+
+let deviceHeartbeat = null;
+
+
+/* =========================================================
+   HTML ELEMENTS
+   ========================================================= */
+
+const coursesContainer =
+    document.getElementById("coursesContainer");
+
+const studentName =
+    document.getElementById("studentName");
+
+const logoutBtn =
+    document.getElementById("logoutBtn");
+
+
+/* =========================================================
+   FIREBASE AUTH CHECK
+   ========================================================= */
+
+onAuthStateChanged(auth, async function (user) {
+
+    if (!user) {
+
+        window.location.href =
+            "login.html";
+
+        return;
+    }
+
+
+    currentUser = user;
+
+
+    const email =
+        user.email.toLowerCase();
+
+
+    if (!STUDENTS[email]) {
+
+        await signOut(auth);
+
+        window.location.href =
+            "login.html";
+
+        return;
+    }
+
+
+    /*
+       Check / register device
+    */
+
+    const allowed =
+        await registerDevice(user);
+
+
+    if (!allowed) {
+
+        await signOut(auth);
+
+        return;
+    }
+
+
+    /*
+       Save login information
+    */
+
+    sessionStorage.setItem(
+        "loggedInStudent",
+        email
+    );
+
+    sessionStorage.setItem(
+        "firebaseUID",
+        user.uid
+    );
+
+
+    /*
+       Show student dashboard
+    */
+
+    const student =
+        STUDENTS[email];
+
+
+    studentName.textContent =
+        "Welcome, " + student.name;
+
 
     showStudentCourses(student);
+
+
+    /*
+       Start heartbeat
+    */
+
+    startDeviceHeartbeat();
+
+});
+
+
+/* =========================================================
+   DEVICE COLLECTION
+   ========================================================= */
+
+function devicesCollection(user) {
+
+    return collection(
+        db,
+        "users",
+        user.uid,
+        "devices"
+    );
+
+}
+
+
+/* =========================================================
+   REGISTER DEVICE
+   ========================================================= */
+
+async function registerDevice(user) {
+
+    try {
+
+        const deviceRef =
+            doc(
+                db,
+                "users",
+                user.uid,
+                "devices",
+                deviceId
+            );
+
+
+        const now =
+            Date.now();
+
+
+        /*
+           Transaction prevents two tabs/devices from
+           simultaneously taking the same available slot.
+        */
+
+        const result =
+            await runTransaction(
+                db,
+                async function (transaction) {
+
+                    const snapshot =
+                        await transaction.get(
+                            deviceRef
+                        );
+
+
+                    /*
+                       Existing device
+                    */
+
+                    if (snapshot.exists()) {
+
+                        transaction.set(
+                            deviceRef,
+                            {
+                                email: user.email,
+                                lastSeen: now,
+                                active: true
+                            },
+                            {
+                                merge: true
+                            }
+                        );
+
+                        return true;
+                    }
+
+
+                    /*
+                       Get all registered devices
+                    */
+
+                    const devicesSnapshot =
+                        await getDocs(
+                            devicesCollection(user)
+                        );
+
+
+                    let activeDevices = [];
+
+
+                    devicesSnapshot.forEach(
+                        function (deviceDoc) {
+
+                            const data =
+                                deviceDoc.data();
+
+
+                            const lastSeen =
+                                Number(
+                                    data.lastSeen || 0
+                                );
+
+
+                            /*
+                               Only recent devices count
+                            */
+
+                            if (
+                                data.active === true &&
+                                now - lastSeen <
+                                    DEVICE_TIMEOUT
+                            ) {
+
+                                activeDevices.push(
+                                    deviceDoc.id
+                                );
+
+                            }
+
+                        }
+                    );
+
+
+                    /*
+                       Maximum 2 devices
+                    */
+
+                    if (
+                        activeDevices.length >=
+                        MAX_DEVICES
+                    ) {
+
+                        return false;
+                    }
+
+
+                    /*
+                       Register new device
+                    */
+
+                    transaction.set(
+                        deviceRef,
+                        {
+                            email: user.email,
+                            lastSeen: now,
+                            active: true,
+                            createdAt:
+                                serverTimestamp()
+                        }
+                    );
+
+
+                    return true;
+
+                }
+            );
+
+
+        if (!result) {
+
+            showDeviceLimitMessage();
+
+            return false;
+        }
+
+
+        return true;
+
+
+    } catch (error) {
+
+        console.error(
+            "Device registration error:",
+            error
+        );
+
+
+        alert(
+            "Unable to verify this device. Please try again."
+        );
+
+
+        return false;
+    }
+
+}
+
+
+/* =========================================================
+   DEVICE LIMIT MESSAGE
+   ========================================================= */
+
+function showDeviceLimitMessage() {
+
+    const message =
+        document.getElementById(
+            "deviceLimitMessage"
+        );
+
+
+    if (message) {
+
+        message.textContent =
+            "Maximum 2 devices are already active for this account. Please logout from another device first.";
+
+        return;
+    }
+
+
+    alert(
+        "Maximum 2 devices are already active for this account.\n\nPlease logout from another device first."
+    );
+
+}
+
+
+/* =========================================================
+   HEARTBEAT
+   ========================================================= */
+
+function startDeviceHeartbeat() {
+
+    /*
+       Update immediately
+    */
+
+    updateDeviceHeartbeat();
+
+
+    /*
+       Every 2 minutes
+    */
+
+    deviceHeartbeat =
+        setInterval(
+            updateDeviceHeartbeat,
+            2 * 60 * 1000
+        );
+
+}
+
+
+/* =========================================================
+   UPDATE DEVICE
+   ========================================================= */
+
+async function updateDeviceHeartbeat() {
+
+    if (!currentUser) return;
+
+
+    try {
+
+        const deviceRef =
+            doc(
+                db,
+                "users",
+                currentUser.uid,
+                "devices",
+                deviceId
+            );
+
+
+        await updateDoc(
+            deviceRef,
+            {
+                lastSeen: Date.now(),
+                active: true
+            }
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Heartbeat error:",
+            error
+        );
+
+    }
 
 }
 
@@ -186,125 +621,213 @@ function showStudentCourses(student) {
 
     coursesContainer.innerHTML = "";
 
-    if (!student.courses || student.courses.length === 0) {
+
+    if (
+        !student.courses ||
+        student.courses.length === 0
+    ) {
 
         coursesContainer.innerHTML = `
+
             <div class="no-course">
+
                 <h3>No Course Assigned</h3>
-                <p>Please contact FJMC Academy.</p>
+
+                <p>
+                    Please contact FJMC Academy.
+                </p>
+
             </div>
+
         `;
 
         return;
     }
 
 
-    student.courses.forEach(courseId => {
+    student.courses.forEach(
+        function (courseId) {
 
-        const course = COURSES[courseId];
-
-        if (!course) return;
-
-
-        const courseCard = document.createElement("div");
-
-        courseCard.className = "course-card";
+            const course =
+                COURSES[courseId];
 
 
-        let contentHTML = "";
+            if (!course) return;
 
 
-        course.contents.forEach((content, index) => {
-
-            /* ================= VIDEO ================= */
-
-            if (content.type === "video") {
-
-                contentHTML += `
-                    <button
-                        class="content-button video-button"
-                        onclick="openYouTubeVideo('${escapeAttribute(content.url)}', '${escapeAttribute(content.title)}')">
-                        ▶ ${content.title}
-                    </button>
-                `;
-            }
+            const courseCard =
+                document.createElement("div");
 
 
-            /* ================= LOCAL VIDEO ================= */
-
-            else if (content.type === "local-video") {
-
-                contentHTML += `
-                    <button
-                        class="content-button video-button"
-                        onclick="openLocalVideo('${escapeAttribute(content.url)}', '${escapeAttribute(content.title)}')">
-                        ▶ ${content.title}
-                    </button>
-                `;
-            }
+            courseCard.className =
+                "course-card";
 
 
-            /* ================= PDF ================= */
-
-            else if (content.type === "pdf") {
-
-                contentHTML += `
-                    <button
-                        class="content-button pdf-button"
-                        onclick="openPDFViewer('${escapeAttribute(content.url)}', '${escapeAttribute(content.title)}')">
-                        📄 ${content.title}
-                    </button>
-                `;
-            }
+            let contentHTML = "";
 
 
-            /* ================= LIVE CLASS ================= */
-
-            else if (content.type === "live") {
-
-                contentHTML += `
-                    <button
-                        class="content-button live-button"
-                        onclick="openLiveClass('${escapeAttribute(content.url)}')">
-                        🔴 ${content.title}
-                    </button>
-                `;
-            }
-
-        });
+            course.contents.forEach(
+                function (content) {
 
 
-        courseCard.innerHTML = `
+                    /* ================= VIDEO ================= */
 
-            <div class="course-title">
-                <h3>${course.title}</h3>
-                <p>${course.description}</p>
-            </div>
+                    if (
+                        content.type ===
+                        "video"
+                    ) {
 
-            <div class="course-content">
-                ${contentHTML}
-            </div>
+                        contentHTML += `
 
-        `;
+                            <button
+                                class="content-button video-button"
+                                onclick="openYouTubeVideo(
+                                    '${escapeAttribute(content.url)}',
+                                    '${escapeAttribute(content.title)}'
+                                )">
+
+                                ▶ ${content.title}
+
+                            </button>
+
+                        `;
+
+                    }
 
 
-        coursesContainer.appendChild(courseCard);
+                    /* ================= LOCAL VIDEO ================= */
 
-    });
+                    else if (
+                        content.type ===
+                        "local-video"
+                    ) {
+
+                        contentHTML += `
+
+                            <button
+                                class="content-button video-button"
+                                onclick="openLocalVideo(
+                                    '${escapeAttribute(content.url)}',
+                                    '${escapeAttribute(content.title)}'
+                                )">
+
+                                ▶ ${content.title}
+
+                            </button>
+
+                        `;
+
+                    }
+
+
+                    /* ================= PDF ================= */
+
+                    else if (
+                        content.type ===
+                        "pdf"
+                    ) {
+
+                        contentHTML += `
+
+                            <button
+                                class="content-button pdf-button"
+                                onclick="openPDFViewer(
+                                    '${escapeAttribute(content.url)}',
+                                    '${escapeAttribute(content.title)}'
+                                )">
+
+                                📄 ${content.title}
+
+                            </button>
+
+                        `;
+
+                    }
+
+
+                    /* ================= LIVE ================= */
+
+                    else if (
+                        content.type ===
+                        "live"
+                    ) {
+
+                        contentHTML += `
+
+                            <button
+                                class="content-button live-button"
+                                onclick="openLiveClass(
+                                    '${escapeAttribute(content.url)}'
+                                )">
+
+                                🔴 ${content.title}
+
+                            </button>
+
+                        `;
+
+                    }
+
+                }
+            );
+
+
+            courseCard.innerHTML = `
+
+                <div class="course-title">
+
+                    <h3>
+                        ${course.title}
+                    </h3>
+
+                    <p>
+                        ${course.description}
+                    </p>
+
+                </div>
+
+
+                <div class="course-content">
+
+                    ${contentHTML}
+
+                </div>
+
+            `;
+
+
+            coursesContainer.appendChild(
+                courseCard
+            );
+
+        }
+    );
 
 }
 
 
 /* =========================================================
-   SAFE ATTRIBUTE TEXT
+   ESCAPE ATTRIBUTE
    ========================================================= */
 
 function escapeAttribute(text) {
 
     return String(text)
-        .replace(/\\/g, "\\\\")
-        .replace(/'/g, "\\'")
-        .replace(/"/g, "&quot;");
+
+        .replace(
+            /\\/g,
+            "\\\\"
+        )
+
+        .replace(
+            /'/g,
+            "\\'"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        );
 
 }
 
@@ -313,11 +836,17 @@ function escapeAttribute(text) {
    YOUTUBE VIDEO
    ========================================================= */
 
-function openYouTubeVideo(url, title) {
+function openYouTubeVideo(
+    url,
+    title
+) {
 
-    const overlay = document.createElement("div");
+    const overlay =
+        document.createElement("div");
 
-    overlay.className = "video-overlay";
+
+    overlay.className =
+        "video-overlay";
 
 
     overlay.innerHTML = `
@@ -326,11 +855,19 @@ function openYouTubeVideo(url, title) {
 
             <div class="video-header">
 
-                <span>${title}</span>
+                <span>
+                    ${title}
+                </span>
 
-                <button class="close-video"
-                        onclick="this.closest('.video-overlay').remove(); document.body.classList.remove('viewer-open');">
+                <button
+                    class="close-video"
+                    onclick="
+                        this.closest('.video-overlay').remove();
+                        document.body.classList.remove('viewer-open');
+                    ">
+
                     ✕
+
                 </button>
 
             </div>
@@ -339,10 +876,23 @@ function openYouTubeVideo(url, title) {
             <div class="video-player-container">
 
                 <iframe
+
                     src="${url}"
+
                     title="${title}"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+
+                    allow="
+                        accelerometer;
+                        autoplay;
+                        clipboard-write;
+                        encrypted-media;
+                        gyroscope;
+                        picture-in-picture;
+                        fullscreen
+                    "
+
                     allowfullscreen>
+
                 </iframe>
 
             </div>
@@ -352,9 +902,14 @@ function openYouTubeVideo(url, title) {
     `;
 
 
-    document.body.appendChild(overlay);
+    document.body.appendChild(
+        overlay
+    );
 
-    document.body.classList.add("viewer-open");
+
+    document.body.classList.add(
+        "viewer-open"
+    );
 
 }
 
@@ -363,11 +918,17 @@ function openYouTubeVideo(url, title) {
    LOCAL VIDEO
    ========================================================= */
 
-function openLocalVideo(url, title) {
+function openLocalVideo(
+    url,
+    title
+) {
 
-    const overlay = document.createElement("div");
+    const overlay =
+        document.createElement("div");
 
-    overlay.className = "video-overlay";
+
+    overlay.className =
+        "video-overlay";
 
 
     overlay.innerHTML = `
@@ -376,11 +937,19 @@ function openLocalVideo(url, title) {
 
             <div class="video-header">
 
-                <span>${title}</span>
+                <span>
+                    ${title}
+                </span>
 
-                <button class="close-video"
-                        onclick="this.closest('.video-overlay').remove(); document.body.classList.remove('viewer-open');">
+                <button
+                    class="close-video"
+                    onclick="
+                        this.closest('.video-overlay').remove();
+                        document.body.classList.remove('viewer-open');
+                    ">
+
                     ✕
+
                 </button>
 
             </div>
@@ -389,13 +958,20 @@ function openLocalVideo(url, title) {
             <div class="video-player-container">
 
                 <video
+
                     controls
+
                     controlsList="nodownload"
+
                     disablePictureInPicture
+
                     playsinline
+
                     preload="metadata">
 
-                    <source src="${url}" type="video/mp4">
+                    <source
+                        src="${url}"
+                        type="video/mp4">
 
                     Your browser does not support video.
 
@@ -408,9 +984,14 @@ function openLocalVideo(url, title) {
     `;
 
 
-    document.body.appendChild(overlay);
+    document.body.appendChild(
+        overlay
+    );
 
-    document.body.classList.add("viewer-open");
+
+    document.body.classList.add(
+        "viewer-open"
+    );
 
 }
 
@@ -421,14 +1002,23 @@ function openLocalVideo(url, title) {
 
 function openLiveClass(url) {
 
-    if (!url || url === "#") {
+    if (
+        !url ||
+        url === "#"
+    ) {
 
-        alert("Live class link will be available here.");
+        alert(
+            "Live class link will be available here."
+        );
 
         return;
     }
 
-    window.open(url, "_blank");
+
+    window.open(
+        url,
+        "_blank"
+    );
 
 }
 
@@ -437,7 +1027,10 @@ function openLiveClass(url) {
    PDF.js WORKER
    ========================================================= */
 
-if (typeof pdfjsLib !== "undefined") {
+if (
+    typeof pdfjsLib !==
+    "undefined"
+) {
 
     pdfjsLib.GlobalWorkerOptions.workerSrc =
         "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -446,90 +1039,141 @@ if (typeof pdfjsLib !== "undefined") {
 
 
 /* =========================================================
-   PROTECTED PDF VIEWER
+   PDF VIEWER
    ========================================================= */
 
-async function openPDFViewer(pdfURL, title) {
+async function openPDFViewer(
+    pdfURL,
+    title
+) {
 
-    if (typeof pdfjsLib === "undefined") {
+    if (
+        typeof pdfjsLib ===
+        "undefined"
+    ) {
 
-        alert("PDF viewer could not load. Please refresh the page.");
+        alert(
+            "PDF viewer could not load. Please refresh the page."
+        );
 
         return;
     }
 
 
-    /* Create overlay */
-
-    const overlay = document.createElement("div");
-
-    overlay.id = "pdfFullscreen";
+    const overlay =
+        document.createElement("div");
 
 
-  overlay.innerHTML = `
+    overlay.id =
+        "pdfFullscreen";
 
-    <div class="pdf-header">
 
-        <div class="pdf-title">
-            ${title}
+    overlay.innerHTML = `
+
+        <div class="pdf-header">
+
+            <div class="pdf-title">
+                ${title}
+            </div>
+
+            <button id="closePDF">
+                ✕ Close
+            </button>
+
         </div>
 
-        <button id="closePDF">
-            ✕ Close
-        </button>
 
-    </div>
+        <div class="pdf-screen-watermark">
 
-    <!-- SCREEN WATERMARK -->
-    <div class="pdf-screen-watermark">
-        <div>FJMC Academy</div>
-        <div>${loggedInEmail}</div>
-    </div>
+            <div>
+                FJMC Academy
+            </div>
 
-    <div id="pdfScrollArea" class="pdf-scroll-area">
+            <div>
+                ${currentUser?.email || ""}
+            </div>
 
-        <div id="pdfLoading" class="pdf-loading">
-            Loading PDF...
         </div>
 
-        <div id="pdfPages" class="pdf-pages"></div>
 
-    </div>
-`;
+        <div
+            id="pdfScrollArea"
+            class="pdf-scroll-area">
+
+            <div
+                id="pdfLoading"
+                class="pdf-loading">
+
+                Loading PDF...
+
+            </div>
 
 
-    document.body.appendChild(overlay);
+            <div
+                id="pdfPages"
+                class="pdf-pages">
 
-    document.body.classList.add("viewer-open");
+            </div>
+
+        </div>
+
+    `;
 
 
-    /* Close PDF */
+    document.body.appendChild(
+        overlay
+    );
 
-    document.getElementById("closePDF").addEventListener("click", closePDFViewer);
+
+    document.body.classList.add(
+        "viewer-open"
+    );
+
+
+    document
+        .getElementById("closePDF")
+        .addEventListener(
+            "click",
+            closePDFViewer
+        );
 
 
     try {
 
-        const loadingTask = pdfjsLib.getDocument({
-            url: pdfURL
-        });
+        const loadingTask =
+            pdfjsLib.getDocument({
+                url: pdfURL
+            });
 
 
-        const pdf = await loadingTask.promise;
+        const pdf =
+            await loadingTask.promise;
 
 
-        const pagesContainer = document.getElementById("pdfPages");
+        const pagesContainer =
+            document.getElementById(
+                "pdfPages"
+            );
 
-        const loadingMessage = document.getElementById("pdfLoading");
+
+        const loadingMessage =
+            document.getElementById(
+                "pdfLoading"
+            );
+
 
         if (loadingMessage) {
+
             loadingMessage.remove();
+
         }
 
 
-        /* Render every page */
-
-        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+        for (
+            let pageNumber = 1;
+            pageNumber <= pdf.numPages;
+            pageNumber++
+        ) {
 
             await renderPDFPage(
                 pdf,
@@ -539,20 +1183,37 @@ async function openPDFViewer(pdfURL, title) {
 
         }
 
+
     } catch (error) {
 
-        console.error("PDF Error:", error);
+        console.error(
+            "PDF Error:",
+            error
+        );
 
 
-        const loadingMessage = document.getElementById("pdfLoading");
+        const loadingMessage =
+            document.getElementById(
+                "pdfLoading"
+            );
+
 
         if (loadingMessage) {
 
             loadingMessage.innerHTML = `
+
                 <div class="pdf-error">
-                    <h3>PDF could not be opened</h3>
-                    <p>Please check the PDF file path.</p>
+
+                    <h3>
+                        PDF could not be opened
+                    </h3>
+
+                    <p>
+                        Please check the PDF file path.
+                    </p>
+
                 </div>
+
             `;
 
         }
@@ -563,124 +1224,149 @@ async function openPDFViewer(pdfURL, title) {
 
 
 /* =========================================================
-   RENDER ONE PDF PAGE
+   RENDER PDF PAGE
    ========================================================= */
 
-async function renderPDFPage(pdf, pageNumber, container) {
+async function renderPDFPage(
+    pdf,
+    pageNumber,
+    container
+) {
 
-    const page = await pdf.getPage(pageNumber);
-
-    /* ===============================
-       PAGE WRAPPER
-       =============================== */
-
-    const wrapper = document.createElement("div");
-
-    wrapper.className = "pdf-page-wrapper";
-
-    wrapper.style.position = "relative";
-    wrapper.style.width = "100%";
-    wrapper.style.display = "flex";
-    wrapper.style.justifyContent = "center";
-    wrapper.style.alignItems = "flex-start";
+    const page =
+        await pdf.getPage(
+            pageNumber
+        );
 
 
-    /* ===============================
-       CANVAS
-       =============================== */
-
-    const canvas = document.createElement("canvas");
-
-    canvas.className = "pdf-page";
-
-    canvas.style.display = "block";
-    canvas.style.margin = "0 auto";
+    const wrapper =
+        document.createElement("div");
 
 
-    wrapper.appendChild(canvas);
-
-    container.appendChild(wrapper);
-
-
-    /* ===============================
-       ORIGINAL PDF SIZE
-       =============================== */
-
-    const originalViewport = page.getViewport({
-        scale: 1
-    });
+    wrapper.className =
+        "pdf-page-wrapper";
 
 
-    /* ===============================
-       SCREEN WIDTH
-       =============================== */
-
-    const screenWidth = window.innerWidth;
+    wrapper.style.position =
+        "relative";
 
 
-    /*
-       Mobile:
-       Keep small side margin.
+    wrapper.style.width =
+        "100%";
 
-       Laptop:
-       Maximum 1000px.
-    */
+
+    wrapper.style.display =
+        "flex";
+
+
+    wrapper.style.justifyContent =
+        "center";
+
+
+    wrapper.style.alignItems =
+        "flex-start";
+
+
+    const canvas =
+        document.createElement("canvas");
+
+
+    canvas.className =
+        "pdf-page";
+
+
+    canvas.style.display =
+        "block";
+
+
+    canvas.style.margin =
+        "0 auto";
+
+
+    wrapper.appendChild(
+        canvas
+    );
+
+
+    container.appendChild(
+        wrapper
+    );
+
+
+    const originalViewport =
+        page.getViewport({
+            scale: 1
+        });
+
+
+    const screenWidth =
+        window.innerWidth;
+
 
     let availableWidth;
 
 
-    if (screenWidth <= 600) {
+    if (
+        screenWidth <= 600
+    ) {
 
-        availableWidth = screenWidth - 20;
+        availableWidth =
+            screenWidth - 20;
 
     } else {
 
         availableWidth =
-            Math.min(screenWidth - 30, 1000);
+            Math.min(
+                screenWidth - 30,
+                1000
+            );
 
     }
 
 
-    /* ===============================
-       SCALE
-       =============================== */
-
     const scale =
-        availableWidth / originalViewport.width;
+        availableWidth /
+        originalViewport.width;
 
 
-    const viewport = page.getViewport({
-        scale: scale
-    });
+    const viewport =
+        page.getViewport({
+            scale: scale
+        });
 
-
-    /* ===============================
-       HIGH DPI
-       =============================== */
 
     const devicePixelRatio =
-        Math.min(window.devicePixelRatio || 1, 2);
+        Math.min(
+            window.devicePixelRatio || 1,
+            2
+        );
 
 
     canvas.width =
-        Math.round(viewport.width * devicePixelRatio);
+        Math.round(
+            viewport.width *
+            devicePixelRatio
+        );
+
 
     canvas.height =
-        Math.round(viewport.height * devicePixelRatio);
+        Math.round(
+            viewport.height *
+            devicePixelRatio
+        );
 
-
-    /* CSS DISPLAY SIZE */
 
     canvas.style.width =
-        Math.round(viewport.width) + "px";
+        Math.round(
+            viewport.width
+        ) + "px";
+
 
     canvas.style.height =
-        Math.round(viewport.height) + "px";
+        Math.round(
+            viewport.height
+        ) + "px";
 
-
-    /* ===============================
-       RENDER
-       =============================== */
 
     const context =
         canvas.getContext("2d");
@@ -688,9 +1374,11 @@ async function renderPDFPage(pdf, pageNumber, container) {
 
     const renderContext = {
 
-        canvasContext: context,
+        canvasContext:
+            context,
 
-        viewport: viewport,
+        viewport:
+            viewport,
 
         transform:
             devicePixelRatio !== 1
@@ -703,11 +1391,17 @@ async function renderPDFPage(pdf, pageNumber, container) {
                     0
                 ]
                 : null
+
     };
 
 
-    await page.render(renderContext).promise;
+    await page
+        .render(renderContext)
+        .promise;
+
 }
+
+
 /* =========================================================
    CLOSE PDF
    ========================================================= */
@@ -715,7 +1409,9 @@ async function renderPDFPage(pdf, pageNumber, container) {
 function closePDFViewer() {
 
     const pdfViewer =
-        document.getElementById("pdfFullscreen");
+        document.getElementById(
+            "pdfFullscreen"
+        );
 
 
     if (pdfViewer) {
@@ -725,7 +1421,9 @@ function closePDFViewer() {
     }
 
 
-    document.body.classList.remove("viewer-open");
+    document.body.classList.remove(
+        "viewer-open"
+    );
 
 }
 
@@ -736,13 +1434,96 @@ function closePDFViewer() {
 
 if (logoutBtn) {
 
-    logoutBtn.addEventListener("click", function () {
+    logoutBtn.addEventListener(
+        "click",
+        async function () {
 
-        sessionStorage.removeItem("loggedInStudent");
+            try {
 
-        window.location.href = "login.html";
+                /*
+                   Device ko inactive karo
+                */
 
-    });
+                if (currentUser) {
+
+                    const deviceRef =
+                        doc(
+                            db,
+                            "users",
+                            currentUser.uid,
+                            "devices",
+                            deviceId
+                        );
+
+
+                    await updateDoc(
+                        deviceRef,
+                        {
+                            active: false,
+                            lastSeen: Date.now()
+                        }
+                    );
+
+                }
+
+
+                /*
+                   Heartbeat stop
+                */
+
+                if (deviceHeartbeat) {
+
+                    clearInterval(
+                        deviceHeartbeat
+                    );
+
+                }
+
+
+                /*
+                   Firebase logout
+                */
+
+                await signOut(auth);
+
+
+                sessionStorage.removeItem(
+                    "loggedInStudent"
+                );
+
+
+                sessionStorage.removeItem(
+                    "firebaseUID"
+                );
+
+
+                window.location.href =
+                    "login.html";
+
+
+            } catch (error) {
+
+                console.error(
+                    "Logout error:",
+                    error
+                );
+
+
+                /*
+                   Even if device update fails,
+                   logout user.
+                */
+
+                await signOut(auth);
+
+
+                window.location.href =
+                    "login.html";
+
+            }
+
+        }
+    );
 
 }
 
@@ -751,81 +1532,108 @@ if (logoutBtn) {
    BASIC PROTECTION
    ========================================================= */
 
-document.addEventListener("contextmenu", function (event) {
-
-    event.preventDefault();
-
-});
-
-
-document.addEventListener("copy", function (event) {
-
-    event.preventDefault();
-
-});
-
-
-document.addEventListener("cut", function (event) {
-
-    event.preventDefault();
-
-});
-
-
-document.addEventListener("selectstart", function (event) {
-
-    event.preventDefault();
-
-});
-
-
-document.addEventListener("keydown", function (event) {
-
-    /* Ctrl + S */
-
-    if (
-        (event.ctrlKey || event.metaKey) &&
-        event.key.toLowerCase() === "s"
-    ) {
+document.addEventListener(
+    "contextmenu",
+    function (event) {
 
         event.preventDefault();
 
     }
+);
 
 
-    /* Ctrl + P */
-
-    if (
-        (event.ctrlKey || event.metaKey) &&
-        event.key.toLowerCase() === "p"
-    ) {
+document.addEventListener(
+    "copy",
+    function (event) {
 
         event.preventDefault();
 
     }
+);
 
 
-    /* Ctrl + U */
-
-    if (
-        (event.ctrlKey || event.metaKey) &&
-        event.key.toLowerCase() === "u"
-    ) {
+document.addEventListener(
+    "cut",
+    function (event) {
 
         event.preventDefault();
 
     }
+);
 
 
-    /* Ctrl + C */
-
-    if (
-        (event.ctrlKey || event.metaKey) &&
-        event.key.toLowerCase() === "c"
-    ) {
+document.addEventListener(
+    "selectstart",
+    function (event) {
 
         event.preventDefault();
 
     }
+);
 
-});
+
+document.addEventListener(
+    "keydown",
+    function (event) {
+
+        /*
+           Ctrl + S
+        */
+
+        if (
+            (event.ctrlKey ||
+                event.metaKey) &&
+            event.key.toLowerCase() === "s"
+        ) {
+
+            event.preventDefault();
+
+        }
+
+
+        /*
+           Ctrl + P
+        */
+
+        if (
+            (event.ctrlKey ||
+                event.metaKey) &&
+            event.key.toLowerCase() === "p"
+        ) {
+
+            event.preventDefault();
+
+        }
+
+
+        /*
+           Ctrl + U
+        */
+
+        if (
+            (event.ctrlKey ||
+                event.metaKey) &&
+            event.key.toLowerCase() === "u"
+        ) {
+
+            event.preventDefault();
+
+        }
+
+
+        /*
+           Ctrl + C
+        */
+
+        if (
+            (event.ctrlKey ||
+                event.metaKey) &&
+            event.key.toLowerCase() === "c"
+        ) {
+
+            event.preventDefault();
+
+        }
+
+    }
+);
