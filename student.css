@@ -252,8 +252,6 @@ body {
 
     font-weight: 600;
 }
-
-
 /* ================================
    MOBILE
 ================================ */
@@ -262,30 +260,102 @@ body {
 
     .login-page {
         padding: 15px;
+
+        /* MOBILE BACKGROUND */
+        background:
+            radial-gradient(
+                circle at top left,
+                rgba(99, 102, 241, 0.18),
+                transparent 35%
+            ),
+            radial-gradient(
+                circle at bottom right,
+                rgba(236, 72, 153, 0.18),
+                transparent 35%
+            );
     }
 
     .login-box {
         padding: 32px 23px;
 
         border-radius: 18px;
+
+        /* MOBILE BOX COLOUR */
+        background: rgba(255, 255, 255, 0.96);
+
+        box-shadow:
+            0 20px 50px rgba(0, 0, 0, 0.12);
     }
 
     .login-box h1 {
         font-size: 25px;
+
+        /* MOBILE HEADING COLOUR */
+        color: #172033;
     }
 
     .logo {
         font-size: 22px;
+
+        /* MOBILE LOGO COLOUR */
+        background: linear-gradient(
+            90deg,
+            #2563eb,
+            #7c3aed,
+            #db2777
+        );
+
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .login-subtitle {
+        color: #697386;
+    }
+
+    #loginForm label {
+        color: #30384a;
     }
 
     #loginForm input {
         height: 48px;
+
+        background: #f9fafb;
+
+        border: 2px solid #e5e7eb;
+
+        color: #172033;
+    }
+
+    #loginForm input:focus {
+        border-color: #6366f1;
+
+        background: #ffffff;
+
+        box-shadow:
+            0 0 0 4px rgba(99, 102, 241, 0.12);
     }
 
     #loginForm button {
         height: 50px;
+
+        /* MOBILE BUTTON COLOUR */
+        background: linear-gradient(
+            90deg,
+            #2563eb,
+            #7c3aed,
+            #db2777
+        );
+
+        color: #ffffff;
+    }
+
+    #loginMessage {
+        color: #dc2626;
     }
 }
+
+
 
 /* =========================================================
    DASHBOARD
