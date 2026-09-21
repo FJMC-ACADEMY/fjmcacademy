@@ -73,734 +73,562 @@ setInterval(function () {
 
 }, 5000);
 /* =====================================================
-   LIFE AT DIPS - COMPLETE SLIDER + GALLERY
+   LIFE AT DIPS - FAST SLIDER
 ===================================================== */
 
-(function () {
+document.addEventListener("DOMContentLoaded", function () {
 
-    document.addEventListener("DOMContentLoaded", function () {
+    const track =
+        document.getElementById("lifeTrack");
 
-        const section =
-            document.querySelector(".life-dips-section");
+    const windowBox =
+        document.getElementById("lifeWindow");
 
-        if (!section) {
+    const cards =
+        Array.from(
+            document.querySelectorAll(".life-card")
+        );
+
+    const prev =
+        document.getElementById("lifePrev");
+
+    const next =
+        document.getElementById("lifeNext");
+
+
+    const galleryBtn =
+        document.getElementById("lifeGalleryBtn");
+
+    const modal =
+        document.getElementById("lifeModal");
+
+    const modalImage =
+        document.getElementById("lifeModalImage");
+
+    const modalClose =
+        document.getElementById("lifeModalClose");
+
+    const modalPrev =
+        document.getElementById("lifeModalPrev");
+
+    const modalNext =
+        document.getElementById("lifeModalNext");
+
+    const modalCount =
+        document.getElementById("lifeModalCount");
+
+
+    /* STOP IF HTML IS NOT PRESENT */
+
+    if (
+        !track ||
+        !windowBox ||
+        !cards.length
+    ) {
+        console.log("Life slider not found");
+        return;
+    }
+
+
+    let current = 0;
+
+    let timer = null;
+
+    let galleryIndex = 0;
+
+    let touchStart = 0;
+
+    let touchEnd = 0;
+
+    let lastTap = 0;
+
+
+    /* =================================================
+       VISIBLE PHOTOS
+    ================================================= */
+
+    function visiblePhotos() {
+
+        return window.innerWidth <= 700
+            ? 1
+            : 4;
+
+    }
+
+
+    /* =================================================
+       MAX POSITION
+    ================================================= */
+
+    function maxPosition() {
+
+        return Math.max(
+            0,
+            cards.length - visiblePhotos()
+        );
+
+    }
+
+
+    /* =================================================
+       MOVE
+    ================================================= */
+
+    function moveSlider() {
+
+        const max =
+            maxPosition();
+
+
+        if (current > max) {
+            current = 0;
+        }
+
+
+        if (current < 0) {
+            current = max;
+        }
+
+
+        const cardWidth =
+            cards[0].getBoundingClientRect().width;
+
+
+        const gap =
+            window.innerWidth <= 700
+                ? 0
+                : 25;
+
+
+        const move =
+            current *
+            (cardWidth + gap);
+
+
+        track.style.transform =
+            "translate3d(-" +
+            move +
+            "px,0,0)";
+    }
+
+
+    /* =================================================
+       NEXT
+    ================================================= */
+
+    function nextPhoto() {
+
+        current++;
+
+
+        if (current > maxPosition()) {
+            current = 0;
+        }
+
+
+        moveSlider();
+
+    }
+
+
+    /* =================================================
+       PREVIOUS
+    ================================================= */
+
+    function previousPhoto() {
+
+        current--;
+
+
+        if (current < 0) {
+            current = maxPosition();
+        }
+
+
+        moveSlider();
+
+    }
+
+
+    /* =================================================
+       AUTO 5 SECONDS
+    ================================================= */
+
+    function startAuto() {
+
+        clearInterval(timer);
+
+
+        timer = setInterval(
+            nextPhoto,
+            5000
+        );
+
+    }
+
+
+    function stopAuto() {
+
+        clearInterval(timer);
+
+        timer = null;
+
+    }
+
+
+    /* =================================================
+       BUTTONS
+    ================================================= */
+
+    next.addEventListener(
+        "click",
+        function () {
+
+            nextPhoto();
+
+            startAuto();
+
+        }
+    );
+
+
+    prev.addEventListener(
+        "click",
+        function () {
+
+            previousPhoto();
+
+            startAuto();
+
+        }
+    );
+
+
+    /* =================================================
+       PAUSE ON PHOTOS
+    ================================================= */
+
+    windowBox.addEventListener(
+        "mouseenter",
+        stopAuto
+    );
+
+
+    windowBox.addEventListener(
+        "mouseleave",
+        startAuto
+    );
+
+
+    /* =================================================
+       GALLERY
+    ================================================= */
+
+    function openGallery(number) {
+
+        if (number < 0) {
+            number = cards.length - 1;
+        }
+
+
+        if (number >= cards.length) {
+            number = 0;
+        }
+
+
+        galleryIndex = number;
+
+
+        const image =
+            cards[galleryIndex]
+                .querySelector("img");
+
+
+        if (!image) {
             return;
         }
 
 
-        const slider =
-            document.getElementById("lifeSlider");
+        modalImage.src =
+            image.src;
 
-        const track =
-            document.getElementById("lifeTrack");
 
-        const slides =
-            Array.from(
-                section.querySelectorAll(".life-slide")
+        modalImage.alt =
+            image.alt;
+
+
+        modalCount.textContent =
+            (galleryIndex + 1) +
+            " / " +
+            cards.length;
+
+
+        modal.classList.add("open");
+
+
+        stopAuto();
+
+    }
+
+
+    /* =================================================
+       GALLERY BUTTON
+    ================================================= */
+
+    galleryBtn.addEventListener(
+        "click",
+        function () {
+
+            openGallery(0);
+
+        }
+    );
+
+
+    /* =================================================
+       GALLERY NEXT
+    ================================================= */
+
+    modalNext.addEventListener(
+        "click",
+        function (event) {
+
+            event.stopPropagation();
+
+            openGallery(
+                galleryIndex + 1
             );
 
-
-        const prevBtn =
-            document.getElementById("lifePrevBtn");
-
-        const nextBtn =
-            document.getElementById("lifeNextBtn");
-
-
-        const galleryBtn =
-            document.getElementById("lifeGalleryBtn");
-
-
-        const popup =
-            document.getElementById("lifeGalleryPopup");
-
-        const popupImage =
-            document.getElementById("lifePopupImage");
-
-        const popupClose =
-            document.getElementById("lifePopupClose");
-
-        const popupPrev =
-            document.getElementById("lifePopupPrev");
-
-        const popupNext =
-            document.getElementById("lifePopupNext");
-
-        const popupCounter =
-            document.getElementById("lifePopupCounter");
-
-
-        if (
-            !slider ||
-            !track ||
-            slides.length === 0
-        ) {
-            console.log("Life slider elements missing");
-            return;
         }
+    );
 
 
-        /* =================================================
-           VARIABLES
-        ================================================= */
+    /* =================================================
+       GALLERY PREVIOUS
+    ================================================= */
 
-        let currentIndex = 0;
+    modalPrev.addEventListener(
+        "click",
+        function (event) {
 
-        let galleryIndex = 0;
+            event.stopPropagation();
 
-        let autoTimer = null;
-
-        let touchStartX = 0;
-
-        let touchEndX = 0;
-
-        let lastTap = 0;
-
-
-        /* =================================================
-           HOW MANY PHOTOS ARE VISIBLE
-        ================================================= */
-
-        function getVisiblePhotos() {
-
-            if (window.innerWidth <= 700) {
-                return 1;
-            }
-
-            return 4;
-        }
-
-
-        /* =================================================
-           MOVE SLIDER
-        ================================================= */
-
-        function updateSlider() {
-
-            const visible =
-                getVisiblePhotos();
-
-
-            const maxIndex =
-                Math.max(
-                    0,
-                    slides.length - visible
-                );
-
-
-            if (currentIndex > maxIndex) {
-                currentIndex = 0;
-            }
-
-
-            if (currentIndex < 0) {
-                currentIndex = maxIndex;
-            }
-
-
-            const slide =
-                slides[0];
-
-
-            const slideWidth =
-                slide.getBoundingClientRect().width;
-
-
-            let gap = 25;
-
-
-            if (window.innerWidth <= 700) {
-                gap = 0;
-            }
-
-
-            const moveAmount =
-                currentIndex *
-                (slideWidth + gap);
-
-
-            track.style.transform =
-                "translate3d(-" +
-                moveAmount +
-                "px, 0, 0)";
-        }
-
-
-        /* =================================================
-           NEXT
-        ================================================= */
-
-        function nextPhoto() {
-
-            const visible =
-                getVisiblePhotos();
-
-
-            const maxIndex =
-                Math.max(
-                    0,
-                    slides.length - visible
-                );
-
-
-            currentIndex++;
-
-
-            if (currentIndex > maxIndex) {
-                currentIndex = 0;
-            }
-
-
-            updateSlider();
-        }
-
-
-        /* =================================================
-           PREVIOUS
-        ================================================= */
-
-        function previousPhoto() {
-
-            const visible =
-                getVisiblePhotos();
-
-
-            const maxIndex =
-                Math.max(
-                    0,
-                    slides.length - visible
-                );
-
-
-            currentIndex--;
-
-
-            if (currentIndex < 0) {
-                currentIndex = maxIndex;
-            }
-
-
-            updateSlider();
-        }
-
-
-        /* =================================================
-           AUTO SLIDE
-           EVERY 5 SECONDS
-        ================================================= */
-
-        function startAutoSlide() {
-
-            stopAutoSlide();
-
-
-            autoTimer =
-                setInterval(
-                    function () {
-
-                        nextPhoto();
-
-                    },
-                    5000
-                );
-        }
-
-
-        function stopAutoSlide() {
-
-            if (autoTimer !== null) {
-
-                clearInterval(autoTimer);
-
-                autoTimer = null;
-            }
-        }
-
-
-        /* =================================================
-           NEXT / PREVIOUS BUTTONS
-        ================================================= */
-
-        if (nextBtn) {
-
-            nextBtn.addEventListener(
-                "click",
-                function () {
-
-                    nextPhoto();
-
-                    startAutoSlide();
-
-                }
+            openGallery(
+                galleryIndex - 1
             );
+
         }
+    );
 
 
-        if (prevBtn) {
+    /* =================================================
+       CLOSE
+    ================================================= */
 
-            prevBtn.addEventListener(
-                "click",
-                function () {
+    function closeGallery() {
 
-                    previousPhoto();
+        modal.classList.remove("open");
 
-                    startAutoSlide();
+        startAuto();
 
-                }
-            );
-        }
+    }
 
 
-        /* =================================================
-           PAUSE WHEN CURSOR IS ON PHOTOS
-        ================================================= */
-
-        slider.addEventListener(
-            "mouseenter",
-            function () {
-
-                stopAutoSlide();
-
-            }
-        );
+    modalClose.addEventListener(
+        "click",
+        closeGallery
+    );
 
 
-        slider.addEventListener(
-            "mouseleave",
-            function () {
+    /* =================================================
+       DOUBLE CLICK DESKTOP
+    ================================================= */
 
-                startAutoSlide();
-
-            }
-        );
-
-
-        /* =================================================
-           OPEN LARGE GALLERY
-        ================================================= */
-
-        function openGallery(index) {
-
-            if (!popup || !popupImage) {
-                return;
-            }
-
-
-            if (index < 0) {
-                index = slides.length - 1;
-            }
-
-
-            if (index >= slides.length) {
-                index = 0;
-            }
-
-
-            galleryIndex = index;
-
+    cards.forEach(
+        function (card, number) {
 
             const image =
-                slides[galleryIndex]
-                    .querySelector("img");
+                card.querySelector("img");
 
 
-            if (!image) {
-                return;
-            }
-
-
-            popupImage.src =
-                image.src;
-
-
-            popupImage.alt =
-                image.alt;
-
-
-            if (popupCounter) {
-
-                popupCounter.textContent =
-                    (galleryIndex + 1) +
-                    " / " +
-                    slides.length;
-
-            }
-
-
-            popup.classList.add("active");
-
-
-            stopAutoSlide();
-        }
-
-
-        /* =================================================
-           CLOSE GALLERY
-        ================================================= */
-
-        function closeGallery() {
-
-            if (!popup) {
-                return;
-            }
-
-
-            popup.classList.remove("active");
-
-
-            if (popupImage) {
-                popupImage.src = "";
-            }
-
-
-            startAutoSlide();
-        }
-
-
-        /* =================================================
-           GALLERY NEXT
-        ================================================= */
-
-        function galleryNext() {
-
-            galleryIndex++;
-
-
-            if (galleryIndex >= slides.length) {
-                galleryIndex = 0;
-            }
-
-
-            openGallery(galleryIndex);
-        }
-
-
-        /* =================================================
-           GALLERY PREVIOUS
-        ================================================= */
-
-        function galleryPrevious() {
-
-            galleryIndex--;
-
-
-            if (galleryIndex < 0) {
-                galleryIndex =
-                    slides.length - 1;
-            }
-
-
-            openGallery(galleryIndex);
-        }
-
-
-        /* =================================================
-           VIEW OUR PICTURE GALLERY
-        ================================================= */
-
-        if (galleryBtn) {
-
-            galleryBtn.addEventListener(
-                "click",
+            image.addEventListener(
+                "dblclick",
                 function () {
 
-                    openGallery(0);
+                    openGallery(number);
 
                 }
             );
+
         }
+    );
 
 
-        /* =================================================
-           POPUP BUTTONS
-        ================================================= */
+    /* =================================================
+       MOBILE DOUBLE TAP
+    ================================================= */
 
-        if (popupNext) {
+    cards.forEach(
+        function (card, number) {
 
-            popupNext.addEventListener(
-                "click",
+            const image =
+                card.querySelector("img");
+
+
+            image.addEventListener(
+                "touchend",
                 function (event) {
 
-                    event.stopPropagation();
+                    const now =
+                        Date.now();
 
-                    galleryNext();
-
-                }
-            );
-        }
-
-
-        if (popupPrev) {
-
-            popupPrev.addEventListener(
-                "click",
-                function (event) {
-
-                    event.stopPropagation();
-
-                    galleryPrevious();
-
-                }
-            );
-        }
-
-
-        if (popupClose) {
-
-            popupClose.addEventListener(
-                "click",
-                function (event) {
-
-                    event.stopPropagation();
-
-                    closeGallery();
-
-                }
-            );
-        }
-
-
-        /* =================================================
-           CLICK DARK AREA TO CLOSE
-        ================================================= */
-
-        if (popup) {
-
-            popup.addEventListener(
-                "click",
-                function (event) {
 
                     if (
-                        event.target === popup
+                        now - lastTap < 350
                     ) {
-
-                        closeGallery();
-
-                    }
-
-                }
-            );
-        }
-
-
-        /* =================================================
-           DOUBLE CLICK DESKTOP
-        ================================================= */
-
-        slides.forEach(
-            function (slide, index) {
-
-                const image =
-                    slide.querySelector("img");
-
-
-                if (!image) {
-                    return;
-                }
-
-
-                image.addEventListener(
-                    "dblclick",
-                    function (event) {
 
                         event.preventDefault();
 
-                        openGallery(index);
+                        openGallery(number);
 
                     }
+
+
+                    lastTap = now;
+
+                },
+                {
+                    passive: false
+                }
+            );
+
+        }
+    );
+
+
+    /* =================================================
+       MOBILE SWIPE
+    ================================================= */
+
+    windowBox.addEventListener(
+        "touchstart",
+        function (event) {
+
+            touchStart =
+                event.touches[0].clientX;
+
+            stopAuto();
+
+        },
+        {
+            passive: true
+        }
+    );
+
+
+    windowBox.addEventListener(
+        "touchend",
+        function (event) {
+
+            touchEnd =
+                event.changedTouches[0].clientX;
+
+
+            const distance =
+                touchStart - touchEnd;
+
+
+            if (Math.abs(distance) > 50) {
+
+                if (distance > 0) {
+
+                    nextPhoto();
+
+                } else {
+
+                    previousPhoto();
+
+                }
+
+            }
+
+
+            startAuto();
+
+        }
+    );
+
+
+    /* =================================================
+       KEYBOARD
+    ================================================= */
+
+    document.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (
+                !modal.classList.contains("open")
+            ) {
+                return;
+            }
+
+
+            if (
+                event.key === "ArrowRight"
+            ) {
+
+                openGallery(
+                    galleryIndex + 1
                 );
 
-
-                /* =========================================
-                   DOUBLE TAP MOBILE
-                ========================================= */
-
-                image.addEventListener(
-                    "touchend",
-                    function (event) {
-
-                        const now =
-                            Date.now();
+            }
 
 
-                        const timeSinceLastTap =
-                            now - lastTap;
+            if (
+                event.key === "ArrowLeft"
+            ) {
 
-
-                        if (
-                            timeSinceLastTap > 0 &&
-                            timeSinceLastTap < 350
-                        ) {
-
-                            event.preventDefault();
-
-                            openGallery(index);
-
-                        }
-
-
-                        lastTap = now;
-
-                    },
-                    {
-                        passive: false
-                    }
+                openGallery(
+                    galleryIndex - 1
                 );
 
             }
-        );
 
 
-        /* =================================================
-           MOBILE SWIPE
-        ================================================= */
+            if (
+                event.key === "Escape"
+            ) {
 
-        slider.addEventListener(
-            "touchstart",
-            function (event) {
-
-                if (
-                    event.touches &&
-                    event.touches.length > 0
-                ) {
-
-                    touchStartX =
-                        event.touches[0].clientX;
-
-                }
-
-                stopAutoSlide();
-
-            },
-            {
-                passive: true
-            }
-        );
-
-
-        slider.addEventListener(
-            "touchmove",
-            function (event) {
-
-                if (
-                    event.touches &&
-                    event.touches.length > 0
-                ) {
-
-                    touchEndX =
-                        event.touches[0].clientX;
-
-                }
-
-            },
-            {
-                passive: true
-            }
-        );
-
-
-        slider.addEventListener(
-            "touchend",
-            function () {
-
-                const distance =
-                    touchStartX -
-                    touchEndX;
-
-
-                if (Math.abs(distance) > 50) {
-
-                    if (distance > 0) {
-
-                        nextPhoto();
-
-                    } else {
-
-                        previousPhoto();
-
-                    }
-
-                }
-
-
-                touchStartX = 0;
-
-                touchEndX = 0;
-
-
-                startAutoSlide();
+                closeGallery();
 
             }
-        );
+
+        }
+    );
 
 
-        /* =================================================
-           KEYBOARD
-        ================================================= */
+    /* =================================================
+       RESIZE
+    ================================================= */
 
-        document.addEventListener(
-            "keydown",
-            function (event) {
-
-                if (
-                    !popup ||
-                    !popup.classList.contains("active")
-                ) {
-                    return;
-                }
+    window.addEventListener(
+        "resize",
+        moveSlider
+    );
 
 
-                if (event.key === "ArrowRight") {
+    /* =================================================
+       START
+    ================================================= */
 
-                    galleryNext();
+    moveSlider();
 
-                }
-
-
-                if (event.key === "ArrowLeft") {
-
-                    galleryPrevious();
-
-                }
+    startAuto();
 
 
-                if (event.key === "Escape") {
+    console.log(
+        "Life at DIPS: READY"
+    );
 
-                    closeGallery();
-
-                }
-
-            }
-        );
-
-
-        /* =================================================
-           RESIZE
-        ================================================= */
-
-        window.addEventListener(
-            "resize",
-            function () {
-
-                updateSlider();
-
-            }
-        );
-
-
-        /* =================================================
-           START
-        ================================================= */
-
-        updateSlider();
-
-        startAutoSlide();
-
-
-        console.log(
-            "Life at DIPS slider loaded successfully"
-        );
-
-    });
-
-})();
+});
