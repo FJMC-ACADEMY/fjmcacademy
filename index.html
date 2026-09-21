@@ -1678,150 +1678,66 @@ function closeMenu() {
     <p class="copyright">
         © 2026 FJMC Academy. All Rights Reserved.
     </p>
-<!-- =====================================================
-     LIFE AT DIPS
-===================================================== -->
+<!-- ================= LIFE AT DIPS ================= -->
 
-<section class="life-dips-section">
+<section class="life-dips">
 
-    <!-- BACKGROUND PHOTO -->
+    <!-- 7.jpg IS THE BACKGROUND -->
     <img
-        src="8.jpg"
-        class="life-background"
+        src="life-at-dips/7.jpg"
+        class="life-bg"
         alt="Life at DIPS Background"
     >
 
-    <!-- DARK OVERLAY -->
-    <div class="life-overlay"></div>
+    <div class="life-dark"></div>
 
 
-    <div class="life-dips-container">
+    <div class="life-container">
 
         <h2>Life at DIPS</h2>
 
-        <div class="life-title-line"></div>
+        <div class="life-line"></div>
 
 
-        <!-- ================= SLIDER ================= -->
+        <!-- SLIDER -->
 
-        <div class="life-slider-wrapper">
+        <div class="life-slider">
 
             <button
                 type="button"
-                class="life-btn life-prev"
-                id="lifePrevBtn">
+                class="life-nav life-prev"
+                id="lifePrev">
                 ❮
             </button>
 
 
-            <div class="life-slider" id="lifeSlider">
+            <div class="life-window" id="lifeWindow">
 
                 <div class="life-track" id="lifeTrack">
 
-
-                    <!-- PHOTO 1 -->
-                    <div class="life-slide">
-                        <img
-                            src="1.jpg"
-                            alt="Life at DIPS 1">
+                    <div class="life-card">
+                        <img src="life-at-dips/1.jpg" alt="Life at DIPS 1">
                     </div>
 
-
-                    <!-- PHOTO 2 -->
-                    <div class="life-slide">
-                        <img
-                            src="2.jpg"
-                            alt="Life at DIPS 2">
+                    <div class="life-card">
+                        <img src="life-at-dips/2.jpg" alt="Life at DIPS 2">
                     </div>
 
-
-                    <!-- PHOTO 3 -->
-                    <div class="life-slide">
-                        <img
-                            src="3.jpg"
-                            alt="Life at DIPS 3">
+                    <div class="life-card">
+                        <img src="life-at-dips/3.jpg" alt="Life at DIPS 3">
                     </div>
 
-
-                    <!-- PHOTO 4 -->
-                    <div class="life-slide">
-                        <img
-                            src="4.jpg"
-                            alt="Life at DIPS 4">
+                    <div class="life-card">
+                        <img src="life-at-dips/4.jpg" alt="Life at DIPS 4">
                     </div>
 
-
-                    <!-- PHOTO 5 -->
-                    <div class="life-slide">
-                        <img
-                            src="5.jpg"
-                            alt="Life at DIPS 5">
+                    <div class="life-card">
+                        <img src="life-at-dips/5.jpg" alt="Life at DIPS 5">
                     </div>
 
-
-                    <!-- PHOTO 6 -->
-                    <div class="life-slide">
-                        <img
-                            src="6.jpg"
-                            alt="Life at DIPS 6">
+                    <div class="life-card">
+                        <img src="life-at-dips/6.jpg" alt="Life at DIPS 6">
                     </div>
-
-
-                    <!-- PHOTO 7 -->
-                    <div class="life-slide">
-                        <img
-                            src="7.jpg"
-                            alt="Life at DIPS 7">
-                    </div>
-
-
-                    <!-- PHOTO 8 -->
-                    <div class="life-slide">
-                        <img
-                            src="life-at-dips/8.jpg"
-                            alt="Life at DIPS 8">
-                    </div>
-
-
-                    <!-- PHOTO 9 -->
-                    <div class="life-slide">
-                        <img
-                            src="life-at-dips/9.jpg"
-                            alt="Life at DIPS 9">
-                    </div>
-
-
-                    <!-- PHOTO 10 -->
-                    <div class="life-slide">
-                        <img
-                            src="life-at-dips/10.jpg"
-                            alt="Life at DIPS 10">
-                    </div>
-
-
-                    <!-- PHOTO 11 -->
-                    <div class="life-slide">
-                        <img
-                            src="life-at-dips/11.jpg"
-                            alt="Life at DIPS 11">
-                    </div>
-
-
-                    <!-- PHOTO 12 -->
-                    <div class="life-slide">
-                        <img
-                            src="life-at-dips/12.jpg"
-                            alt="Life at DIPS 12">
-                    </div>
-
-
-                    <!-- PHOTO 13 -->
-                    <div class="life-slide">
-                        <img
-                            src="life-at-dips/13.jpg"
-                            alt="Life at DIPS 13">
-                    </div>
-
 
                 </div>
 
@@ -1830,15 +1746,13 @@ function closeMenu() {
 
             <button
                 type="button"
-                class="life-btn life-next"
-                id="lifeNextBtn">
+                class="life-nav life-next"
+                id="lifeNext">
                 ❯
             </button>
 
         </div>
 
-
-        <!-- ================= GALLERY BUTTON ================= -->
 
         <button
             type="button"
@@ -1852,52 +1766,44 @@ function closeMenu() {
 </section>
 
 
+<!-- ================= LARGE GALLERY ================= -->
 
-<!-- =====================================================
-     LARGE PHOTO GALLERY POPUP
-===================================================== -->
-
-<div
-    class="life-gallery-popup"
-    id="lifeGalleryPopup">
+<div class="life-modal" id="lifeModal">
 
     <button
         type="button"
-        class="life-popup-close"
-        id="lifePopupClose">
+        class="life-modal-close"
+        id="lifeModalClose">
         ×
     </button>
 
 
     <button
         type="button"
-        class="life-popup-arrow life-popup-prev"
-        id="lifePopupPrev">
+        class="life-modal-nav life-modal-prev"
+        id="lifeModalPrev">
         ❮
     </button>
 
 
-    <div class="life-popup-content">
-
-        <img
-            id="lifePopupImage"
-            src=""
-            alt="Gallery Photo">
-
-        <div
-            class="life-popup-counter"
-            id="lifePopupCounter">
-            1 / 13
-        </div>
-
-    </div>
+    <img
+        id="lifeModalImage"
+        src=""
+        alt="Life at DIPS">
 
 
     <button
         type="button"
-        class="life-popup-arrow life-popup-next"
-        id="lifePopupNext">
+        class="life-modal-nav life-modal-next"
+        id="lifeModalNext">
         ❯
     </button>
+
+
+    <div
+        class="life-modal-count"
+        id="lifeModalCount">
+        1 / 6
+    </div>
 
 </div>
