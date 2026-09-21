@@ -79,41 +79,50 @@ setInterval(function () {
 
     function initLifeDips() {
 
-        const section = document.querySelector(".life-dips-section");
+        const section =
+            document.querySelector(".life-dips-section");
 
         if (!section) {
-            console.log("Life DIPS section not found");
             return;
         }
 
-        const track = section.querySelector(".life-track");
-        const slider = section.querySelector(".life-slider");
-        const slides = section.querySelectorAll(".life-slide");
+        const track =
+            section.querySelector(".life-track");
 
-        const prev = section.querySelector(".life-prev");
-        const next = section.querySelector(".life-next");
+        const slider =
+            section.querySelector(".life-slider");
 
-        const gallery = section.querySelector(".life-gallery-btn");
+        const slides =
+            section.querySelectorAll(".life-slide");
 
-        const popup = document.getElementById("lifePhotoPopup");
-        const popupImage = document.getElementById("lifePopupImage");
-        const popupClose = document.getElementById("lifePopupClose");
+        const prev =
+            section.querySelector(".life-prev");
+
+        const next =
+            section.querySelector(".life-next");
+
+        const gallery =
+            section.querySelector(".life-gallery-btn");
+
+        const popup =
+            document.getElementById("lifePhotoPopup");
+
+        const popupImage =
+            document.getElementById("lifePopupImage");
+
+        const popupClose =
+            document.getElementById("lifePopupClose");
 
 
         if (!track || !slider || !slides.length) {
-            console.log("Life slider elements missing");
             return;
         }
 
 
         let index = 0;
-        let visible = 4;
+
         let timer = null;
 
-
-        /* =========================================
-           VISIBLE PHOTO COUNT
-        ========================================= */
 
         function getVisible() {
 
@@ -129,183 +138,180 @@ setInterval(function () {
         }
 
 
-        /* =========================================
-           MOVE
-        ========================================= */
+        function moveSlider() {
 
-        function move() {
-
-            visible = getVisible();
+            const visible =
+                getVisible();
 
             const max =
                 Math.max(0, slides.length - visible);
+
 
             if (index > max) {
                 index = 0;
             }
 
-            const slideWidth =
+
+            const width =
                 slides[0].getBoundingClientRect().width;
+
 
             const gap =
                 window.innerWidth <= 600 ? 0 : 28;
 
-            const position =
-                index * (slideWidth + gap);
 
             track.style.transform =
-                "translate3d(-" + position + "px,0,0)";
+                "translateX(-" +
+                (index * (width + gap)) +
+                "px)";
         }
 
 
-        /* =========================================
-           NEXT
-        ========================================= */
-
         function nextPhoto() {
 
-            visible = getVisible();
+            const visible =
+                getVisible();
 
             const max =
                 Math.max(0, slides.length - visible);
 
+
             index++;
+
 
             if (index > max) {
                 index = 0;
             }
 
-            move();
+
+            moveSlider();
         }
 
 
-        /* =========================================
-           PREVIOUS
-        ========================================= */
-
         function previousPhoto() {
 
-            visible = getVisible();
+            const visible =
+                getVisible();
 
             const max =
                 Math.max(0, slides.length - visible);
 
+
             index--;
+
 
             if (index < 0) {
                 index = max;
             }
 
-            move();
+
+            moveSlider();
         }
 
 
-        /* =========================================
-           BUTTONS
-        ========================================= */
+        /* NEXT */
 
         if (next) {
 
-            next.onclick = function (e) {
+            next.addEventListener("click", function(e) {
 
                 e.preventDefault();
 
                 nextPhoto();
 
-                restart();
+                restartAuto();
 
-            };
+            });
+
         }
 
 
+        /* PREVIOUS */
+
         if (prev) {
 
-            prev.onclick = function (e) {
+            prev.addEventListener("click", function(e) {
 
                 e.preventDefault();
 
                 previousPhoto();
 
-                restart();
+                restartAuto();
 
-            };
+            });
+
         }
 
 
-        /* =========================================
-           AUTO SLIDE - 5 SECONDS
-        ========================================= */
+        /* AUTO 5 SECOND */
 
-        function start() {
+        function startAuto() {
 
             clearInterval(timer);
 
-            timer = setInterval(function () {
+            timer = setInterval(function() {
 
                 nextPhoto();
 
             }, 5000);
+
         }
 
 
-        function stop() {
+        function stopAuto() {
 
             clearInterval(timer);
 
-            timer = null;
         }
 
 
-        function restart() {
+        function restartAuto() {
 
-            stop();
+            stopAuto();
 
-            start();
+            startAuto();
 
         }
 
 
-        /* =========================================
-           MOUSE PAUSE
-        ========================================= */
+        /* MOUSE PAUSE */
 
-        slider.addEventListener("mouseenter", function () {
+        slider.addEventListener("mouseenter", function() {
 
-            stop();
+            stopAuto();
 
         });
 
 
-        slider.addEventListener("mouseleave", function () {
+        slider.addEventListener("mouseleave", function() {
 
-            start();
+            startAuto();
 
         });
 
 
-        /* =========================================
-           OPEN FULL IMAGE
-        ========================================= */
+        /* OPEN IMAGE */
 
-        function openImage(image) {
+        function openPhoto(image) {
 
             if (!popup || !popupImage) {
                 return;
             }
 
-            popupImage.src = image.src;
+
+            popupImage.src =
+                image.src;
 
             popup.classList.add("active");
 
-            stop();
+            stopAuto();
+
         }
 
 
-        /* =========================================
-           DOUBLE CLICK
-        ========================================= */
+        /* DOUBLE CLICK */
 
-        slides.forEach(function (slide) {
+        slides.forEach(function(slide) {
 
             const image =
                 slide.querySelector("img");
@@ -315,24 +321,26 @@ setInterval(function () {
             }
 
 
-            image.ondblclick = function (e) {
+            image.addEventListener(
+                "dblclick",
+                function(e) {
 
-                e.preventDefault();
+                    e.preventDefault();
 
-                openImage(image);
+                    openPhoto(image);
 
-            };
+                }
+            );
 
 
-            /* =====================================
-               MOBILE DOUBLE TAP
-            ===================================== */
+            /* MOBILE DOUBLE TAP */
 
             let lastTap = 0;
 
+
             image.addEventListener(
                 "touchend",
-                function (e) {
+                function(e) {
 
                     const now =
                         Date.now();
@@ -348,7 +356,7 @@ setInterval(function () {
 
                         e.preventDefault();
 
-                        openImage(image);
+                        openPhoto(image);
 
                     }
 
@@ -362,94 +370,91 @@ setInterval(function () {
         });
 
 
-        /* =========================================
-           GALLERY BUTTON
-        ========================================= */
+        /* GALLERY */
 
         if (gallery) {
 
-            gallery.onclick = function (e) {
+            gallery.addEventListener(
+                "click",
+                function(e) {
 
-                e.preventDefault();
+                    e.preventDefault();
 
-                const image =
-                    slides[index].querySelector("img");
+                    const image =
+                        slides[index].querySelector("img");
 
-                if (image) {
+                    if (image) {
 
-                    openImage(image);
+                        openPhoto(image);
+
+                    }
 
                 }
-
-            };
+            );
 
         }
 
 
-        /* =========================================
-           CLOSE POPUP
-        ========================================= */
+        /* CLOSE */
 
         if (popupClose) {
 
-            popupClose.onclick = function () {
-
-                popup.classList.remove("active");
-
-                popupImage.src = "";
-
-                start();
-
-            };
-
-        }
-
-
-        /* =========================================
-           CLICK OUTSIDE IMAGE
-        ========================================= */
-
-        if (popup) {
-
-            popup.onclick = function (e) {
-
-                if (e.target === popup) {
+            popupClose.addEventListener(
+                "click",
+                function() {
 
                     popup.classList.remove("active");
 
                     popupImage.src = "";
 
-                    start();
+                    startAuto();
 
                 }
-
-            };
+            );
 
         }
 
 
-        /* =========================================
-           ESC
-        ========================================= */
+        /* OUTSIDE CLICK */
 
-        document.addEventListener(
-            "keydown",
-            function (e) {
+        if (popup) {
 
-                if (e.key === "Escape") {
+            popup.addEventListener(
+                "click",
+                function(e) {
 
-                    if (
-                        popup &&
-                        popup.classList.contains("active")
-                    ) {
+                    if (e.target === popup) {
 
                         popup.classList.remove("active");
 
                         popupImage.src = "";
 
-                        start();
+                        startAuto();
 
                     }
+
+                }
+            );
+
+        }
+
+
+        /* ESC */
+
+        document.addEventListener(
+            "keydown",
+            function(e) {
+
+                if (
+                    e.key === "Escape" &&
+                    popup.classList.contains("active")
+                ) {
+
+                    popup.classList.remove("active");
+
+                    popupImage.src = "";
+
+                    startAuto();
 
                 }
 
@@ -457,39 +462,20 @@ setInterval(function () {
         );
 
 
-        /* =========================================
-           RESIZE
-        ========================================= */
-
         window.addEventListener(
             "resize",
-            function () {
-
-                move();
-
-            }
+            moveSlider
         );
 
 
-        /* =========================================
-           INITIAL
-        ========================================= */
+        /* START */
 
-        move();
+        moveSlider();
 
-        start();
-
-
-        console.log(
-            "Life at DIPS slider started successfully"
-        );
+        startAuto();
 
     }
 
-
-    /* =============================================
-       WAIT FOR HTML
-    ============================================= */
 
     if (document.readyState === "loading") {
 
@@ -505,9 +491,6 @@ setInterval(function () {
     }
 
 })();
-
-
-
 /* ================= TOP RANKER DATA ================= */
 
 const rankerData = {
