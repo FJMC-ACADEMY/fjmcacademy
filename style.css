@@ -1120,48 +1120,86 @@ footer {
     }
 
 }
-/* ================= LIFE AT DIPS ================= */
+/* =====================================================
+   LIFE AT DIPS
+===================================================== */
 
 .life-dips-section {
     position: relative;
+
     width: 100%;
     min-height: 420px;
 
-    background-image: url("life-at-dips/background.jpg");
-    background-size: cover;
-    background-position: center;
-
     overflow: hidden;
+
     color: white;
 }
 
+
+/* =====================================================
+   BACKGROUND IMAGE
+===================================================== */
+
+.life-background {
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    z-index: 0;
+}
+
+
+/* =====================================================
+   DARK OVERLAY
+===================================================== */
+
 .life-overlay {
     position: absolute;
-    inset: 0;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
 
     background: rgba(0, 0, 0, 0.70);
 
-    pointer-events: none;
+    z-index: 1;
 }
+
+
+/* =====================================================
+   CONTAINER
+===================================================== */
 
 .life-dips-container {
     position: relative;
+
     z-index: 2;
 
     width: 100%;
     max-width: 1250px;
 
-    margin: auto;
+    margin: 0 auto;
 
     padding: 35px 20px 30px;
 }
 
-.life-dips-container h2 {
-    font-size: 24px;
-    font-weight: 500;
 
+.life-dips-container h2 {
     margin: 0 0 8px;
+
+    font-size: 24px;
+
+    font-weight: 500;
 }
+
 
 .life-title-line {
     width: 35px;
@@ -1173,7 +1211,9 @@ footer {
 }
 
 
-/* ================= SLIDER ================= */
+/* =====================================================
+   SLIDER WRAPPER
+===================================================== */
 
 .life-slider-wrapper {
     position: relative;
@@ -1184,6 +1224,11 @@ footer {
     align-items: center;
 }
 
+
+/* =====================================================
+   SLIDER WINDOW
+===================================================== */
+
 .life-slider {
     width: 100%;
 
@@ -1191,6 +1236,11 @@ footer {
 
     touch-action: pan-y;
 }
+
+
+/* =====================================================
+   TRACK
+===================================================== */
 
 .life-track {
     display: flex;
@@ -1202,6 +1252,11 @@ footer {
     will-change: transform;
 }
 
+
+/* =====================================================
+   EACH PHOTO
+===================================================== */
+
 .life-slide {
     flex: 0 0 calc((100% - 84px) / 4);
 
@@ -1211,10 +1266,9 @@ footer {
 
     background: #111;
 
-    position: relative;
-
     cursor: pointer;
 }
+
 
 .life-slide img {
     width: 100%;
@@ -1232,17 +1286,21 @@ footer {
     transition: transform 0.4s ease;
 }
 
+
 .life-slide:hover img {
     transform: scale(1.04);
 }
 
 
-/* ================= NEXT / PREVIOUS BUTTON ================= */
+/* =====================================================
+   NEXT / PREVIOUS BUTTONS
+===================================================== */
 
 .life-btn {
     position: absolute;
 
     top: 50%;
+
     transform: translateY(-50%);
 
     z-index: 10;
@@ -1256,44 +1314,52 @@ footer {
 
     color: white;
 
-    font-size: 25px;
+    font-size: 24px;
 
     cursor: pointer;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
     opacity: 0;
 
-    transition:
-        opacity 0.25s ease,
-        background 0.25s ease;
+    transition: opacity 0.25s ease,
+                background 0.25s ease;
 }
 
+
 .life-btn:hover {
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.90);
 }
+
 
 .life-slider-wrapper:hover .life-btn {
     opacity: 1;
 }
 
+
 .life-prev {
     left: 0;
 }
+
 
 .life-next {
     right: 0;
 }
 
 
-/* ================= GALLERY BUTTON ================= */
+/* =====================================================
+   GALLERY BUTTON
+===================================================== */
 
 .life-gallery-btn {
     display: block;
 
     margin: 25px auto 0;
+
+    padding: 10px 22px;
 
     border: none;
 
@@ -1301,14 +1367,11 @@ footer {
 
     color: white;
 
-    padding: 10px 22px;
-
     font-size: 14px;
 
     cursor: pointer;
-
-    transition: background 0.25s ease;
 }
+
 
 .life-gallery-btn:hover {
     background: #d97700;
@@ -1316,51 +1379,51 @@ footer {
 
 
 /* =====================================================
-   FULL IMAGE POPUP
+   FULL PHOTO POPUP
 ===================================================== */
 
-.life-image-modal {
+.life-photo-popup {
     position: fixed;
 
-    inset: 0;
+    top: 0;
+    left: 0;
 
-    z-index: 99999;
+    width: 100%;
+    height: 100%;
 
-    background: rgba(0, 0, 0, 0.92);
+    background: rgba(0, 0, 0, 0.94);
+
+    z-index: 999999;
 
     display: none;
 
     align-items: center;
     justify-content: center;
 
-    padding: 30px;
-
-    cursor: zoom-out;
+    padding: 20px;
 }
 
-.life-image-modal.active {
+
+.life-photo-popup.active {
     display: flex;
 }
 
-.life-image-modal img {
-    max-width: 95vw;
-    max-height: 90vh;
+
+.life-photo-popup img {
+    max-width: 95%;
+
+    max-height: 90%;
 
     width: auto;
     height: auto;
 
     object-fit: contain;
-
-    user-select: none;
-    -webkit-user-select: none;
-
-    cursor: default;
 }
 
 
-/* CLOSE BUTTON */
+/* CLOSE */
 
-.life-modal-close {
+.life-popup-close {
     position: absolute;
 
     top: 15px;
@@ -1371,25 +1434,23 @@ footer {
 
     border: none;
 
+    border-radius: 50%;
+
     background: rgba(255, 255, 255, 0.15);
 
     color: white;
 
     font-size: 32px;
 
-    line-height: 1;
-
     cursor: pointer;
 
-    border-radius: 50%;
-}
-
-.life-modal-close:hover {
-    background: rgba(255, 255, 255, 0.3);
+    z-index: 2;
 }
 
 
-/* ================= TABLET ================= */
+/* =====================================================
+   TABLET
+===================================================== */
 
 @media (max-width: 900px) {
 
@@ -1400,7 +1461,9 @@ footer {
 }
 
 
-/* ================= MOBILE ================= */
+/* =====================================================
+   MOBILE
+===================================================== */
 
 @media (max-width: 600px) {
 
@@ -1408,24 +1471,30 @@ footer {
         padding: 25px 12px 28px;
     }
 
+
     .life-dips-container h2 {
         font-size: 22px;
     }
+
 
     .life-title-line {
         margin-bottom: 30px;
     }
 
+
     .life-track {
         gap: 0;
     }
 
+
     .life-slide {
         flex: 0 0 100%;
+
         height: 220px;
     }
 
-    /* Mobile buttons ALWAYS visible */
+
+    /* Mobile buttons always visible */
 
     .life-btn {
         opacity: 1;
@@ -1435,36 +1504,41 @@ footer {
 
         font-size: 21px;
 
-        background: rgba(0, 0, 0, 0.60);
+        background: rgba(0, 0, 0, 0.65);
     }
+
 
     .life-prev {
         left: 0;
     }
 
+
     .life-next {
         right: 0;
     }
+
 
     .life-gallery-btn {
         margin-top: 20px;
 
         padding: 11px 20px;
-
-        font-size: 14px;
     }
 
-    .life-image-modal {
-        padding: 15px;
+
+    .life-photo-popup {
+        padding: 10px;
     }
 
-    .life-image-modal img {
-        max-width: 96vw;
-        max-height: 85vh;
+
+    .life-photo-popup img {
+        max-width: 96%;
+        max-height: 85%;
     }
 
-    .life-modal-close {
+
+    .life-popup-close {
         top: 10px;
         right: 10px;
     }
+
 }
