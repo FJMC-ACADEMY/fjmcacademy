@@ -1682,6 +1682,7 @@ function closeMenu() {
 
 <section class="life-dips-section">
 
+    <!-- Background overlay -->
     <div class="life-overlay"></div>
 
     <div class="life-dips-container">
@@ -1690,55 +1691,123 @@ function closeMenu() {
 
         <div class="life-title-line"></div>
 
+
+        <!-- ================= SLIDER ================= -->
+
         <div class="life-slider-wrapper">
 
-            <button class="life-btn life-prev" onclick="lifePrev()">❮</button>
+            <!-- Previous -->
+            <button
+                type="button"
+                class="life-btn life-prev"
+                id="lifePrevBtn"
+                aria-label="Previous photo">
+                ❮
+            </button>
 
-            <div class="life-slider">
+
+            <!-- Slider -->
+            <div class="life-slider" id="lifeSlider">
+
                 <div class="life-track" id="lifeTrack">
 
                     <div class="life-slide">
-                        <img src="1.jpg">
+                        <img
+                            src="life-at-dips/1.jpg"
+                            alt="Life at DIPS 1"
+                            draggable="false">
                     </div>
 
                     <div class="life-slide">
-                        <img src="2.jpg">
+                        <img
+                            src="life-at-dips/2.jpg"
+                            alt="Life at DIPS 2"
+                            draggable="false">
                     </div>
 
                     <div class="life-slide">
-                        <img src="3.jpg">
+                        <img
+                            src="life-at-dips/3.jpg"
+                            alt="Life at DIPS 3"
+                            draggable="false">
                     </div>
 
                     <div class="life-slide">
-                        <img src="4.jpg">
+                        <img
+                            src="life-at-dips/4.jpg"
+                            alt="Life at DIPS 4"
+                            draggable="false">
                     </div>
 
                     <div class="life-slide">
-                        <img src="5.jpg">
+                        <img
+                            src="life-at-dips/5.jpg"
+                            alt="Life at DIPS 5"
+                            draggable="false">
                     </div>
 
                     <div class="life-slide">
-                        <img src="6.jpg">
+                        <img
+                            src="life-at-dips/6.jpg"
+                            alt="Life at DIPS 6"
+                            draggable="false">
                     </div>
 
                     <div class="life-slide">
-                        <img src="7.jpg">
+                        <img
+                            src="life-at-dips/7.jpg"
+                            alt="Life at DIPS 7"
+                            draggable="false">
                     </div>
 
                 </div>
+
             </div>
 
-            <button class="life-btn life-next" onclick="lifeNext()">❯</button>
+
+            <!-- Next -->
+            <button
+                type="button"
+                class="life-btn life-next"
+                id="lifeNextBtn"
+                aria-label="Next photo">
+                ❯
+            </button>
 
         </div>
 
-        <button class="life-gallery-btn">
+
+        <!-- Gallery Button -->
+        <button
+            type="button"
+            class="life-gallery-btn"
+            id="lifeGalleryBtn">
             View Our Picture Gallery
         </button>
 
     </div>
 
 </section>
+
+
+<!-- ================= FULL IMAGE POPUP ================= -->
+
+<div class="life-image-modal" id="lifeImageModal">
+
+    <button
+        type="button"
+        class="life-modal-close"
+        id="lifeModalClose"
+        aria-label="Close">
+        ×
+    </button>
+
+    <img
+        id="lifeModalImage"
+        src=""
+        alt="Life at DIPS">
+
+</div>
 <!-- ================= TOP RANKERS ================= -->
 
 <section class="rankers-section">
