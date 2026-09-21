@@ -728,3 +728,471 @@ setInterval(function () {
     }
 
 })();
+/* =====================================
+   TOP RANKERS DATA
+===================================== */
+
+const rankers = [
+
+  {
+    name: "Rohit Sharma",
+    rank: "Rank-16",
+    exam: "june",
+    examName: "CSIR NET June 25",
+    photo: "images/rohit.jpg"
+  },
+
+  {
+    name: "Ankita Rana",
+    rank: "Rank-27",
+    exam: "june",
+    examName: "CSIR NET June 25",
+    photo: "images/ankita.jpg"
+  },
+
+  {
+    name: "Prakhar Nigam",
+    rank: "Rank-28",
+    exam: "june",
+    examName: "CSIR NET June 25",
+    photo: "images/prakhar.jpg"
+  },
+
+  {
+    name: "Madhumita Raj",
+    rank: "Rank-34",
+    exam: "june",
+    examName: "CSIR NET June 25",
+    photo: "images/madhumita.jpg"
+  },
+
+  {
+    name: "Poornima",
+    rank: "Rank-38",
+    exam: "june",
+    examName: "CSIR NET June 25",
+    photo: "images/poornima.jpg"
+  },
+
+
+  {
+    name: "Tanishka Singh",
+    rank: "Rank-28",
+    exam: "dec",
+    examName: "CSIR NET Dec 24",
+    photo: "images/tanishka.jpg"
+  },
+
+  {
+    name: "Aaina Dalal",
+    rank: "Rank-30",
+    exam: "dec",
+    examName: "CSIR NET Dec 24",
+    photo: "images/aaina.jpg"
+  },
+
+  {
+    name: "Ananya Tripathi",
+    rank: "Rank-30",
+    exam: "dec",
+    examName: "CSIR NET Dec 24",
+    photo: "images/ananya.jpg"
+  },
+
+  {
+    name: "Gouranga Payra",
+    rank: "Rank-34",
+    exam: "dec",
+    examName: "CSIR NET Dec 24",
+    photo: "images/gouranga.jpg"
+  },
+
+
+  {
+    name: "Harish Kumar",
+    rank: "Rank-13",
+    exam: "jam",
+    examName: "IIT JAM 25",
+    photo: "images/harish.jpg"
+  },
+
+  {
+    name: "Rahul Maithani",
+    rank: "Rank-18",
+    exam: "jam",
+    examName: "IIT JAM 25",
+    photo: "images/rahul.jpg"
+  },
+
+  {
+    name: "Narendra Kumar",
+    rank: "Rank-30",
+    exam: "jam",
+    examName: "IIT JAM 25",
+    photo: "images/narendra.jpg"
+  },
+
+  {
+    name: "Tushar Daila",
+    rank: "Rank-31",
+    exam: "jam",
+    examName: "IIT JAM 25",
+    photo: "images/tushar.jpg"
+  }
+
+];
+
+
+/* =====================================
+   VARIABLES
+===================================== */
+
+const cardsContainer =
+  document.getElementById("rankersGrid");
+
+const dotsContainer =
+  document.getElementById("rankerDots");
+
+const prevButton =
+  document.getElementById("prevRanker");
+
+const nextButton =
+  document.getElementById("nextRanker");
+
+const examTabs =
+  document.querySelectorAll(".exam-tab");
+
+const viewAllButton =
+  document.getElementById("viewAllRankers");
+
+const modal =
+  document.getElementById("rankersModal");
+
+const closeModal =
+  document.getElementById("closeRankersModal");
+
+const allRankersGrid =
+  document.getElementById("allRankersGrid");
+
+
+let currentExam = "june";
+
+let currentIndex = 0;
+
+const visibleCards = 4;
+
+
+/* =====================================
+   CREATE CARD
+===================================== */
+
+function createCard(person) {
+
+  return `
+    <article class="ranker-card">
+
+      <img
+        class="ranker-photo"
+        src="${person.photo}"
+        alt="${person.name}"
+        onerror="this.style.display='none'"
+      >
+
+      <div class="ranker-info">
+
+        <h3>${person.name}</h3>
+
+        <span class="ranker-rank">
+          ${person.rank}
+        </span>
+
+        <div class="ranker-exam">
+          ${person.examName}
+        </div>
+
+      </div>
+
+    </article>
+  `;
+}
+
+
+/* =====================================
+   GET CURRENT EXAM RANKERS
+===================================== */
+
+function getCurrentRankers() {
+
+  return rankers.filter(
+    person => person.exam === currentExam
+  );
+
+}
+
+
+/* =====================================
+   RENDER MAIN CARDS
+===================================== */
+
+function renderRankers() {
+
+  const data = getCurrentRankers();
+
+  const maxIndex =
+    Math.max(0, data.length - visibleCards);
+
+  if (currentIndex > maxIndex) {
+    currentIndex = maxIndex;
+  }
+
+
+  const visibleData =
+    data.slice(
+      currentIndex,
+      currentIndex + visibleCards
+    );
+
+
+  cardsContainer.innerHTML =
+    visibleData.map(createCard).join("");
+
+
+  renderDots(data.length, maxIndex);
+
+  updateButtons(data.length, maxIndex);
+}
+
+
+/* =====================================
+   DOTS
+===================================== */
+
+function renderDots(total, maxIndex) {
+
+  dotsContainer.innerHTML = "";
+
+
+  for (
+    let i = 0;
+    i <= maxIndex;
+    i++
+  ) {
+
+    const dot =
+      document.createElement("span");
+
+    dot.className = "ranker-dot";
+
+    if (i === currentIndex) {
+      dot.classList.add("active");
+    }
+
+
+    dot.addEventListener(
+      "click",
+      () => {
+
+        currentIndex = i;
+
+        renderRankers();
+
+      }
+    );
+
+
+    dotsContainer.appendChild(dot);
+
+  }
+
+}
+
+
+/* =====================================
+   BUTTON STATUS
+===================================== */
+
+function updateButtons(total, maxIndex) {
+
+  prevButton.disabled =
+    currentIndex === 0;
+
+  nextButton.disabled =
+    currentIndex >= maxIndex;
+
+}
+
+
+/* =====================================
+   NEXT
+===================================== */
+
+nextButton.addEventListener(
+  "click",
+  () => {
+
+    const data = getCurrentRankers();
+
+    const maxIndex =
+      Math.max(
+        0,
+        data.length - visibleCards
+      );
+
+
+    if (currentIndex < maxIndex) {
+
+      currentIndex++;
+
+      renderRankers();
+
+    }
+
+  }
+);
+
+
+/* =====================================
+   PREVIOUS
+===================================== */
+
+prevButton.addEventListener(
+  "click",
+  () => {
+
+    if (currentIndex > 0) {
+
+      currentIndex--;
+
+      renderRankers();
+
+    }
+
+  }
+);
+
+
+/* =====================================
+   EXAM TABS
+===================================== */
+
+examTabs.forEach(tab => {
+
+  tab.addEventListener(
+    "click",
+    () => {
+
+      examTabs.forEach(t =>
+        t.classList.remove("active")
+      );
+
+      tab.classList.add("active");
+
+
+      currentExam =
+        tab.dataset.exam;
+
+      currentIndex = 0;
+
+      renderRankers();
+
+    }
+  );
+
+});
+
+
+/* =====================================
+   VIEW ALL
+===================================== */
+
+viewAllButton.addEventListener(
+  "click",
+  () => {
+
+    renderAllRankers();
+
+    modal.classList.add("show");
+
+    document.body.style.overflow =
+      "hidden";
+
+  }
+);
+
+
+/* =====================================
+   RENDER ALL
+===================================== */
+
+function renderAllRankers() {
+
+  const data =
+    getCurrentRankers();
+
+
+  allRankersGrid.innerHTML =
+    data.map(createCard).join("");
+
+}
+
+
+/* =====================================
+   CLOSE MODAL
+===================================== */
+
+closeModal.addEventListener(
+  "click",
+  closeRankers
+);
+
+
+modal.addEventListener(
+  "click",
+  event => {
+
+    if (event.target === modal) {
+
+      closeRankers();
+
+    }
+
+  }
+);
+
+
+function closeRankers() {
+
+  modal.classList.remove("show");
+
+  document.body.style.overflow =
+    "";
+
+}
+
+
+/* =====================================
+   ESC KEY
+===================================== */
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if (
+      event.key === "Escape" &&
+      modal.classList.contains("show")
+    ) {
+
+      closeRankers();
+
+    }
+
+  }
+);
+
+
+/* =====================================
+   INITIAL LOAD
+===================================== */
+
+renderRankers();
