@@ -768,4 +768,4 @@ rankerArea.addEventListener("mouseleave", () => {
 window.addEventListener("resize",
     updateRankerSlider);
 
-</script>
+
