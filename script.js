@@ -164,31 +164,31 @@ const rankerData = {
     "net-june-25": [
 
         {
-            image: "top-rankers/net-june-25/1.jpg",
+            image: "1.jpg",
             name: "Madhumita Raj",
             rank: "Rank-34"
         },
 
         {
-            image: "top-rankers/net-june-25/2.jpg",
+            image: "2.jpg",
             name: "Poornima",
             rank: "Rank-38"
         },
 
         {
-            image: "top-rankers/net-june-25/3.jpg",
+            image: "3.jpg",
             name: "Nimesh Bhatt",
             rank: "Rank-46"
         },
 
         {
-            image: "top-rankers/net-june-25/4.jpg",
+            image: "4.jpg",
             name: "Ritik Agarwal",
             rank: "Rank-47"
         },
 
         {
-            image: "top-rankers/net-june-25/5.jpg",
+            image: "t5.jpg",
             name: "Nisha Yadav",
             rank: "Rank-66"
         }
@@ -199,13 +199,13 @@ const rankerData = {
     "net-dec-24": [
 
         {
-            image: "top-rankers/net-dec-24/1.jpg",
+            image: "1.jpg",
             name: "Student 1",
             rank: "Rank-12"
         },
 
         {
-            image: "top-rankers/net-dec-24/2.jpg",
+            image: "2.jpg",
             name: "Student 2",
             rank: "Rank-25"
         }
@@ -216,7 +216,7 @@ const rankerData = {
     "jam-25": [
 
         {
-            image: "top-rankers/jam-25/1.jpg",
+            image: "1.jpg",
             name: "Student 1",
             rank: "Rank-10"
         },
