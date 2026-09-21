@@ -1678,208 +1678,95 @@ function closeMenu() {
     <p class="copyright">
         © 2026 FJMC Academy. All Rights Reserved.
     </p>
-<!-- ================= LIFE AT DIPS ================= -->
-
-<section id="lifeDipsSection">
-
-    <!-- 7.jpg = BACKGROUND -->
-    <img
-        id="lifeDipsBackground"
-        src="7.jpg"
-        alt=""
-    >
-
-    <div id="lifeDipsOverlay"></div>
-
-    <div id="lifeDipsContent">
-
-        <h2>Life at DIPS</h2>
-
-        <div id="lifeDipsLine"></div>
-
-        <div id="lifeDipsSlider">
-
-            <button
-                type="button"
-                id="lifeDipsPrev">
-                ❮
-            </button>
-
-            <div id="lifeDipsViewport">
-
-                <div id="lifeDipsTrack">
-
-                    <div class="lifeDipsPhoto">
-                        <img src="1.jpg" alt="Life 1">
-                    </div>
-
-                    <div class="lifeDipsPhoto">
-                        <img src="2.jpg" alt="Life 2">
-                    </div>
-
-                    <div class="lifeDipsPhoto">
-                        <img src="3.jpg" alt="Life 3">
-                    </div>
-
-                    <div class="lifeDipsPhoto">
-                        <img src="4.jpg" alt="Life 4">
-                    </div>
-
-                    <div class="lifeDipsPhoto">
-                        <img src="5.jpg" alt="Life 5">
-                    </div>
-
-                    <div class="lifeDipsPhoto">
-                        <img src="6.jpg" alt="Life 6">
-                    </div>
-
-                </div>
-
-            </div>
-
-            <button
-                type="button"
-                id="lifeDipsNext">
-                ❯
-            </button>
-
-        </div>
-
-
-        <button
-            type="button"
-            id="lifeDipsGalleryButton">
-            View Our Picture Gallery
-        </button>
-
-    </div>
-
-</section>
-
-
-<!-- ================= FULL PHOTO GALLERY ================= -->
-
-<div id="lifeDipsGallery">
-
-    <button
-        type="button"
-        id="lifeDipsClose">
-        ×
-    </button>
-
-    <button
-        type="button"
-        id="lifeDipsGalleryPrev">
-        ❮
-    </button>
-
-    <img
-        id="lifeDipsLargeImage"
-        src=""
-        alt="">
-
-    <button
-        type="button"
-        id="lifeDipsGalleryNext">
-        ❯
-    </button>
-
-    <div id="lifeDipsCounter">
-        1 / 6
-    </div>
-
-</div>
 <section class="rankers-section">
 
-  <!-- Moon + Stars Background -->
-  <div class="1.jpg">
-    <div class="moon"></div>
+  <div class="rankers-bg"></div>
+  <div class="rankers-overlay"></div>
 
-    <span class="star star-1">✦</span>
-    <span class="star star-2">✦</span>
-    <span class="star star-3">✧</span>
-    <span class="star star-4">✦</span>
-    <span class="star star-5">✧</span>
-    <span class="star star-6">✦</span>
-    <span class="star star-7">✧</span>
-    <span class="star star-8">✦</span>
-    <span class="star star-9">✧</span>
-    <span class="star star-10">✦</span>
-    <span class="star star-11">✧</span>
-    <span class="star star-12">✦</span>
-    <span class="star star-13">✧</span>
-    <span class="star star-14">✦</span>
-    <span class="star star-15">✧</span>
-  </div>
+  <div class="rankers-container">
 
-  <!-- Website Content -->
-  <div class="rankers-content">
+    <div class="rankers-heading">
+      <div class="rankers-small-title">DIPS</div>
+      <h2>Our Top Rankers</h2>
+      <p>Celebrating the success of our students</p>
+    </div>
 
-    <h1>Our Top Rankers</h1>
-
-    <p class="rankers-subtitle">
-      Celebrating the success of our brilliant students
-    </p>
-
-    <!-- Exam Tabs -->
-    <div class="exam-tabs">
-      <button class="exam-tab active" data-exam="june">
-        CSIR NET JUNE 25
+    <div class="rankers-tabs">
+      <button class="ranker-tab active" data-exam="CSIR NET June 25">
+        CSIR NET June 25
       </button>
 
-      <button class="exam-tab" data-exam="dec">
-        CSIR NET DEC 24
+      <button class="ranker-tab" data-exam="CSIR NET Dec 24">
+        CSIR NET Dec 24
       </button>
 
-      <button class="exam-tab" data-exam="jam">
+      <button class="ranker-tab" data-exam="IIT JAM 25">
         IIT JAM 25
       </button>
     </div>
 
-    <!-- Cards -->
-    <div class="rankers-carousel">
+    <div class="rankers-slider">
 
-      <button class="carousel-btn" id="prevRanker">
-        ❮
+      <button class="ranker-arrow ranker-prev" id="rankerPrev">
+        &#10094;
       </button>
 
-      <div class="rankers-viewport">
-        <div class="rankers-grid" id="rankersGrid"></div>
-      </div>
+      <div class="rankers-cards" id="rankersCards"></div>
 
-      <button class="carousel-btn" id="nextRanker">
-        ❯
+      <button class="ranker-arrow ranker-next" id="rankerNext">
+        &#10095;
       </button>
 
     </div>
 
-    <!-- Dots -->
-    <div class="ranker-dots" id="rankerDots"></div>
+    <div class="rankers-dots" id="rankersDots"></div>
 
-    <!-- View All -->
-    <button class="view-all-btn" id="viewAllRankers">
+    <button class="view-all-rankers" id="viewAllRankers">
       View All Top Rankers
     </button>
 
-  </div>
+    <div class="background-selector">
+      <span>Change Background</span>
 
+      <div class="background-buttons">
+        <button data-background="1">1</button>
+        <button data-background="2">2</button>
+        <button data-background="3">3</button>
+        <button data-background="4">4</button>
+        <button data-background="5">5</button>
+        <button data-background="6">6</button>
+        <button data-background="7">7</button>
+        <button data-background="8">8</button>
+      </div>
+    </div>
+
+  </div>
 </section>
 
-
-<!-- ALL RANKERS MODAL -->
 
 <div class="rankers-modal" id="rankersModal">
 
   <div class="rankers-modal-box">
 
-    <button class="modal-close" id="closeRankersModal">
-      ×
+    <button class="rankers-modal-close" id="rankersModalClose">
+      &times;
     </button>
 
-    <h2>All Top Rankers</h2>
+    <h2 id="rankersModalTitle">Top Rankers</h2>
 
-    <div class="all-rankers-grid" id="allRankersGrid"></div>
+    <div class="all-rankers" id="allRankers"></div>
 
   </div>
+
+</div>
+
+
+<div class="ranker-photo-viewer" id="rankerPhotoViewer">
+
+  <button class="ranker-photo-close" id="rankerPhotoClose">
+    &times;
+  </button>
+
+  <img id="rankerLargePhoto" src="" alt="Ranker">
 
 </div>
