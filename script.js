@@ -71,3 +71,87 @@ setInterval(function () {
     showStudent();
 
 }, 5000);
+<script>
+
+let lifeIndex = 0;
+
+const lifeTrack = document.getElementById("lifeTrack");
+const lifeSlides = document.querySelectorAll(".life-slide");
+
+let lifeVisible = 4;
+
+function updateLifeVisible() {
+
+    if (window.innerWidth <= 600) {
+        lifeVisible = 1;
+    }
+    else if (window.innerWidth <= 900) {
+        lifeVisible = 2;
+    }
+    else {
+        lifeVisible = 4;
+    }
+
+    if (lifeIndex > lifeSlides.length - lifeVisible) {
+        lifeIndex = 0;
+    }
+
+    updateLifeSlider();
+}
+
+function updateLifeSlider() {
+
+    const slideWidth =
+        lifeSlides[0].getBoundingClientRect().width + 28;
+
+    lifeTrack.style.transform =
+        `translateX(-${lifeIndex * slideWidth}px)`;
+}
+
+function lifeNext() {
+
+    lifeIndex++;
+
+    if (lifeIndex > lifeSlides.length - lifeVisible) {
+        lifeIndex = 0;
+    }
+
+    updateLifeSlider();
+}
+
+function lifePrev() {
+
+    lifeIndex--;
+
+    if (lifeIndex < 0) {
+        lifeIndex = lifeSlides.length - lifeVisible;
+    }
+
+    updateLifeSlider();
+}
+
+
+/* AUTO SLIDE */
+
+let lifeAutoSlide = setInterval(lifeNext, 4000);
+
+
+/* PAUSE ON MOUSE */
+
+const lifeSliderArea =
+    document.querySelector(".life-slider-wrapper");
+
+lifeSliderArea.addEventListener("mouseenter", () => {
+    clearInterval(lifeAutoSlide);
+});
+
+lifeSliderArea.addEventListener("mouseleave", () => {
+    lifeAutoSlide = setInterval(lifeNext, 4000);
+});
+
+
+window.addEventListener("resize", updateLifeVisible);
+
+updateLifeVisible();
+
+</script>
