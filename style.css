@@ -845,1062 +845,542 @@ footer {
     }
 
 }
-/* =====================================================
-   LIFE AT DIPS
-===================================================== */
-
-#lifeDipsSection {
-    position: relative;
-    width: 100%;
-    min-height: 430px;
-    overflow: hidden;
-    color: #fff;
-}
-
-
-/* BACKGROUND */
-
-#lifeDipsBackground {
-    position: absolute;
-    inset: 0;
-
-    width: 100%;
-    height: 100%;
-
-    object-fit: cover;
-
-    z-index: 0;
-}
-
-
-#lifeDipsOverlay {
-    position: absolute;
-    inset: 0;
-
-    background: rgba(0,0,0,0.68);
-
-    z-index: 1;
-}
-
-
-/* CONTENT */
-
-#lifeDipsContent {
-    position: relative;
-    z-index: 2;
-
-    width: 100%;
-    max-width: 1250px;
-
-    margin: auto;
-
-    padding: 40px 20px 35px;
-}
-
-
-#lifeDipsContent h2 {
-    margin: 0 0 8px;
-
-    font-size: 25px;
-    font-weight: 500;
-}
-
-
-#lifeDipsLine {
-    width: 38px;
-    height: 3px;
-
-    background: #f4c400;
-
-    margin-bottom: 35px;
-}
-
-
-/* =====================================================
-   SLIDER
-===================================================== */
-
-#lifeDipsSlider {
-    position: relative;
-    width: 100%;
-}
-
-
-#lifeDipsViewport {
-    width: 100%;
-    overflow: hidden;
-}
-
-
-#lifeDipsTrack {
-    display: flex;
-
-    gap: 25px;
-
-    transform: translate3d(0,0,0);
-
-    transition: transform 0.15s ease-out;
-
-    will-change: transform;
-}
-
-
-.lifeDipsPhoto {
-    flex: 0 0 calc((100% - 75px) / 4);
-
-    height: 215px;
-
-    overflow: hidden;
-
-    cursor: pointer;
-
-    background: #111;
-}
-
-
-.lifeDipsPhoto img {
-    width: 100%;
-    height: 100%;
-
-    display: block;
-
-    object-fit: cover;
-
-    user-select: none;
-
-    -webkit-user-drag: none;
-}
-
-
-/* =====================================================
-   SLIDER BUTTONS
-===================================================== */
-
-#lifeDipsPrev,
-#lifeDipsNext {
-    position: absolute;
-
-    top: 50%;
-
-    transform: translateY(-50%);
-
-    z-index: 10;
-
-    width: 44px;
-    height: 60px;
-
-    border: 0;
-
-    background: rgba(0,0,0,0.78);
-
-    color: white;
-
-    font-size: 25px;
-
-    cursor: pointer;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-
-#lifeDipsPrev {
-    left: 0;
-}
-
-
-#lifeDipsNext {
-    right: 0;
-}
-
-
-#lifeDipsPrev:hover,
-#lifeDipsNext:hover {
-    background: rgba(0,0,0,1);
-}
-
-
-/* =====================================================
-   GALLERY BUTTON
-===================================================== */
-
-#lifeDipsGalleryButton {
-    display: block;
-
-    margin: 28px auto 0;
-
-    padding: 11px 25px;
-
-    border: 0;
-
-    background: #f28c00;
-
-    color: #fff;
-
-    font-size: 14px;
-
-    cursor: pointer;
-}
-
-
-#lifeDipsGalleryButton:hover {
-    background: #d97700;
-}
-
-
-/* =====================================================
-   FULL GALLERY
-===================================================== */
-
-#lifeDipsGallery {
-    position: fixed;
-
-    inset: 0;
-
-    z-index: 999999;
-
-    display: none;
-
-    align-items: center;
-    justify-content: center;
-
-    background: rgba(0,0,0,0.96);
-}
-
-
-#lifeDipsGallery.lifeGalleryOpen {
-    display: flex;
-}
-
-
-/* LARGE IMAGE */
-
-#lifeDipsLargeImage {
-    display: block;
-
-    max-width: 86vw;
-    max-height: 82vh;
-
-    width: auto;
-    height: auto;
-
-    object-fit: contain;
-
-    user-select: none;
-
-    -webkit-user-drag: none;
-}
-
-
-/* CLOSE */
-
-#lifeDipsClose {
-    position: absolute;
-
-    top: 15px;
-    right: 20px;
-
-    z-index: 20;
-
-    width: 46px;
-    height: 46px;
-
-    border: 0;
-
-    border-radius: 50%;
-
-    background: rgba(255,255,255,0.15);
-
-    color: #fff;
-
-    font-size: 32px;
-
-    cursor: pointer;
-}
-
-
-/* LARGE PREVIOUS/NEXT */
-
-#lifeDipsGalleryPrev,
-#lifeDipsGalleryNext {
-    position: absolute;
-
-    top: 50%;
-
-    transform: translateY(-50%);
-
-    z-index: 20;
-
-    width: 58px;
-    height: 75px;
-
-    border: 0;
-
-    background: rgba(255,255,255,0.15);
-
-    color: white;
-
-    font-size: 32px;
-
-    cursor: pointer;
-}
-
-
-#lifeDipsGalleryPrev {
-    left: 20px;
-}
-
-
-#lifeDipsGalleryNext {
-    right: 20px;
-}
-
-
-/* COUNTER */
-
-#lifeDipsCounter {
-    position: absolute;
-
-    bottom: 18px;
-    left: 50%;
-
-    transform: translateX(-50%);
-
-    color: white;
-
-    font-size: 15px;
-}
-
-
-/* =====================================================
-   MOBILE
-===================================================== */
-
-@media (max-width: 700px) {
-
-    #lifeDipsContent {
-        padding: 28px 12px 30px;
-    }
-
-
-    #lifeDipsContent h2 {
-        font-size: 22px;
-    }
-
-
-    #lifeDipsLine {
-        margin-bottom: 25px;
-    }
-
-
-    #lifeDipsTrack {
-        gap: 0;
-    }
-
-
-    .lifeDipsPhoto {
-        flex: 0 0 100%;
-
-        height: 220px;
-    }
-
-
-    #lifeDipsPrev,
-    #lifeDipsNext {
-        width: 40px;
-        height: 54px;
-
-        font-size: 22px;
-    }
-
-
-    #lifeDipsLargeImage {
-        max-width: 92vw;
-        max-height: 78vh;
-    }
-
-
-    #lifeDipsGalleryPrev,
-    #lifeDipsGalleryNext {
-        width: 43px;
-        height: 58px;
-
-        font-size: 25px;
-    }
-
-
-    #lifeDipsGalleryPrev {
-        left: 4px;
-    }
-
-
-    #lifeDipsGalleryNext {
-        right: 4px;
-    }
-
-}
-/* ===============================
-   TOP RANKERS SECTION
-================================ */
-
 .rankers-section {
   position: relative;
   min-height: 100vh;
-  padding: 70px 5%;
+  padding: 70px 20px;
   overflow: hidden;
-
-  background:
-    linear-gradient(
-      rgba(10, 18, 45, 0.88),
-      rgba(22, 12, 55, 0.92)
-    );
-
   color: #fff;
 }
 
-
-/* ===============================
-   MOON + STARS BACKGROUND
-================================ */
-
-.sky-background {
+.rankers-bg {
   position: absolute;
   inset: 0;
   z-index: 0;
-  overflow: hidden;
 
-  background:
-    radial-gradient(
-      circle at 80% 20%,
-      rgba(91, 103, 180, 0.35),
-      transparent 30%
-    ),
-    linear-gradient(
-      135deg,
-      #071126,
-      #111b3c 45%,
-      #241344
-    );
+  background-image: url("1.jpg");
+  background-size: cover;
+  background-position: center;
+
+  transition: background-image 0.4s ease;
 }
 
-
-/* Moon */
-
-.moon {
+.rankers-overlay {
   position: absolute;
+  inset: 0;
+  z-index: 1;
 
-  width: 150px;
-  height: 150px;
-
-  right: 9%;
-  top: 7%;
-
-  border-radius: 50%;
-
-  background:
-    radial-gradient(
-      circle at 35% 30%,
-      #ffffff,
-      #e9e8ff 55%,
-      #bfc5e8
-    );
-
-  box-shadow:
-    0 0 25px rgba(255,255,255,.65),
-    0 0 70px rgba(170,180,255,.35);
+  background: rgba(0, 0, 0, 0.58);
 }
 
-
-/* Moon shadow */
-
-.moon::after {
-  content: "";
-
-  position: absolute;
-
-  width: 150px;
-  height: 150px;
-
-  border-radius: 50%;
-
-  background: #111b3c;
-
-  left: 42px;
-  top: -12px;
-}
-
-
-/* Stars */
-
-.star {
-  position: absolute;
-
-  color: #fff;
-
-  font-size: 18px;
-
-  opacity: .85;
-
-  text-shadow:
-    0 0 7px #fff,
-    0 0 15px rgba(180,190,255,.9);
-
-  animation: twinkle 2.5s infinite ease-in-out;
-}
-
-
-/* Different star positions */
-
-.star-1 {
-  top: 10%;
-  left: 12%;
-}
-
-.star-2 {
-  top: 18%;
-  left: 30%;
-}
-
-.star-3 {
-  top: 8%;
-  left: 48%;
-}
-
-.star-4 {
-  top: 30%;
-  left: 8%;
-}
-
-.star-5 {
-  top: 42%;
-  left: 18%;
-}
-
-.star-6 {
-  top: 22%;
-  left: 65%;
-}
-
-.star-7 {
-  top: 35%;
-  left: 82%;
-}
-
-.star-8 {
-  top: 55%;
-  left: 7%;
-}
-
-.star-9 {
-  top: 65%;
-  left: 27%;
-}
-
-.star-10 {
-  top: 58%;
-  left: 52%;
-}
-
-.star-11 {
-  top: 70%;
-  left: 72%;
-}
-
-.star-12 {
-  top: 82%;
-  left: 14%;
-}
-
-.star-13 {
-  top: 88%;
-  left: 45%;
-}
-
-.star-14 {
-  top: 76%;
-  left: 90%;
-}
-
-.star-15 {
-  top: 45%;
-  left: 94%;
-}
-
-
-/* Twinkle animation */
-
-@keyframes twinkle {
-
-  0%,
-  100% {
-    opacity: .3;
-    transform: scale(.8);
-  }
-
-  50% {
-    opacity: 1;
-    transform: scale(1.3);
-  }
-}
-
-
-/* ===============================
-   CONTENT
-================================ */
-
-.rankers-content {
+.rankers-container {
   position: relative;
+  z-index: 2;
 
-  z-index: 5;
-
+  width: 100%;
   max-width: 1250px;
-
   margin: auto;
+}
 
+
+/* HEADING */
+
+.rankers-heading {
   text-align: center;
-}
-
-
-.rankers-content h1 {
-  margin: 0;
-
-  font-size: 44px;
-
-  font-weight: 800;
-
-  letter-spacing: .5px;
-
-  color: #fff;
-}
-
-
-.rankers-subtitle {
-  margin: 10px 0 30px;
-
-  color: rgba(255,255,255,.75);
-
-  font-size: 17px;
-}
-
-
-/* ===============================
-   TABS
-================================ */
-
-.exam-tabs {
-  display: flex;
-
-  justify-content: center;
-
-  gap: 12px;
-
-  flex-wrap: wrap;
-
   margin-bottom: 35px;
 }
 
+.rankers-small-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  margin-bottom: 8px;
+}
 
-.exam-tab {
-  border: none;
+.rankers-heading h2 {
+  margin: 0 0 10px;
+  font-size: 48px;
+  line-height: 1.1;
+  color: #fff;
+}
 
-  padding: 12px 22px;
+.rankers-heading p {
+  margin: 0;
+  font-size: 16px;
+  color: rgba(255,255,255,0.9);
+}
 
-  border-radius: 30px;
 
-  background: rgba(255,255,255,.13);
+/* TABS */
 
+.rankers-tabs {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 35px;
+}
+
+.ranker-tab {
+  border: 1px solid rgba(255,255,255,0.55);
+  background: rgba(255,255,255,0.12);
   color: #fff;
 
+  padding: 12px 22px;
+  border-radius: 30px;
+
+  font-size: 14px;
+  font-weight: 600;
+
   cursor: pointer;
-
-  font-weight: 700;
-
-  transition: .25s;
+  transition: 0.25s;
 }
 
-
-.exam-tab:hover {
-  background: rgba(255,255,255,.22);
+.ranker-tab:hover {
+  background: rgba(255,255,255,0.22);
 }
 
-
-.exam-tab.active {
+.ranker-tab.active {
   background: #fff;
-
-  color: #182044;
-
-  box-shadow:
-    0 8px 25px rgba(0,0,0,.2);
+  color: #111;
 }
 
 
-/* ===============================
-   CAROUSEL
-================================ */
+/* SLIDER */
 
-.rankers-carousel {
+.rankers-slider {
   display: flex;
-
   align-items: center;
-
-  gap: 18px;
+  gap: 14px;
 }
 
-
-.rankers-viewport {
+.rankers-cards {
   flex: 1;
+  min-width: 0;
 
-  overflow: hidden;
-}
-
-
-.rankers-grid {
   display: grid;
-
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
-
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 20px;
 }
 
 
-/* ===============================
-   RANK CARD
-================================ */
+/* CARD */
 
 .ranker-card {
   background: #fff;
-
-  color: #17203a;
+  color: #111;
 
   border-radius: 18px;
-
   overflow: hidden;
 
-  box-shadow:
-    0 15px 40px rgba(0,0,0,.25);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.25);
 
-  transition: .3s;
-
-  text-align: left;
+  transition: transform 0.3s ease;
 }
-
 
 .ranker-card:hover {
-  transform: translateY(-7px);
-
-  box-shadow:
-    0 20px 45px rgba(0,0,0,.35);
+  transform: translateY(-6px);
 }
 
-
-.ranker-photo {
+.ranker-image-box {
   width: 100%;
+  aspect-ratio: 1 / 1.05;
 
-  height: 230px;
+  overflow: hidden;
+  cursor: pointer;
 
-  object-fit: cover;
+  background: #eee;
+}
+
+.ranker-image-box img {
+  width: 100%;
+  height: 100%;
 
   display: block;
+  object-fit: cover;
+
+  transition: transform 0.4s ease;
 }
 
+.ranker-image-box:hover img {
+  transform: scale(1.06);
+}
 
 .ranker-info {
-  padding: 17px;
+  text-align: center;
+  padding: 18px 12px 20px;
 }
 
-
-.ranker-info h3 {
-  margin: 0 0 7px;
-
-  font-size: 20px;
+.ranker-name {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 7px;
 }
-
 
 .ranker-rank {
-  display: inline-block;
-
-  background: #eef1ff;
-
-  color: #3949ab;
-
-  padding: 6px 11px;
-
-  border-radius: 20px;
-
-  font-weight: 800;
-
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 5px;
 }
-
 
 .ranker-exam {
-  margin-top: 10px;
-
-  color: #777;
-
   font-size: 13px;
+  color: #666;
 }
 
 
-/* ===============================
-   PREVIOUS NEXT
-================================ */
+/* ARROWS */
 
-.carousel-btn {
+.ranker-arrow {
   flex-shrink: 0;
 
-  width: 48px;
-  height: 48px;
+  width: 45px;
+  height: 45px;
 
-  border: none;
-
+  border: 0;
   border-radius: 50%;
 
   background: #fff;
+  color: #111;
 
-  color: #17203a;
-
-  font-size: 22px;
+  font-size: 21px;
 
   cursor: pointer;
 
-  box-shadow:
-    0 8px 25px rgba(0,0,0,.25);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
 
-  transition: .25s;
+  transition: 0.25s;
 }
 
-
-.carousel-btn:hover {
+.ranker-arrow:hover {
   transform: scale(1.08);
 }
 
-
-.carousel-btn:disabled {
-  opacity: .35;
-
+.ranker-arrow:disabled {
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
 
-/* ===============================
-   DOTS
-================================ */
+/* DOTS */
 
-.ranker-dots {
+.rankers-dots {
   display: flex;
-
   justify-content: center;
-
   gap: 7px;
-
-  margin-top: 22px;
+  margin-top: 20px;
 }
-
 
 .ranker-dot {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
 
+  border: 0;
   border-radius: 50%;
 
-  background: rgba(255,255,255,.35);
+  background: rgba(255,255,255,0.4);
 
   cursor: pointer;
-
-  transition: .2s;
 }
 
-
 .ranker-dot.active {
-  width: 25px;
-
+  width: 23px;
   border-radius: 10px;
-
   background: #fff;
 }
 
 
-/* ===============================
-   VIEW ALL BUTTON
-================================ */
+/* VIEW ALL */
 
-.view-all-btn {
-  margin-top: 28px;
+.view-all-rankers {
+  display: block;
 
-  border: none;
+  margin: 32px auto 0;
 
   padding: 14px 27px;
 
+  border: 0;
   border-radius: 30px;
 
   background: #fff;
+  color: #111;
 
-  color: #182044;
-
-  font-weight: 800;
+  font-size: 15px;
+  font-weight: 700;
 
   cursor: pointer;
 
-  box-shadow:
-    0 10px 30px rgba(0,0,0,.25);
-
-  transition: .25s;
+  transition: 0.25s;
 }
 
-
-.view-all-btn:hover {
+.view-all-rankers:hover {
   transform: translateY(-2px);
-
-  box-shadow:
-    0 15px 35px rgba(0,0,0,.35);
 }
 
 
-/* ===============================
-   MODAL
-================================ */
+/* BACKGROUND SELECTOR */
+
+.background-selector {
+  text-align: center;
+  margin-top: 35px;
+}
+
+.background-selector > span {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 10px;
+  opacity: 0.8;
+}
+
+.background-buttons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.background-buttons button {
+  width: 32px;
+  height: 32px;
+
+  border: 1px solid rgba(255,255,255,0.5);
+  border-radius: 50%;
+
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+
+  cursor: pointer;
+}
+
+.background-buttons button:hover,
+.background-buttons button.active {
+  background: #fff;
+  color: #111;
+}
+
+
+/* MODAL */
 
 .rankers-modal {
   position: fixed;
-
   inset: 0;
 
-  z-index: 100;
+  z-index: 99999;
 
   display: none;
 
-  padding: 25px;
+  padding: 25px 15px;
 
-  background: rgba(0,0,0,.7);
+  background: rgba(0,0,0,0.84);
 
   overflow-y: auto;
 }
 
-
 .rankers-modal.show {
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
+  display: block;
 }
-
 
 .rankers-modal-box {
   position: relative;
 
-  width: min(1200px, 100%);
+  width: 100%;
+  max-width: 1200px;
 
-  max-height: 90vh;
+  margin: 20px auto;
 
-  overflow-y: auto;
-
-  background: #fff;
-
-  color: #182044;
+  padding: 40px 25px 30px;
 
   border-radius: 20px;
 
-  padding: 30px;
+  background: #fff;
+  color: #111;
 }
 
-
 .rankers-modal-box h2 {
-  margin-top: 0;
+  margin: 0 0 30px;
 
   text-align: center;
 
   font-size: 30px;
 }
 
-
-.modal-close {
+.rankers-modal-close {
   position: absolute;
 
-  right: 20px;
   top: 15px;
+  right: 15px;
 
   width: 40px;
   height: 40px;
 
-  border: none;
-
+  border: 0;
   border-radius: 50%;
 
-  background: #f0f0f0;
+  background: #111;
+  color: #fff;
 
-  font-size: 28px;
+  font-size: 25px;
 
   cursor: pointer;
 }
 
 
-/* All cards */
+/* ALL RANKERS */
 
-.all-rankers-grid {
+.all-rankers {
   display: grid;
 
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0,1fr));
 
   gap: 20px;
 }
 
 
-/* ===============================
-   MOBILE
-================================ */
+/* LARGE PHOTO */
 
-@media (max-width: 1000px) {
+.ranker-photo-viewer {
+  position: fixed;
+  inset: 0;
 
-  .rankers-grid,
-  .all-rankers-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-  }
+  z-index: 100000;
 
+  display: none;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(0,0,0,0.94);
+}
+
+.ranker-photo-viewer.show {
+  display: flex;
+}
+
+.ranker-photo-viewer img {
+  max-width: 92vw;
+  max-height: 90vh;
+
+  width: auto;
+  height: auto;
+
+  object-fit: contain;
+
+  border-radius: 10px;
+
+  box-shadow: 0 20px 80px rgba(0,0,0,0.6);
+}
+
+.ranker-photo-close {
+  position: absolute;
+
+  top: 18px;
+  right: 22px;
+
+  width: 48px;
+  height: 48px;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: #fff;
+  color: #111;
+
+  font-size: 30px;
+
+  cursor: pointer;
 }
 
 
-@media (max-width: 600px) {
+/* TABLET */
+
+@media (max-width: 1000px) {
+
+  .rankers-cards {
+    grid-template-columns: repeat(3, minmax(0,1fr));
+  }
+
+  .all-rankers {
+    grid-template-columns: repeat(3, minmax(0,1fr));
+  }
+
+  .rankers-heading h2 {
+    font-size: 40px;
+  }
+}
+
+
+/* MOBILE */
+
+@media (max-width: 700px) {
 
   .rankers-section {
-    padding: 50px 18px;
+    padding: 45px 10px 55px;
   }
 
-  .rankers-content h1 {
-    font-size: 32px;
+  .rankers-heading h2 {
+    font-size: 34px;
   }
 
-  .rankers-carousel {
-    gap: 8px;
+  .rankers-heading p {
+    font-size: 14px;
   }
 
-  .rankers-grid,
-  .all-rankers-grid {
+  .ranker-tab {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .rankers-slider {
+    gap: 6px;
+  }
+
+  .rankers-cards {
     grid-template-columns: 1fr;
   }
 
-  .carousel-btn {
-    width: 40px;
-    height: 40px;
+  .ranker-card {
+    width: 100%;
+    max-width: 330px;
+    margin: auto;
   }
 
-  .ranker-photo {
-    height: 260px;
+  .ranker-arrow {
+    width: 38px;
+    height: 38px;
+    font-size: 18px;
   }
 
-  .moon {
-    width: 100px;
-    height: 100px;
+  .all-rankers {
+    grid-template-columns: 1fr;
   }
 
-  .moon::after {
-    width: 100px;
-    height: 100px;
+  .rankers-modal-box {
+    padding: 45px 12px 25px;
+  }
+
+  .rankers-modal-box h2 {
+    font-size: 24px;
+  }
+
+  .ranker-photo-viewer img {
+    max-width: 96vw;
+    max-height: 85vh;
+  }
+}
+
+
+/* SMALL MOBILE */
+
+@media (max-width: 400px) {
+
+  .rankers-heading h2 {
+    font-size: 29px;
+  }
+
+  .ranker-tab {
+    width: 100%;
   }
 
 }
