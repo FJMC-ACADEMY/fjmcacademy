@@ -1682,8 +1682,16 @@ function closeMenu() {
 
 <section class="life-dips-section">
 
-    <!-- Background overlay -->
+    <!-- BACKGROUND IMAGE -->
+    <img
+        class="life-background"
+        src="life-at-dips/background.jpg"
+        alt="Life at DIPS Background"
+    >
+
+    <!-- DARK OVERLAY -->
     <div class="life-overlay"></div>
+
 
     <div class="life-dips-container">
 
@@ -1692,92 +1700,103 @@ function closeMenu() {
         <div class="life-title-line"></div>
 
 
-        <!-- ================= SLIDER ================= -->
+        <!-- ================= PHOTO SLIDER ================= -->
 
         <div class="life-slider-wrapper">
 
-            <!-- Previous -->
+            <!-- PREVIOUS BUTTON -->
             <button
                 type="button"
                 class="life-btn life-prev"
-                id="lifePrevBtn"
-                aria-label="Previous photo">
+                id="lifePrevBtn">
                 ❮
             </button>
 
 
-            <!-- Slider -->
             <div class="life-slider" id="lifeSlider">
 
                 <div class="life-track" id="lifeTrack">
 
+
+                    <!-- PHOTO 1 -->
                     <div class="life-slide">
                         <img
-                            src="1.jpg"
-                            alt="Life at DIPS 1"
+                            src="life-at-dips/1.jpg"
+                            alt="Life at DIPS Photo 1"
                             draggable="false">
                     </div>
 
+
+                    <!-- PHOTO 2 -->
                     <div class="life-slide">
                         <img
-                            src="2.jpg"
-                            alt="Life at DIPS 2"
+                            src="life-at-dips/2.jpg"
+                            alt="Life at DIPS Photo 2"
                             draggable="false">
                     </div>
 
+
+                    <!-- PHOTO 3 -->
                     <div class="life-slide">
                         <img
-                            src="3.jpg"
-                            alt="Life at DIPS 3"
+                            src="life-at-dips/3.jpg"
+                            alt="Life at DIPS Photo 3"
                             draggable="false">
                     </div>
 
+
+                    <!-- PHOTO 4 -->
                     <div class="life-slide">
                         <img
-                            src="4.jpg"
-                            alt="Life at DIPS 4"
+                            src="life-at-dips/4.jpg"
+                            alt="Life at DIPS Photo 4"
                             draggable="false">
                     </div>
 
+
+                    <!-- PHOTO 5 -->
                     <div class="life-slide">
                         <img
-                            src="5.jpg"
-                            alt="Life at DIPS 5"
+                            src="life-at-dips/5.jpg"
+                            alt="Life at DIPS Photo 5"
                             draggable="false">
                     </div>
 
+
+                    <!-- PHOTO 6 -->
                     <div class="life-slide">
                         <img
-                            src="6.jpg"
-                            alt="Life at DIPS 6"
+                            src="life-at-dips/6.jpg"
+                            alt="Life at DIPS Photo 6"
                             draggable="false">
                     </div>
 
+
+                    <!-- PHOTO 7 -->
                     <div class="life-slide">
                         <img
-                            src="7.jpg"
-                            alt="Life at DIPS 7"
+                            src="life-at-dips/7.jpg"
+                            alt="Life at DIPS Photo 7"
                             draggable="false">
                     </div>
+
 
                 </div>
-
             </div>
 
 
-            <!-- Next -->
+            <!-- NEXT BUTTON -->
             <button
                 type="button"
                 class="life-btn life-next"
-                id="lifeNextBtn"
-                aria-label="Next photo">
+                id="lifeNextBtn">
                 ❯
             </button>
 
         </div>
 
 
-        <!-- Gallery Button -->
+        <!-- GALLERY BUTTON -->
         <button
             type="button"
             class="life-gallery-btn"
@@ -1790,22 +1809,21 @@ function closeMenu() {
 </section>
 
 
-<!-- ================= FULL IMAGE POPUP ================= -->
+<!-- ================= FULL PHOTO POPUP ================= -->
 
-<div class="life-image-modal" id="lifeImageModal">
+<div class="life-photo-popup" id="lifePhotoPopup">
 
     <button
         type="button"
-        class="life-modal-close"
-        id="lifeModalClose"
-        aria-label="Close">
+        class="life-popup-close"
+        id="lifePopupClose">
         ×
     </button>
 
     <img
-        id="lifeModalImage"
+        id="lifePopupImage"
         src=""
-        alt="Life at DIPS">
+        alt="Life at DIPS Full Image">
 
 </div>
 <!-- ================= TOP RANKERS ================= -->
