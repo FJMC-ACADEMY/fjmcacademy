@@ -73,562 +73,658 @@ setInterval(function () {
 
 }, 5000);
 /* =====================================================
-   LIFE AT DIPS - FAST SLIDER
+   LIFE AT DIPS - FINAL VERSION
 ===================================================== */
 
-document.addEventListener("DOMContentLoaded", function () {
+(function () {
+
+    function startLifeDips() {
+
+        const track =
+            document.getElementById("lifeDipsTrack");
+
+        const viewport =
+            document.getElementById("lifeDipsViewport");
+
+        const photos =
+            Array.from(
+                document.querySelectorAll(".lifeDipsPhoto")
+            );
+
+        const nextButton =
+            document.getElementById("lifeDipsNext");
+
+        const prevButton =
+            document.getElementById("lifeDipsPrev");
+
+        const galleryButton =
+            document.getElementById(
+                "lifeDipsGalleryButton"
+            );
+
+        const gallery =
+            document.getElementById(
+                "lifeDipsGallery"
+            );
+
+        const largeImage =
+            document.getElementById(
+                "lifeDipsLargeImage"
+            );
+
+        const galleryNext =
+            document.getElementById(
+                "lifeDipsGalleryNext"
+            );
+
+        const galleryPrev =
+            document.getElementById(
+                "lifeDipsGalleryPrev"
+            );
+
+        const closeButton =
+            document.getElementById(
+                "lifeDipsClose"
+            );
+
+        const counter =
+            document.getElementById(
+                "lifeDipsCounter"
+            );
+
+
+        if (
+            !track ||
+            !viewport ||
+            !photos.length ||
+            !nextButton ||
+            !prevButton
+        ) {
+            console.log(
+                "Life at DIPS HTML missing"
+            );
 
-    const track =
-        document.getElementById("lifeTrack");
-
-    const windowBox =
-        document.getElementById("lifeWindow");
-
-    const cards =
-        Array.from(
-            document.querySelectorAll(".life-card")
-        );
-
-    const prev =
-        document.getElementById("lifePrev");
-
-    const next =
-        document.getElementById("lifeNext");
-
-
-    const galleryBtn =
-        document.getElementById("lifeGalleryBtn");
-
-    const modal =
-        document.getElementById("lifeModal");
-
-    const modalImage =
-        document.getElementById("lifeModalImage");
-
-    const modalClose =
-        document.getElementById("lifeModalClose");
-
-    const modalPrev =
-        document.getElementById("lifeModalPrev");
-
-    const modalNext =
-        document.getElementById("lifeModalNext");
-
-    const modalCount =
-        document.getElementById("lifeModalCount");
-
-
-    /* STOP IF HTML IS NOT PRESENT */
-
-    if (
-        !track ||
-        !windowBox ||
-        !cards.length
-    ) {
-        console.log("Life slider not found");
-        return;
-    }
-
-
-    let current = 0;
-
-    let timer = null;
-
-    let galleryIndex = 0;
-
-    let touchStart = 0;
-
-    let touchEnd = 0;
-
-    let lastTap = 0;
-
-
-    /* =================================================
-       VISIBLE PHOTOS
-    ================================================= */
-
-    function visiblePhotos() {
-
-        return window.innerWidth <= 700
-            ? 1
-            : 4;
-
-    }
-
-
-    /* =================================================
-       MAX POSITION
-    ================================================= */
-
-    function maxPosition() {
-
-        return Math.max(
-            0,
-            cards.length - visiblePhotos()
-        );
-
-    }
-
-
-    /* =================================================
-       MOVE
-    ================================================= */
-
-    function moveSlider() {
-
-        const max =
-            maxPosition();
-
-
-        if (current > max) {
-            current = 0;
-        }
-
-
-        if (current < 0) {
-            current = max;
-        }
-
-
-        const cardWidth =
-            cards[0].getBoundingClientRect().width;
-
-
-        const gap =
-            window.innerWidth <= 700
-                ? 0
-                : 25;
-
-
-        const move =
-            current *
-            (cardWidth + gap);
-
-
-        track.style.transform =
-            "translate3d(-" +
-            move +
-            "px,0,0)";
-    }
-
-
-    /* =================================================
-       NEXT
-    ================================================= */
-
-    function nextPhoto() {
-
-        current++;
-
-
-        if (current > maxPosition()) {
-            current = 0;
-        }
-
-
-        moveSlider();
-
-    }
-
-
-    /* =================================================
-       PREVIOUS
-    ================================================= */
-
-    function previousPhoto() {
-
-        current--;
-
-
-        if (current < 0) {
-            current = maxPosition();
-        }
-
-
-        moveSlider();
-
-    }
-
-
-    /* =================================================
-       AUTO 5 SECONDS
-    ================================================= */
-
-    function startAuto() {
-
-        clearInterval(timer);
-
-
-        timer = setInterval(
-            nextPhoto,
-            5000
-        );
-
-    }
-
-
-    function stopAuto() {
-
-        clearInterval(timer);
-
-        timer = null;
-
-    }
-
-
-    /* =================================================
-       BUTTONS
-    ================================================= */
-
-    next.addEventListener(
-        "click",
-        function () {
-
-            nextPhoto();
-
-            startAuto();
-
-        }
-    );
-
-
-    prev.addEventListener(
-        "click",
-        function () {
-
-            previousPhoto();
-
-            startAuto();
-
-        }
-    );
-
-
-    /* =================================================
-       PAUSE ON PHOTOS
-    ================================================= */
-
-    windowBox.addEventListener(
-        "mouseenter",
-        stopAuto
-    );
-
-
-    windowBox.addEventListener(
-        "mouseleave",
-        startAuto
-    );
-
-
-    /* =================================================
-       GALLERY
-    ================================================= */
-
-    function openGallery(number) {
-
-        if (number < 0) {
-            number = cards.length - 1;
-        }
-
-
-        if (number >= cards.length) {
-            number = 0;
-        }
-
-
-        galleryIndex = number;
-
-
-        const image =
-            cards[galleryIndex]
-                .querySelector("img");
-
-
-        if (!image) {
             return;
         }
 
 
-        modalImage.src =
-            image.src;
+        let sliderIndex = 0;
+
+        let galleryIndex = 0;
+
+        let autoTimer = null;
+
+        let startX = 0;
+
+        let endX = 0;
 
 
-        modalImage.alt =
-            image.alt;
+        /* =============================================
+           VISIBLE
+        ============================================= */
 
+        function visible() {
 
-        modalCount.textContent =
-            (galleryIndex + 1) +
-            " / " +
-            cards.length;
+            if (
+                window.innerWidth <= 700
+            ) {
+                return 1;
+            }
 
-
-        modal.classList.add("open");
-
-
-        stopAuto();
-
-    }
-
-
-    /* =================================================
-       GALLERY BUTTON
-    ================================================= */
-
-    galleryBtn.addEventListener(
-        "click",
-        function () {
-
-            openGallery(0);
-
+            return 4;
         }
-    );
 
 
-    /* =================================================
-       GALLERY NEXT
-    ================================================= */
+        /* =============================================
+           MAX INDEX
+        ============================================= */
 
-    modalNext.addEventListener(
-        "click",
-        function (event) {
+        function maxSliderIndex() {
 
-            event.stopPropagation();
-
-            openGallery(
-                galleryIndex + 1
+            return Math.max(
+                0,
+                photos.length - visible()
             );
 
         }
-    );
 
 
-    /* =================================================
-       GALLERY PREVIOUS
-    ================================================= */
+        /* =============================================
+           MOVE
+        ============================================= */
 
-    modalPrev.addEventListener(
-        "click",
-        function (event) {
+        function moveSlider() {
 
-            event.stopPropagation();
-
-            openGallery(
-                galleryIndex - 1
-            );
-
-        }
-    );
+            const max =
+                maxSliderIndex();
 
 
-    /* =================================================
-       CLOSE
-    ================================================= */
-
-    function closeGallery() {
-
-        modal.classList.remove("open");
-
-        startAuto();
-
-    }
+            if (sliderIndex > max) {
+                sliderIndex = 0;
+            }
 
 
-    modalClose.addEventListener(
-        "click",
-        closeGallery
-    );
+            if (sliderIndex < 0) {
+                sliderIndex = max;
+            }
 
 
-    /* =================================================
-       DOUBLE CLICK DESKTOP
-    ================================================= */
-
-    cards.forEach(
-        function (card, number) {
-
-            const image =
-                card.querySelector("img");
+            const width =
+                photos[0]
+                .getBoundingClientRect()
+                .width;
 
 
-            image.addEventListener(
-                "dblclick",
-                function () {
-
-                    openGallery(number);
-
-                }
-            );
-
-        }
-    );
-
-
-    /* =================================================
-       MOBILE DOUBLE TAP
-    ================================================= */
-
-    cards.forEach(
-        function (card, number) {
-
-            const image =
-                card.querySelector("img");
-
-
-            image.addEventListener(
-                "touchend",
-                function (event) {
-
-                    const now =
-                        Date.now();
-
-
-                    if (
-                        now - lastTap < 350
-                    ) {
-
-                        event.preventDefault();
-
-                        openGallery(number);
-
-                    }
-
-
-                    lastTap = now;
-
-                },
-                {
-                    passive: false
-                }
-            );
-
-        }
-    );
-
-
-    /* =================================================
-       MOBILE SWIPE
-    ================================================= */
-
-    windowBox.addEventListener(
-        "touchstart",
-        function (event) {
-
-            touchStart =
-                event.touches[0].clientX;
-
-            stopAuto();
-
-        },
-        {
-            passive: true
-        }
-    );
-
-
-    windowBox.addEventListener(
-        "touchend",
-        function (event) {
-
-            touchEnd =
-                event.changedTouches[0].clientX;
+            const gap =
+                window.innerWidth <= 700
+                    ? 0
+                    : 25;
 
 
             const distance =
-                touchStart - touchEnd;
+                sliderIndex *
+                (width + gap);
 
 
-            if (Math.abs(distance) > 50) {
+            track.style.transform =
+                "translate3d(-" +
+                distance +
+                "px,0,0)";
 
-                if (distance > 0) {
+        }
 
-                    nextPhoto();
 
-                } else {
+        /* =============================================
+           NEXT
+        ============================================= */
 
-                    previousPhoto();
+        function nextSlide() {
 
-                }
+            sliderIndex++;
+
+
+            if (
+                sliderIndex >
+                maxSliderIndex()
+            ) {
+
+                sliderIndex = 0;
 
             }
 
+
+            moveSlider();
+
+        }
+
+
+        /* =============================================
+           PREVIOUS
+        ============================================= */
+
+        function previousSlide() {
+
+            sliderIndex--;
+
+
+            if (sliderIndex < 0) {
+
+                sliderIndex =
+                    maxSliderIndex();
+
+            }
+
+
+            moveSlider();
+
+        }
+
+
+        /* =============================================
+           BUTTONS
+        ============================================= */
+
+        nextButton.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                nextSlide();
+
+                restartAuto();
+
+            }
+        );
+
+
+        prevButton.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                previousSlide();
+
+                restartAuto();
+
+            }
+        );
+
+
+        /* =============================================
+           AUTO 5 SEC
+        ============================================= */
+
+        function startAuto() {
+
+            clearInterval(autoTimer);
+
+
+            autoTimer =
+                setInterval(
+                    function () {
+
+                        nextSlide();
+
+                    },
+                    5000
+                );
+
+        }
+
+
+        function stopAuto() {
+
+            clearInterval(autoTimer);
+
+        }
+
+
+        function restartAuto() {
+
+            stopAuto();
 
             startAuto();
 
         }
-    );
 
 
-    /* =================================================
-       KEYBOARD
-    ================================================= */
+        /* =============================================
+           MOUSE PAUSE
+        ============================================= */
 
-    document.addEventListener(
-        "keydown",
-        function (event) {
+        viewport.addEventListener(
+            "mouseenter",
+            function () {
 
-            if (
-                !modal.classList.contains("open")
-            ) {
+                stopAuto();
+
+            }
+        );
+
+
+        viewport.addEventListener(
+            "mouseleave",
+            function () {
+
+                startAuto();
+
+            }
+        );
+
+
+        /* =============================================
+           OPEN LARGE IMAGE
+        ============================================= */
+
+        function showGallery(number) {
+
+            if (!gallery || !largeImage) {
                 return;
             }
 
 
-            if (
-                event.key === "ArrowRight"
-            ) {
+            if (number < 0) {
 
-                openGallery(
+                number =
+                    photos.length - 1;
+
+            }
+
+
+            if (number >= photos.length) {
+
+                number = 0;
+
+            }
+
+
+            galleryIndex = number;
+
+
+            const image =
+                photos[galleryIndex]
+                .querySelector("img");
+
+
+            if (!image) {
+                return;
+            }
+
+
+            largeImage.src =
+                image.src;
+
+
+            largeImage.alt =
+                image.alt;
+
+
+            counter.textContent =
+                (galleryIndex + 1) +
+                " / " +
+                photos.length;
+
+
+            gallery.classList.add(
+                "lifeGalleryOpen"
+            );
+
+
+            stopAuto();
+
+        }
+
+
+        /* =============================================
+           VIEW OUR PICTURE GALLERY
+        ============================================= */
+
+        if (galleryButton) {
+
+            galleryButton.addEventListener(
+                "click",
+                function (event) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    showGallery(0);
+
+                }
+            );
+
+        }
+
+
+        /* =============================================
+           LARGE NEXT
+        ============================================= */
+
+        galleryNext.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                showGallery(
                     galleryIndex + 1
                 );
 
             }
+        );
 
 
-            if (
-                event.key === "ArrowLeft"
-            ) {
+        /* =============================================
+           LARGE PREVIOUS
+        ============================================= */
 
-                openGallery(
+        galleryPrev.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                showGallery(
                     galleryIndex - 1
                 );
 
             }
+        );
 
 
-            if (
-                event.key === "Escape"
-            ) {
+        /* =============================================
+           CLOSE
+        ============================================= */
 
-                closeGallery();
+        closeButton.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                gallery.classList.remove(
+                    "lifeGalleryOpen"
+                );
+
+                startAuto();
 
             }
-
-        }
-    );
+        );
 
 
-    /* =================================================
-       RESIZE
-    ================================================= */
+        /* =============================================
+           CLICK OUTSIDE IMAGE
+        ============================================= */
 
-    window.addEventListener(
-        "resize",
-        moveSlider
-    );
+        gallery.addEventListener(
+            "click",
+            function (event) {
+
+                if (
+                    event.target === gallery
+                ) {
+
+                    gallery.classList.remove(
+                        "lifeGalleryOpen"
+                    );
+
+                    startAuto();
+
+                }
+
+            }
+        );
 
 
-    /* =================================================
-       START
-    ================================================= */
+        /* =============================================
+           DOUBLE CLICK DESKTOP
+        ============================================= */
 
-    moveSlider();
+        photos.forEach(
+            function (photo, number) {
 
-    startAuto();
+                const image =
+                    photo.querySelector("img");
 
 
-    console.log(
-        "Life at DIPS: READY"
-    );
+                image.addEventListener(
+                    "dblclick",
+                    function (event) {
 
-});
+                        event.preventDefault();
+
+                        showGallery(number);
+
+                    }
+                );
+
+            }
+        );
+
+
+        /* =============================================
+           MOBILE SWIPE
+        ============================================= */
+
+        viewport.addEventListener(
+            "touchstart",
+            function (event) {
+
+                startX =
+                    event.touches[0].clientX;
+
+                stopAuto();
+
+            },
+            {
+                passive: true
+            }
+        );
+
+
+        viewport.addEventListener(
+            "touchend",
+            function (event) {
+
+                endX =
+                    event.changedTouches[0].clientX;
+
+
+                const difference =
+                    startX - endX;
+
+
+                if (
+                    Math.abs(difference) > 50
+                ) {
+
+                    if (difference > 0) {
+
+                        nextSlide();
+
+                    } else {
+
+                        previousSlide();
+
+                    }
+
+                }
+
+
+                startAuto();
+
+            },
+            {
+                passive: true
+            }
+        );
+
+
+        /* =============================================
+           KEYBOARD
+        ============================================= */
+
+        document.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (
+                    !gallery.classList.contains(
+                        "lifeGalleryOpen"
+                    )
+                ) {
+                    return;
+                }
+
+
+                if (
+                    event.key === "ArrowRight"
+                ) {
+
+                    showGallery(
+                        galleryIndex + 1
+                    );
+
+                }
+
+
+                if (
+                    event.key === "ArrowLeft"
+                ) {
+
+                    showGallery(
+                        galleryIndex - 1
+                    );
+
+                }
+
+
+                if (
+                    event.key === "Escape"
+                ) {
+
+                    gallery.classList.remove(
+                        "lifeGalleryOpen"
+                    );
+
+                    startAuto();
+
+                }
+
+            }
+        );
+
+
+        /* =============================================
+           RESIZE
+        ============================================= */
+
+        window.addEventListener(
+            "resize",
+            function () {
+
+                moveSlider();
+
+            }
+        );
+
+
+        /* =============================================
+           START
+        ============================================= */
+
+        moveSlider();
+
+        startAuto();
+
+
+        console.log(
+            "LIFE AT DIPS FINAL SYSTEM READY"
+        );
+
+    }
+
+
+    if (
+        document.readyState === "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            startLifeDips
+        );
+
+    } else {
+
+        startLifeDips();
+
+    }
+
+})();
