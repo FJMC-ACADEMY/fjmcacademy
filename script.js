@@ -358,93 +358,105 @@ window.addEventListener("resize",
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    const lifeTrack = document.getElementById("lifeTrack");
-    const lifeSlider = document.getElementById("lifeSlider");
+    const track =
+        document.getElementById("lifeTrack");
 
-    const lifeSlides =
+    const slider =
+        document.getElementById("lifeSlider");
+
+    const slides =
         document.querySelectorAll(".life-slide");
 
-    const lifePrevBtn =
-        document.getElementById("lifePrevBtn");
-
-    const lifeNextBtn =
+    const nextBtn =
         document.getElementById("lifeNextBtn");
 
-    const lifeModal =
-        document.getElementById("lifeImageModal");
-
-    const lifeModalImage =
-        document.getElementById("lifeModalImage");
-
-    const lifeModalClose =
-        document.getElementById("lifeModalClose");
+    const prevBtn =
+        document.getElementById("lifePrevBtn");
 
 
-    let lifeIndex = 0;
+    /* POPUP */
 
-    let lifeVisible = 4;
+    const popup =
+        document.getElementById("lifePhotoPopup");
 
-    let lifeAutoSlide = null;
+    const popupImage =
+        document.getElementById("lifePopupImage");
 
-    let isMouseOverPhoto = false;
+    const popupClose =
+        document.getElementById("lifePopupClose");
+
+
+    let currentIndex = 0;
+
+    let visibleSlides = 4;
+
+    let autoSlide;
 
 
     /* =================================================
-       FIND NUMBER OF VISIBLE PHOTOS
+       VISIBLE SLIDES
     ================================================= */
 
-    function updateLifeVisible() {
+    function setVisibleSlides() {
 
         if (window.innerWidth <= 600) {
 
-            lifeVisible = 1;
+            visibleSlides = 1;
 
         } else if (window.innerWidth <= 900) {
 
-            lifeVisible = 2;
+            visibleSlides = 2;
 
         } else {
 
-            lifeVisible = 4;
+            visibleSlides = 4;
         }
 
 
-        const maxIndex =
-            Math.max(0, lifeSlides.length - lifeVisible);
+        const maximumIndex =
+            Math.max(0, slides.length - visibleSlides);
 
-        if (lifeIndex > maxIndex) {
-            lifeIndex = 0;
+
+        if (currentIndex > maximumIndex) {
+
+            currentIndex = 0;
         }
 
-        updateLifeSlider();
+
+        moveSlider();
     }
 
 
     /* =================================================
-       UPDATE SLIDER POSITION
+       MOVE SLIDER
     ================================================= */
 
-    function updateLifeSlider() {
+    function moveSlider() {
 
-        if (!lifeSlides.length) {
+        if (!slides.length) {
             return;
         }
 
 
         const slideWidth =
-            lifeSlides[0].getBoundingClientRect().width;
+            slides[0].getBoundingClientRect().width;
 
 
-        const gap =
-            window.innerWidth <= 600 ? 0 : 28;
+        let gap = 28;
 
 
-        const move =
-            lifeIndex * (slideWidth + gap);
+        if (window.innerWidth <= 600) {
+
+            gap = 0;
+        }
 
 
-        lifeTrack.style.transform =
-            "translateX(-" + move + "px)";
+        const distance =
+            currentIndex * (slideWidth + gap);
+
+
+        track.style.transform =
+            "translateX(-" + distance + "px)";
     }
 
 
@@ -452,21 +464,22 @@ document.addEventListener("DOMContentLoaded", function () {
        NEXT
     ================================================= */
 
-    function lifeNext() {
+    function nextSlide() {
 
-        const maxIndex =
-            Math.max(0, lifeSlides.length - lifeVisible);
-
-
-        lifeIndex++;
+        const maximumIndex =
+            Math.max(0, slides.length - visibleSlides);
 
 
-        if (lifeIndex > maxIndex) {
-            lifeIndex = 0;
+        currentIndex++;
+
+
+        if (currentIndex > maximumIndex) {
+
+            currentIndex = 0;
         }
 
 
-        updateLifeSlider();
+        moveSlider();
     }
 
 
@@ -474,173 +487,159 @@ document.addEventListener("DOMContentLoaded", function () {
        PREVIOUS
     ================================================= */
 
-    function lifePrev() {
+    function previousSlide() {
 
-        const maxIndex =
-            Math.max(0, lifeSlides.length - lifeVisible);
-
-
-        lifeIndex--;
+        const maximumIndex =
+            Math.max(0, slides.length - visibleSlides);
 
 
-        if (lifeIndex < 0) {
-            lifeIndex = maxIndex;
+        currentIndex--;
+
+
+        if (currentIndex < 0) {
+
+            currentIndex = maximumIndex;
         }
 
 
-        updateLifeSlider();
+        moveSlider();
     }
 
 
     /* =================================================
-       BUTTON EVENTS
+       BUTTONS
     ================================================= */
 
-    lifeNextBtn.addEventListener("click", function (event) {
+    nextBtn.addEventListener("click", function () {
 
-        event.preventDefault();
-
-        lifeNext();
+        nextSlide();
 
         restartAutoSlide();
+
     });
 
 
-    lifePrevBtn.addEventListener("click", function (event) {
+    prevBtn.addEventListener("click", function () {
 
-        event.preventDefault();
-
-        lifePrev();
+        previousSlide();
 
         restartAutoSlide();
+
     });
 
 
     /* =================================================
-       AUTO SLIDE
-       EVERY 5 SECONDS
+       AUTO SLIDE — 5 SECONDS
     ================================================= */
 
     function startAutoSlide() {
 
-        clearInterval(lifeAutoSlide);
+        clearInterval(autoSlide);
 
 
-        lifeAutoSlide = setInterval(function () {
+        autoSlide = setInterval(function () {
 
-            if (!isMouseOverPhoto) {
-                lifeNext();
-            }
+            nextSlide();
 
         }, 5000);
     }
 
 
-    function stopAutoSlide() {
-
-        clearInterval(lifeAutoSlide);
-
-        lifeAutoSlide = null;
-    }
-
-
     function restartAutoSlide() {
 
-        stopAutoSlide();
+        clearInterval(autoSlide);
 
         startAutoSlide();
     }
 
 
     /* =================================================
-       DESKTOP:
-       MOUSE OVER PHOTO = PAUSE
+       MOUSE HOVER = PAUSE
     ================================================= */
 
-    lifeSlider.addEventListener("mouseenter", function () {
+    slider.addEventListener("mouseenter", function () {
 
-        isMouseOverPhoto = true;
+        clearInterval(autoSlide);
 
     });
 
 
-    lifeSlider.addEventListener("mouseleave", function () {
+    slider.addEventListener("mouseleave", function () {
 
-        isMouseOverPhoto = false;
+        startAutoSlide();
 
     });
 
 
     /* =================================================
-       MOBILE TOUCH:
-       TOUCH DOES NOT STOP AUTO SLIDE PERMANENTLY
+       DOUBLE CLICK = OPEN FULL PHOTO
     ================================================= */
 
-    lifeSlider.addEventListener("touchstart", function () {
+    slides.forEach(function (slide) {
 
-        isMouseOverPhoto = true;
-
-    }, { passive: true });
-
-
-    lifeSlider.addEventListener("touchend", function () {
-
-        /*
-           Mobile par finger hataane ke baad
-           slider phir automatically chalega.
-        */
-
-        isMouseOverPhoto = false;
-
-    }, { passive: true });
-
-
-    /* =================================================
-       DOUBLE CLICK IMAGE = OPEN LARGE
-    ================================================= */
-
-    lifeSlides.forEach(function (slide) {
-
-        const image = slide.querySelector("img");
+        const image =
+            slide.querySelector("img");
 
 
         image.addEventListener("dblclick", function (event) {
 
             event.preventDefault();
 
-            lifeModalImage.src = image.src;
 
-            lifeModal.classList.add("active");
+            popupImage.src =
+                image.src;
+
+
+            popup.classList.add("active");
+
+
+            clearInterval(autoSlide);
 
         });
 
+    });
 
-        /* MOBILE DOUBLE TAP */
+
+    /* =================================================
+       MOBILE DOUBLE TAP
+    ================================================= */
+
+    slides.forEach(function (slide) {
+
+        const image =
+            slide.querySelector("img");
+
 
         let lastTap = 0;
 
 
         image.addEventListener("touchend", function (event) {
 
-            const currentTime =
-                new Date().getTime();
+            const now =
+                Date.now();
 
 
-            const tapLength =
-                currentTime - lastTap;
+            const difference =
+                now - lastTap;
 
 
-            if (tapLength < 350 && tapLength > 0) {
+            if (difference > 0 && difference < 350) {
 
                 event.preventDefault();
 
-                lifeModalImage.src = image.src;
 
-                lifeModal.classList.add("active");
+                popupImage.src =
+                    image.src;
+
+
+                popup.classList.add("active");
+
+
+                clearInterval(autoSlide);
             }
 
 
-            lastTap = currentTime;
+            lastTap = now;
 
         });
 
@@ -648,43 +647,51 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /* =================================================
-       CLOSE IMAGE POPUP
+       CLOSE POPUP
     ================================================= */
 
-    lifeModalClose.addEventListener("click", function () {
+    popupClose.addEventListener("click", function () {
 
-        lifeModal.classList.remove("active");
+        popup.classList.remove("active");
 
-        lifeModalImage.src = "";
+        popupImage.src = "";
+
+        startAutoSlide();
 
     });
 
 
-    /* Click outside image = close */
+    /* =================================================
+       CLICK OUTSIDE PHOTO = CLOSE
+    ================================================= */
 
-    lifeModal.addEventListener("click", function (event) {
+    popup.addEventListener("click", function (event) {
 
-        if (event.target === lifeModal) {
+        if (event.target === popup) {
 
-            lifeModal.classList.remove("active");
+            popup.classList.remove("active");
 
-            lifeModalImage.src = "";
+            popupImage.src = "";
+
+            startAutoSlide();
         }
 
     });
 
 
     /* =================================================
-       ESC KEY = CLOSE
+       ESC KEY
     ================================================= */
 
     document.addEventListener("keydown", function (event) {
 
         if (event.key === "Escape") {
 
-            lifeModal.classList.remove("active");
+            popup.classList.remove("active");
 
-            lifeModalImage.src = "";
+            popupImage.src = "";
+
+            startAutoSlide();
         }
 
     });
@@ -694,45 +701,42 @@ document.addEventListener("DOMContentLoaded", function () {
        GALLERY BUTTON
     ================================================= */
 
-    const lifeGalleryBtn =
-        document.getElementById("lifeGalleryBtn");
+    document
+        .getElementById("lifeGalleryBtn")
+        .addEventListener("click", function () {
+
+            const image =
+                slides[currentIndex].querySelector("img");
 
 
-    lifeGalleryBtn.addEventListener("click", function () {
+            popupImage.src =
+                image.src;
 
-        /*
-           Abhi button slider ko hi gallery ki tarah use karega.
-           Baad mein separate gallery page bhi connect
-           kiya ja sakta hai.
-        */
 
-        lifeSlides[lifeIndex]
-            .querySelector("img")
-            .dispatchEvent(
-                new MouseEvent("dblclick", {
-                    bubbles: true
-                })
-            );
+            popup.classList.add("active");
 
-    });
+
+            clearInterval(autoSlide);
+
+        });
 
 
     /* =================================================
-       WINDOW RESIZE
+       RESIZE
     ================================================= */
 
     window.addEventListener("resize", function () {
 
-        updateLifeVisible();
+        setVisibleSlides();
 
     });
 
 
     /* =================================================
-       INITIALIZE
+       START
     ================================================= */
 
-    updateLifeVisible();
+    setVisibleSlides();
 
     startAutoSlide();
 
