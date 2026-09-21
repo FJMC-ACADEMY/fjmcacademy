@@ -1019,3 +1019,277 @@ footer {
     }
 
 }
+/* ================= TOP RANKERS ================= */
+
+.rankers-section {
+
+    position: relative;
+
+    width: 100%;
+
+    min-height: 400px;
+
+    background-image:
+        url("top-rankers/background.jpg");
+
+    background-size: cover;
+    background-position: center;
+
+    color: white;
+
+    overflow: hidden;
+}
+
+.rankers-overlay {
+
+    position: absolute;
+
+    inset: 0;
+
+    background: rgba(0,0,0,0.75);
+}
+
+.rankers-container {
+
+    position: relative;
+
+    z-index: 2;
+
+    max-width: 950px;
+
+    margin: auto;
+
+    padding: 30px 20px 35px;
+}
+
+.rankers-container h2 {
+
+    font-size: 23px;
+
+    font-weight: 500;
+
+    margin: 0 0 12px;
+}
+
+
+/* ================= TABS ================= */
+
+.ranker-tabs {
+
+    display: flex;
+
+    flex-wrap: nowrap;
+
+    overflow-x: auto;
+
+    scrollbar-width: none;
+
+    margin-bottom: 35px;
+}
+
+.ranker-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.ranker-tab {
+
+    border: none;
+
+    background: #f3e4ce;
+
+    color: #222;
+
+    padding: 11px 13px;
+
+    font-size: 12px;
+
+    white-space: nowrap;
+
+    cursor: pointer;
+
+    border-right: 1px solid #ddd;
+}
+
+.ranker-tab.active {
+
+    background: #f2c400;
+
+    color: #222;
+}
+
+.ranker-tab:hover {
+
+    background: #e8b700;
+}
+
+
+/* ================= SLIDER ================= */
+
+.ranker-slider-area {
+
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+}
+
+.ranker-slider {
+
+    width: 100%;
+
+    overflow: hidden;
+}
+
+.ranker-track {
+
+    display: flex;
+
+    gap: 35px;
+
+    transition: transform 0.6s ease;
+}
+
+.ranker-card {
+
+    flex: 0 0 145px;
+
+    background: white;
+
+    color: #222;
+
+    overflow: hidden;
+
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+}
+
+.ranker-card img {
+
+    width: 145px;
+
+    height: 150px;
+
+    object-fit: cover;
+
+    display: block;
+}
+
+.ranker-info {
+
+    height: 50px;
+
+    background: #f5c400;
+
+    color: #222;
+
+    text-align: center;
+
+    padding: 6px 3px;
+
+    font-size: 11px;
+
+    font-weight: bold;
+
+    line-height: 18px;
+}
+
+
+/* ================= ARROWS ================= */
+
+.ranker-arrow {
+
+    position: absolute;
+
+    z-index: 10;
+
+    width: 30px;
+
+    height: 30px;
+
+    border: none;
+
+    background: rgba(0,0,0,0.45);
+
+    color: white;
+
+    cursor: pointer;
+
+    font-size: 16px;
+}
+
+.ranker-left {
+    left: -15px;
+}
+
+.ranker-right {
+    right: -15px;
+}
+
+.ranker-arrow:hover {
+
+    background: #d5ad00;
+}
+
+
+/* ================= BUTTON ================= */
+
+.all-rankers-btn {
+
+    display: block;
+
+    margin: 28px auto 0;
+
+    padding: 10px 20px;
+
+    border: none;
+
+    background: #f5c400;
+
+    color: #222;
+
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.all-rankers-btn:hover {
+
+    background: #e0b300;
+}
+
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 600px) {
+
+    .rankers-container {
+
+        padding: 25px 12px;
+    }
+
+    .ranker-card {
+
+        flex: 0 0 140px;
+    }
+
+    .ranker-card img {
+
+        width: 140px;
+
+        height: 145px;
+    }
+
+    .ranker-track {
+
+        gap: 15px;
+    }
+
+    .ranker-left {
+        left: 0;
+    }
+
+    .ranker-right {
+        right: 0;
+    }
+
+}
