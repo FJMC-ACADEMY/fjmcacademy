@@ -1680,74 +1680,66 @@ function closeMenu() {
     </p>
 <!-- ================= LIFE AT DIPS ================= -->
 
-<section class="life-dips">
+<section id="lifeDipsSection">
 
-    <!-- 7.jpg IS THE BACKGROUND -->
+    <!-- 7.jpg = BACKGROUND -->
     <img
-        src="7.jpg"
-        class="life-bg"
-        alt="Life at DIPS Background"
+        id="lifeDipsBackground"
+        src="life-at-dips/7.jpg"
+        alt=""
     >
 
-    <div class="life-dark"></div>
+    <div id="lifeDipsOverlay"></div>
 
-
-    <div class="life-container">
+    <div id="lifeDipsContent">
 
         <h2>Life at DIPS</h2>
 
-        <div class="life-line"></div>
+        <div id="lifeDipsLine"></div>
 
-
-        <!-- SLIDER -->
-
-        <div class="life-slider">
+        <div id="lifeDipsSlider">
 
             <button
                 type="button"
-                class="life-nav life-prev"
-                id="lifePrev">
+                id="lifeDipsPrev">
                 ❮
             </button>
 
+            <div id="lifeDipsViewport">
 
-            <div class="life-window" id="lifeWindow">
+                <div id="lifeDipsTrack">
 
-                <div class="life-track" id="lifeTrack">
-
-                    <div class="life-card">
-                        <img src="1.jpg" alt="Life at DIPS 1">
+                    <div class="lifeDipsPhoto">
+                        <img src="life-at-dips/1.jpg" alt="Life 1">
                     </div>
 
-                    <div class="life-card">
-                        <img src="2.jpg" alt="Life at DIPS 2">
+                    <div class="lifeDipsPhoto">
+                        <img src="life-at-dips/2.jpg" alt="Life 2">
                     </div>
 
-                    <div class="life-card">
-                        <img src="3.jpg" alt="Life at DIPS 3">
+                    <div class="lifeDipsPhoto">
+                        <img src="life-at-dips/3.jpg" alt="Life 3">
                     </div>
 
-                    <div class="life-card">
-                        <img src="4.jpg" alt="Life at DIPS 4">
+                    <div class="lifeDipsPhoto">
+                        <img src="life-at-dips/4.jpg" alt="Life 4">
                     </div>
 
-                    <div class="life-card">
-                        <img src="5.jpg" alt="Life at DIPS 5">
+                    <div class="lifeDipsPhoto">
+                        <img src="life-at-dips/5.jpg" alt="Life 5">
                     </div>
 
-                    <div class="life-card">
-                        <img src="6.jpg" alt="Life at DIPS 6">
+                    <div class="lifeDipsPhoto">
+                        <img src="life-at-dips/6.jpg" alt="Life 6">
                     </div>
 
                 </div>
 
             </div>
 
-
             <button
                 type="button"
-                class="life-nav life-next"
-                id="lifeNext">
+                id="lifeDipsNext">
                 ❯
             </button>
 
@@ -1756,8 +1748,7 @@ function closeMenu() {
 
         <button
             type="button"
-            class="life-gallery-btn"
-            id="lifeGalleryBtn">
+            id="lifeDipsGalleryButton">
             View Our Picture Gallery
         </button>
 
@@ -1766,43 +1757,34 @@ function closeMenu() {
 </section>
 
 
-<!-- ================= LARGE GALLERY ================= -->
+<!-- ================= FULL PHOTO GALLERY ================= -->
 
-<div class="life-modal" id="lifeModal">
+<div id="lifeDipsGallery">
 
     <button
         type="button"
-        class="life-modal-close"
-        id="lifeModalClose">
+        id="lifeDipsClose">
         ×
     </button>
 
-
     <button
         type="button"
-        class="life-modal-nav life-modal-prev"
-        id="lifeModalPrev">
+        id="lifeDipsGalleryPrev">
         ❮
     </button>
 
-
     <img
-        id="lifeModalImage"
+        id="lifeDipsLargeImage"
         src=""
-        alt="Life at DIPS">
-
+        alt="">
 
     <button
         type="button"
-        class="life-modal-nav life-modal-next"
-        id="lifeModalNext">
+        id="lifeDipsGalleryNext">
         ❯
     </button>
 
-
-    <div
-        class="life-modal-count"
-        id="lifeModalCount">
+    <div id="lifeDipsCounter">
         1 / 6
     </div>
 
