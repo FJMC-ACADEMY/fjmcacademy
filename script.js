@@ -739,7 +739,7 @@ const rankers = [
     rank: "Rank-16",
     exam: "june",
     examName: "CSIR NET June 25",
-    photo: "images/rohit.jpg"
+    photo: "1.jpg"
   },
 
   {
@@ -747,7 +747,7 @@ const rankers = [
     rank: "Rank-27",
     exam: "june",
     examName: "CSIR NET June 25",
-    photo: "images/ankita.jpg"
+    photo: "2.jpg"
   },
 
   {
@@ -755,7 +755,7 @@ const rankers = [
     rank: "Rank-28",
     exam: "june",
     examName: "CSIR NET June 25",
-    photo: "images/prakhar.jpg"
+    photo: "3.jpg"
   },
 
   {
@@ -763,7 +763,7 @@ const rankers = [
     rank: "Rank-34",
     exam: "june",
     examName: "CSIR NET June 25",
-    photo: "images/madhumita.jpg"
+    photo: "4.jpg"
   },
 
   {
@@ -771,7 +771,7 @@ const rankers = [
     rank: "Rank-38",
     exam: "june",
     examName: "CSIR NET June 25",
-    photo: "images/poornima.jpg"
+    photo: "5.jpg"
   },
 
 
@@ -780,7 +780,7 @@ const rankers = [
     rank: "Rank-28",
     exam: "dec",
     examName: "CSIR NET Dec 24",
-    photo: "images/tanishka.jpg"
+    photo: "6.jpg"
   },
 
   {
@@ -788,7 +788,7 @@ const rankers = [
     rank: "Rank-30",
     exam: "dec",
     examName: "CSIR NET Dec 24",
-    photo: "images/aaina.jpg"
+    photo: "7.jpg"
   },
 
   {
@@ -796,7 +796,7 @@ const rankers = [
     rank: "Rank-30",
     exam: "dec",
     examName: "CSIR NET Dec 24",
-    photo: "images/ananya.jpg"
+    photo: "1.jpg"
   },
 
   {
@@ -804,7 +804,7 @@ const rankers = [
     rank: "Rank-34",
     exam: "dec",
     examName: "CSIR NET Dec 24",
-    photo: "images/gouranga.jpg"
+    photo: "2.jpg"
   },
 
 
@@ -813,7 +813,7 @@ const rankers = [
     rank: "Rank-13",
     exam: "jam",
     examName: "IIT JAM 25",
-    photo: "images/harish.jpg"
+    photo: "4.jpg"
   },
 
   {
@@ -821,7 +821,7 @@ const rankers = [
     rank: "Rank-18",
     exam: "jam",
     examName: "IIT JAM 25",
-    photo: "images/rahul.jpg"
+    photo: "8.jpg"
   },
 
   {
@@ -829,7 +829,7 @@ const rankers = [
     rank: "Rank-30",
     exam: "jam",
     examName: "IIT JAM 25",
-    photo: "images/narendra.jpg"
+    photo: "6.jpg"
   },
 
   {
@@ -837,7 +837,7 @@ const rankers = [
     rank: "Rank-31",
     exam: "jam",
     examName: "IIT JAM 25",
-    photo: "images/tushar.jpg"
+    photo: "5r.jpg"
   }
 
 ];
