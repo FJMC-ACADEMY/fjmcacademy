@@ -846,27 +846,22 @@ footer {
 
 }
 /* =====================================================
-   LIFE AT DIPS
+   LIFE AT DIPS - CSS
 ===================================================== */
 
-.life-dips-section {
+.life-dips {
     position: relative;
     width: 100%;
     min-height: 430px;
-
     overflow: hidden;
-
-    color: white;
-
-    background: #111;
+    color: #fff;
 }
 
 
 /* ================= BACKGROUND ================= */
 
-.life-background {
+.life-bg {
     position: absolute;
-
     inset: 0;
 
     width: 100%;
@@ -878,11 +873,8 @@ footer {
 }
 
 
-/* DARK OVERLAY */
-
-.life-overlay {
+.life-dark {
     position: absolute;
-
     inset: 0;
 
     background: rgba(0, 0, 0, 0.68);
@@ -891,9 +883,9 @@ footer {
 }
 
 
-/* ================= CONTAINER ================= */
+/* ================= CONTENT ================= */
 
-.life-dips-container {
+.life-container {
     position: relative;
 
     z-index: 2;
@@ -907,27 +899,21 @@ footer {
 }
 
 
-.life-dips-container h2 {
+.life-container h2 {
     margin: 0 0 8px;
 
     font-size: 25px;
-
     font-weight: 500;
-
-    color: white;
 }
 
 
-/* YELLOW LINE */
-
-.life-title-line {
+.life-line {
     width: 38px;
-
     height: 3px;
 
     background: #f4c400;
 
-    margin-bottom: 38px;
+    margin-bottom: 35px;
 }
 
 
@@ -935,23 +921,17 @@ footer {
    SLIDER
 ===================================================== */
 
-.life-slider-wrapper {
+.life-slider {
     position: relative;
 
     width: 100%;
-
-    display: flex;
-
-    align-items: center;
 }
 
 
-.life-slider {
+.life-window {
     width: 100%;
 
     overflow: hidden;
-
-    position: relative;
 }
 
 
@@ -960,92 +940,86 @@ footer {
 
     gap: 25px;
 
-    width: max-content;
+    transform: translate3d(0, 0, 0);
 
-    transition: transform 0.6s ease;
+    transition: transform 0.18s ease-out;
 
     will-change: transform;
 }
 
 
-.life-slide {
-    flex: 0 0 280px;
+/* PHOTO */
+
+.life-card {
+    flex: 0 0 calc((100% - 75px) / 4);
 
     height: 215px;
 
     overflow: hidden;
 
-    background: #222;
-
-    border-radius: 2px;
+    background: #111;
 
     cursor: pointer;
-
-    position: relative;
 }
 
 
-.life-slide img {
-    width: 100%;
-
-    height: 100%;
-
+.life-card img {
     display: block;
+
+    width: 100%;
+    height: 100%;
 
     object-fit: cover;
 
     user-select: none;
 
     -webkit-user-drag: none;
-
-    transition: transform 0.35s ease;
 }
 
 
-.life-slide:hover img {
-    transform: scale(1.04);
+.life-card:hover img {
+    transform: scale(1.03);
 }
 
 
 /* =====================================================
-   NEXT / PREVIOUS
+   PREVIOUS / NEXT
 ===================================================== */
 
-.life-btn {
+.life-nav {
     position: absolute;
 
     top: 50%;
 
     transform: translateY(-50%);
 
-    z-index: 10;
+    z-index: 20;
 
     width: 42px;
-
     height: 58px;
 
-    border: none;
+    padding: 0;
 
-    background: rgba(0, 0, 0, 0.65);
+    border: 0;
 
-    color: white;
+    background: rgba(0, 0, 0, 0.75);
 
-    font-size: 25px;
+    color: #fff;
+
+    font-size: 24px;
 
     cursor: pointer;
 
     display: flex;
-
     align-items: center;
-
     justify-content: center;
 
-    transition: background 0.25s ease;
+    transition: background 0.15s ease;
 }
 
 
-.life-btn:hover {
-    background: rgba(0, 0, 0, 0.9);
+.life-nav:hover {
+    background: rgba(0, 0, 0, 0.95);
 }
 
 
@@ -1070,19 +1044,17 @@ footer {
 
     padding: 11px 24px;
 
-    border: none;
-
-    border-radius: 2px;
+    border: 0;
 
     background: #f28c00;
 
-    color: white;
+    color: #fff;
 
     font-size: 14px;
 
     cursor: pointer;
 
-    transition: background 0.25s ease;
+    transition: background 0.15s ease;
 }
 
 
@@ -1092,182 +1064,119 @@ footer {
 
 
 /* =====================================================
-   LARGE GALLERY POPUP
+   LARGE GALLERY MODAL
 ===================================================== */
 
-.life-gallery-popup {
+.life-modal {
     position: fixed;
 
     inset: 0;
 
-    z-index: 99999;
+    z-index: 999999;
 
     display: none;
 
     align-items: center;
-
     justify-content: center;
 
-    background: rgba(0, 0, 0, 0.94);
-
-    padding: 20px;
+    background: rgba(0, 0, 0, 0.95);
 }
 
 
-.life-gallery-popup.active {
+.life-modal.open {
     display: flex;
 }
 
 
-/* POPUP CONTENT */
-
-.life-popup-content {
-    position: relative;
-
-    max-width: 90vw;
-
-    max-height: 90vh;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-}
-
-
-.life-popup-content img {
+.life-modal > img {
     display: block;
 
     max-width: 88vw;
-
     max-height: 82vh;
 
     width: auto;
-
     height: auto;
 
     object-fit: contain;
 
     user-select: none;
-
-    -webkit-user-drag: none;
 }
 
 
 /* CLOSE */
 
-.life-popup-close {
+.life-modal-close {
     position: absolute;
 
     top: 15px;
+    right: 20px;
 
-    right: 22px;
-
-    z-index: 20;
+    z-index: 30;
 
     width: 45px;
-
     height: 45px;
 
-    border: none;
+    border: 0;
 
     border-radius: 50%;
 
     background: rgba(255,255,255,0.15);
 
-    color: white;
+    color: #fff;
 
-    font-size: 34px;
-
-    line-height: 40px;
+    font-size: 32px;
 
     cursor: pointer;
 }
 
 
-.life-popup-close:hover {
-    background: rgba(255,255,255,0.30);
-}
+/* MODAL ARROWS */
 
-
-/* POPUP ARROWS */
-
-.life-popup-arrow {
+.life-modal-nav {
     position: absolute;
 
     top: 50%;
 
     transform: translateY(-50%);
 
-    z-index: 20;
+    z-index: 30;
 
-    width: 52px;
-
+    width: 55px;
     height: 70px;
 
-    border: none;
+    border: 0;
 
-    background: rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.15);
 
-    color: white;
+    color: #fff;
 
-    font-size: 32px;
+    font-size: 30px;
 
     cursor: pointer;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
 }
 
 
-.life-popup-arrow:hover {
-    background: rgba(255,255,255,0.25);
-}
-
-
-.life-popup-prev {
+.life-modal-prev {
     left: 20px;
 }
 
 
-.life-popup-next {
+.life-modal-next {
     right: 20px;
 }
 
 
-/* COUNTER */
-
-.life-popup-counter {
+.life-modal-count {
     position: absolute;
 
-    bottom: -35px;
-
+    bottom: 18px;
     left: 50%;
 
     transform: translateX(-50%);
 
-    color: white;
+    color: #fff;
 
     font-size: 14px;
-
-    white-space: nowrap;
-}
-
-
-/* =====================================================
-   TABLET
-===================================================== */
-
-@media (max-width: 1000px) {
-
-    .life-slide {
-        flex-basis: 300px;
-    }
-
 }
 
 
@@ -1277,30 +1186,18 @@ footer {
 
 @media (max-width: 700px) {
 
-    .life-dips-section {
-        min-height: 360px;
-    }
-
-
-    .life-dips-container {
+    .life-container {
         padding: 28px 12px 30px;
     }
 
 
-    .life-dips-container h2 {
+    .life-container h2 {
         font-size: 22px;
     }
 
 
-    .life-title-line {
+    .life-line {
         margin-bottom: 25px;
-    }
-
-
-    .life-slide {
-        flex: 0 0 calc(100vw - 24px);
-
-        height: 220px;
     }
 
 
@@ -1309,50 +1206,34 @@ footer {
     }
 
 
-    .life-btn {
-        width: 38px;
+    .life-card {
+        flex: 0 0 100%;
 
+        height: 220px;
+    }
+
+
+    .life-nav {
+        width: 38px;
         height: 52px;
 
-        font-size: 22px;
+        font-size: 21px;
     }
 
 
-    .life-gallery-btn {
-        margin-top: 22px;
+    .life-modal > img {
+        max-width: 92vw;
+        max-height: 78vh;
     }
 
 
-    .life-popup-arrow {
-        width: 42px;
-
-        height: 55px;
-
-        font-size: 25px;
-    }
-
-
-    .life-popup-prev {
+    .life-modal-prev {
         left: 5px;
     }
 
 
-    .life-popup-next {
+    .life-modal-next {
         right: 5px;
-    }
-
-
-    .life-popup-close {
-        top: 8px;
-
-        right: 8px;
-    }
-
-
-    .life-popup-content img {
-        max-width: 92vw;
-
-        max-height: 78vh;
     }
 
 }
