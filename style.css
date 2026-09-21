@@ -846,10 +846,10 @@ footer {
 
 }
 /* =====================================================
-   LIFE AT DIPS - CSS
+   LIFE AT DIPS
 ===================================================== */
 
-.life-dips {
+#lifeDipsSection {
     position: relative;
     width: 100%;
     min-height: 430px;
@@ -858,9 +858,9 @@ footer {
 }
 
 
-/* ================= BACKGROUND ================= */
+/* BACKGROUND */
 
-.life-bg {
+#lifeDipsBackground {
     position: absolute;
     inset: 0;
 
@@ -873,21 +873,20 @@ footer {
 }
 
 
-.life-dark {
+#lifeDipsOverlay {
     position: absolute;
     inset: 0;
 
-    background: rgba(0, 0, 0, 0.68);
+    background: rgba(0,0,0,0.68);
 
     z-index: 1;
 }
 
 
-/* ================= CONTENT ================= */
+/* CONTENT */
 
-.life-container {
+#lifeDipsContent {
     position: relative;
-
     z-index: 2;
 
     width: 100%;
@@ -899,7 +898,7 @@ footer {
 }
 
 
-.life-container h2 {
+#lifeDipsContent h2 {
     margin: 0 0 8px;
 
     font-size: 25px;
@@ -907,7 +906,7 @@ footer {
 }
 
 
-.life-line {
+#lifeDipsLine {
     width: 38px;
     height: 3px;
 
@@ -921,53 +920,49 @@ footer {
    SLIDER
 ===================================================== */
 
-.life-slider {
+#lifeDipsSlider {
     position: relative;
-
     width: 100%;
 }
 
 
-.life-window {
+#lifeDipsViewport {
     width: 100%;
-
     overflow: hidden;
 }
 
 
-.life-track {
+#lifeDipsTrack {
     display: flex;
 
     gap: 25px;
 
-    transform: translate3d(0, 0, 0);
+    transform: translate3d(0,0,0);
 
-    transition: transform 0.18s ease-out;
+    transition: transform 0.15s ease-out;
 
     will-change: transform;
 }
 
 
-/* PHOTO */
-
-.life-card {
+.lifeDipsPhoto {
     flex: 0 0 calc((100% - 75px) / 4);
 
     height: 215px;
 
     overflow: hidden;
 
-    background: #111;
-
     cursor: pointer;
+
+    background: #111;
 }
 
 
-.life-card img {
-    display: block;
-
+.lifeDipsPhoto img {
     width: 100%;
     height: 100%;
+
+    display: block;
 
     object-fit: cover;
 
@@ -977,59 +972,52 @@ footer {
 }
 
 
-.life-card:hover img {
-    transform: scale(1.03);
-}
-
-
 /* =====================================================
-   PREVIOUS / NEXT
+   SLIDER BUTTONS
 ===================================================== */
 
-.life-nav {
+#lifeDipsPrev,
+#lifeDipsNext {
     position: absolute;
 
     top: 50%;
 
     transform: translateY(-50%);
 
-    z-index: 20;
+    z-index: 10;
 
-    width: 42px;
-    height: 58px;
-
-    padding: 0;
+    width: 44px;
+    height: 60px;
 
     border: 0;
 
-    background: rgba(0, 0, 0, 0.75);
+    background: rgba(0,0,0,0.78);
 
-    color: #fff;
+    color: white;
 
-    font-size: 24px;
+    font-size: 25px;
 
     cursor: pointer;
 
     display: flex;
     align-items: center;
     justify-content: center;
-
-    transition: background 0.15s ease;
 }
 
 
-.life-nav:hover {
-    background: rgba(0, 0, 0, 0.95);
-}
-
-
-.life-prev {
+#lifeDipsPrev {
     left: 0;
 }
 
 
-.life-next {
+#lifeDipsNext {
     right: 0;
+}
+
+
+#lifeDipsPrev:hover,
+#lifeDipsNext:hover {
+    background: rgba(0,0,0,1);
 }
 
 
@@ -1037,12 +1025,12 @@ footer {
    GALLERY BUTTON
 ===================================================== */
 
-.life-gallery-btn {
+#lifeDipsGalleryButton {
     display: block;
 
     margin: 28px auto 0;
 
-    padding: 11px 24px;
+    padding: 11px 25px;
 
     border: 0;
 
@@ -1053,21 +1041,19 @@ footer {
     font-size: 14px;
 
     cursor: pointer;
-
-    transition: background 0.15s ease;
 }
 
 
-.life-gallery-btn:hover {
+#lifeDipsGalleryButton:hover {
     background: #d97700;
 }
 
 
 /* =====================================================
-   LARGE GALLERY MODAL
+   FULL GALLERY
 ===================================================== */
 
-.life-modal {
+#lifeDipsGallery {
     position: fixed;
 
     inset: 0;
@@ -1079,19 +1065,21 @@ footer {
     align-items: center;
     justify-content: center;
 
-    background: rgba(0, 0, 0, 0.95);
+    background: rgba(0,0,0,0.96);
 }
 
 
-.life-modal.open {
+#lifeDipsGallery.lifeGalleryOpen {
     display: flex;
 }
 
 
-.life-modal > img {
+/* LARGE IMAGE */
+
+#lifeDipsLargeImage {
     display: block;
 
-    max-width: 88vw;
+    max-width: 86vw;
     max-height: 82vh;
 
     width: auto;
@@ -1100,21 +1088,23 @@ footer {
     object-fit: contain;
 
     user-select: none;
+
+    -webkit-user-drag: none;
 }
 
 
 /* CLOSE */
 
-.life-modal-close {
+#lifeDipsClose {
     position: absolute;
 
     top: 15px;
     right: 20px;
 
-    z-index: 30;
+    z-index: 20;
 
-    width: 45px;
-    height: 45px;
+    width: 46px;
+    height: 46px;
 
     border: 0;
 
@@ -1130,43 +1120,46 @@ footer {
 }
 
 
-/* MODAL ARROWS */
+/* LARGE PREVIOUS/NEXT */
 
-.life-modal-nav {
+#lifeDipsGalleryPrev,
+#lifeDipsGalleryNext {
     position: absolute;
 
     top: 50%;
 
     transform: translateY(-50%);
 
-    z-index: 30;
+    z-index: 20;
 
-    width: 55px;
-    height: 70px;
+    width: 58px;
+    height: 75px;
 
     border: 0;
 
     background: rgba(255,255,255,0.15);
 
-    color: #fff;
+    color: white;
 
-    font-size: 30px;
+    font-size: 32px;
 
     cursor: pointer;
 }
 
 
-.life-modal-prev {
+#lifeDipsGalleryPrev {
     left: 20px;
 }
 
 
-.life-modal-next {
+#lifeDipsGalleryNext {
     right: 20px;
 }
 
 
-.life-modal-count {
+/* COUNTER */
+
+#lifeDipsCounter {
     position: absolute;
 
     bottom: 18px;
@@ -1174,9 +1167,9 @@ footer {
 
     transform: translateX(-50%);
 
-    color: #fff;
+    color: white;
 
-    font-size: 14px;
+    font-size: 15px;
 }
 
 
@@ -1186,54 +1179,64 @@ footer {
 
 @media (max-width: 700px) {
 
-    .life-container {
+    #lifeDipsContent {
         padding: 28px 12px 30px;
     }
 
 
-    .life-container h2 {
+    #lifeDipsContent h2 {
         font-size: 22px;
     }
 
 
-    .life-line {
+    #lifeDipsLine {
         margin-bottom: 25px;
     }
 
 
-    .life-track {
+    #lifeDipsTrack {
         gap: 0;
     }
 
 
-    .life-card {
+    .lifeDipsPhoto {
         flex: 0 0 100%;
 
         height: 220px;
     }
 
 
-    .life-nav {
-        width: 38px;
-        height: 52px;
+    #lifeDipsPrev,
+    #lifeDipsNext {
+        width: 40px;
+        height: 54px;
 
-        font-size: 21px;
+        font-size: 22px;
     }
 
 
-    .life-modal > img {
+    #lifeDipsLargeImage {
         max-width: 92vw;
         max-height: 78vh;
     }
 
 
-    .life-modal-prev {
-        left: 5px;
+    #lifeDipsGalleryPrev,
+    #lifeDipsGalleryNext {
+        width: 43px;
+        height: 58px;
+
+        font-size: 25px;
     }
 
 
-    .life-modal-next {
-        right: 5px;
+    #lifeDipsGalleryPrev {
+        left: 4px;
+    }
+
+
+    #lifeDipsGalleryNext {
+        right: 4px;
     }
 
 }
