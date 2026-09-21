@@ -1,3 +1,4 @@
+alert("SCRIPT JS LOADED");
 // ================= MOBILE MENU =================
 
 function toggleMenu() {
