@@ -12,7 +12,7 @@ const STUDENTS = {
         courses: ["linear-algebra", "calculus"]
     },
 
-    "neha@gmail.com": {
+    "fogatjagmohan@gmail.com": {
         password: "Neha@789",
         name: "Neha",
         courses: ["real-analysis", "calculus"]
