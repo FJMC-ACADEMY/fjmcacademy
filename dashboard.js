@@ -1158,6 +1158,7 @@ function openLiveClass(url) {
 
 /* =========================================================
    PDF VIEWER
+   SCREEN CENTER FIXED WATERMARK
    ========================================================= */
 
 async function openPDFViewer(
@@ -1203,6 +1204,9 @@ async function openPDFViewer(
             style="
                 padding:15px;
                 text-align:center;
+                user-select:none;
+                -webkit-user-select:none;
+                -webkit-touch-callout:none;
             "
         >
         </div>
@@ -1249,6 +1253,125 @@ async function openPDFViewer(
         }
 
 
+        /* =================================================
+           SCREEN WATERMARK
+           ================================================= */
+
+        /* Purana watermark ho to remove */
+
+        const oldWatermark =
+            document.getElementById(
+                "fjmcScreenWatermark"
+            );
+
+
+        if (oldWatermark) {
+            oldWatermark.remove();
+        }
+
+
+        /* Naya watermark */
+
+        const watermark =
+            document.createElement(
+                "div"
+            );
+
+
+        watermark.id =
+            "fjmcScreenWatermark";
+
+
+        watermark.textContent =
+            "FJMC ACADEMY";
+
+
+        /*
+           IMPORTANT:
+           FIXED = SCREEN PAR FIXED
+           PDF PAGE KE ANDAR NAHI
+        */
+
+        watermark.style.position =
+            "fixed";
+
+
+        watermark.style.left =
+            "50%";
+
+
+        watermark.style.top =
+            "50%";
+
+
+        watermark.style.transform =
+            "translate(-50%, -50%) rotate(-30deg)";
+
+
+        /* Dark black transparent */
+
+        watermark.style.color =
+            "rgba(0, 0, 0, 0.38)";
+
+
+        watermark.style.fontSize =
+            "34px";
+
+
+        watermark.style.fontWeight =
+            "800";
+
+
+        watermark.style.letterSpacing =
+            "2px";
+
+
+        watermark.style.whiteSpace =
+            "nowrap";
+
+
+        /*
+           PDF ke upar rahega
+        */
+
+        watermark.style.zIndex =
+            "1000000";
+
+
+        /*
+           Click/select nahi hoga
+        */
+
+        watermark.style.pointerEvents =
+            "none";
+
+
+        watermark.style.userSelect =
+            "none";
+
+
+        watermark.style.webkitUserSelect =
+            "none";
+
+
+        watermark.style.webkitTouchCallout =
+            "none";
+
+
+        /*
+           SCREEN par add hoga,
+           PDF PAGE ke wrapper me nahi
+        */
+
+        document.body.appendChild(
+            watermark
+        );
+
+
+        /* =================================================
+           RENDER PDF PAGES
+           ================================================= */
+
         for (
             let pageNumber = 1;
             pageNumber <= pdf.numPages;
@@ -1276,12 +1399,30 @@ async function openPDFViewer(
             wrapper.style.position =
                 "relative";
 
+
             wrapper.style.display =
                 "inline-block";
+
 
             wrapper.style.margin =
                 "0 auto 20px auto";
 
+
+            wrapper.style.maxWidth =
+                "100%";
+
+
+            wrapper.style.background =
+                "#ffffff";
+
+
+            wrapper.style.overflow =
+                "hidden";
+
+
+            /* =========================================
+               CANVAS
+               ========================================= */
 
             const canvas =
                 document.createElement(
@@ -1292,6 +1433,7 @@ async function openPDFViewer(
             canvas.width =
                 viewport.width;
 
+
             canvas.height =
                 viewport.height;
 
@@ -1299,58 +1441,25 @@ async function openPDFViewer(
             canvas.style.maxWidth =
                 "100%";
 
+
             canvas.style.height =
                 "auto";
+
 
             canvas.style.display =
                 "block";
 
 
-            wrapper.appendChild(
-                canvas
-            );
-
-
-            const watermark =
-                document.createElement(
-                    "div"
-                );
-
-
-            watermark.textContent =
-                "FJMC ACADEMY";
-
-
-            watermark.style.position =
-                "absolute";
-
-            watermark.style.left =
-                "50%";
-
-            watermark.style.top =
-                "50%";
-
-            watermark.style.transform =
-                "translate(-50%,-50%) rotate(-30deg)";
-
-            watermark.style.color =
-                "rgba(180,180,180,.25)";
-
-            watermark.style.fontSize =
-                "28px";
-
-            watermark.style.fontWeight =
-                "bold";
-
-            watermark.style.pointerEvents =
+            canvas.style.userSelect =
                 "none";
 
-            watermark.style.whiteSpace =
-                "nowrap";
+
+            canvas.style.webkitUserSelect =
+                "none";
 
 
             wrapper.appendChild(
-                watermark
+                canvas
             );
 
 
@@ -1359,6 +1468,10 @@ async function openPDFViewer(
             );
 
 
+            /* =========================================
+               RENDER PAGE
+               ========================================= */
+
             const context =
                 canvas.getContext(
                     "2d"
@@ -1366,20 +1479,33 @@ async function openPDFViewer(
 
 
             await page.render({
-                canvasContext: context,
-                viewport: viewport
+
+                canvasContext:
+                    context,
+
+                viewport:
+                    viewport
+
             }).promise;
 
         }
 
 
-        /* Disable selection inside PDF */
+        /* =================================================
+           DISABLE SELECTION
+           ================================================= */
 
         pages.style.userSelect =
             "none";
 
+
         pages.style.webkitUserSelect =
             "none";
+
+
+        pages.style.webkitTouchCallout =
+            "none";
+
 
     } catch (error) {
 
@@ -1387,6 +1513,19 @@ async function openPDFViewer(
             "PDF error:",
             error
         );
+
+
+        /* Error hone par watermark hata do */
+
+        const watermark =
+            document.getElementById(
+                "fjmcScreenWatermark"
+            );
+
+
+        if (watermark) {
+            watermark.remove();
+        }
 
 
         body.innerHTML = `
@@ -1408,12 +1547,12 @@ async function openPDFViewer(
                 </p>
 
             </div>
+
         `;
 
     }
 
 }
-
 
 /* =========================================================
    LOGOUT
