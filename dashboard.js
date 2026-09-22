@@ -1155,27 +1155,6 @@ function openLiveClass(url) {
     );
 }
 
-/* =========================================================
-   CLOSE MODAL
-   ========================================================= */
-
-function closeModal() {
-
-    const watermark =
-        document.getElementById("fjmcFloatingWatermark");
-
-    if (watermark) {
-        watermark.remove();
-    }
-
-    const modal =
-        document.getElementById("fjmcContentModal");
-
-    if (modal) {
-        modal.remove();
-    }
-}
-
 
 /* =========================================================
    PDF VIEWER
@@ -1434,7 +1413,6 @@ async function openPDFViewer(
     }
 
 }
-
 
 
 /* =========================================================
