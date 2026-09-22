@@ -78,19 +78,19 @@ const COURSES = {
             {
                 type: "local-video",
                 title: "Lecture 3",
-                url: "./real-analysis-lecture-3.mp4"
+                url: "real-analysis-lecture-3.mp4"
             },
 
             {
                 type: "pdf",
                 title: "Lecture 1 PDF",
-                url: "./321581555.PDF"
+                url: "321581555.PDF"
             },
 
             {
                 type: "pdf",
                 title: "Lecture 2 PDF",
-                url: "./ch03.pdf"
+                url: "ch03.pdf"
             },
 
             {
