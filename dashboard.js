@@ -1155,9 +1155,9 @@ function openLiveClass(url) {
     );
 }
 
-
 /* =========================================================
    PDF VIEWER
+   CENTER + DARKER FJMC WATERMARK
    ========================================================= */
 
 async function openPDFViewer(
@@ -1168,22 +1168,17 @@ async function openPDFViewer(
     const modal =
         createModal();
 
-
     const modalTitle =
         document.getElementById(
             "fjmcModalTitle"
         );
-
 
     const body =
         document.getElementById(
             "fjmcModalBody"
         );
 
-
-    modalTitle.textContent =
-        title;
-
+    modalTitle.textContent = title;
 
     body.innerHTML = `
 
@@ -1203,11 +1198,12 @@ async function openPDFViewer(
             style="
                 padding:15px;
                 text-align:center;
+                user-select:none;
+                -webkit-user-select:none;
             "
         >
         </div>
     `;
-
 
     try {
 
@@ -1221,15 +1217,14 @@ async function openPDFViewer(
             );
         }
 
-
         pdfjsLib.GlobalWorkerOptions.workerSrc =
             "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 
         const pdf =
-            await pdfjsLib.getDocument(
-                url
-            ).promise;
+            await pdfjsLib
+                .getDocument(url)
+                .promise;
 
 
         const pages =
@@ -1237,17 +1232,19 @@ async function openPDFViewer(
                 "pdfPages"
             );
 
-
         const loading =
             document.getElementById(
                 "pdfLoading"
             );
 
-
         if (loading) {
             loading.remove();
         }
 
+
+        /* ================================================
+           RENDER EVERY PDF PAGE
+           ================================================ */
 
         for (
             let pageNumber = 1;
@@ -1267,11 +1264,14 @@ async function openPDFViewer(
                 });
 
 
+            /* ============================================
+               PAGE WRAPPER
+               ============================================ */
+
             const wrapper =
                 document.createElement(
                     "div"
                 );
-
 
             wrapper.style.position =
                 "relative";
@@ -1280,14 +1280,26 @@ async function openPDFViewer(
                 "inline-block";
 
             wrapper.style.margin =
-                "0 auto 20px auto";
+                "0 auto 25px auto";
 
+            wrapper.style.maxWidth =
+                "100%";
+
+            wrapper.style.overflow =
+                "hidden";
+
+            wrapper.style.background =
+                "#ffffff";
+
+
+            /* ============================================
+               CANVAS
+               ============================================ */
 
             const canvas =
                 document.createElement(
                     "canvas"
                 );
-
 
             canvas.width =
                 viewport.width;
@@ -1295,8 +1307,7 @@ async function openPDFViewer(
             canvas.height =
                 viewport.height;
 
-
-            canvas.style.maxWidth =
+            canvas.style.width =
                 "100%";
 
             canvas.style.height =
@@ -1305,17 +1316,27 @@ async function openPDFViewer(
             canvas.style.display =
                 "block";
 
+            canvas.style.userSelect =
+                "none";
+
+            canvas.style.webkitUserSelect =
+                "none";
+
 
             wrapper.appendChild(
                 canvas
             );
 
 
+            /* ============================================
+               WATERMARK
+               EXACT CENTER
+               ============================================ */
+
             const watermark =
                 document.createElement(
                     "div"
                 );
-
 
             watermark.textContent =
                 "FJMC ACADEMY";
@@ -1330,23 +1351,46 @@ async function openPDFViewer(
             watermark.style.top =
                 "50%";
 
+
             watermark.style.transform =
-                "translate(-50%,-50%) rotate(-30deg)";
+                "translate(-50%, -50%) rotate(-30deg)";
+
+
+            /* DARKER THAN BEFORE */
 
             watermark.style.color =
-                "rgba(180,180,180,.25)";
+                "rgba(100, 100, 100, 0.38)";
+
 
             watermark.style.fontSize =
-                "28px";
+                "32px";
 
             watermark.style.fontWeight =
-                "bold";
+                "700";
+
+            watermark.style.letterSpacing =
+                "2px";
+
+            watermark.style.whiteSpace =
+                "nowrap";
+
+
+            /* WATERMARK ABOVE PDF */
+
+            watermark.style.zIndex =
+                "10";
+
+
+            /* USER CANNOT SELECT IT */
 
             watermark.style.pointerEvents =
                 "none";
 
-            watermark.style.whiteSpace =
-                "nowrap";
+            watermark.style.userSelect =
+                "none";
+
+            watermark.style.webkitUserSelect =
+                "none";
 
 
             wrapper.appendChild(
@@ -1354,10 +1398,18 @@ async function openPDFViewer(
             );
 
 
+            /* ============================================
+               ADD PAGE
+               ============================================ */
+
             pages.appendChild(
                 wrapper
             );
 
+
+            /* ============================================
+               RENDER PDF
+               ============================================ */
 
             const context =
                 canvas.getContext(
@@ -1366,20 +1418,31 @@ async function openPDFViewer(
 
 
             await page.render({
-                canvasContext: context,
-                viewport: viewport
+
+                canvasContext:
+                    context,
+
+                viewport:
+                    viewport
+
             }).promise;
 
         }
 
 
-        /* Disable selection inside PDF */
+        /* ================================================
+           EXTRA PDF PROTECTION
+           ================================================ */
 
         pages.style.userSelect =
             "none";
 
         pages.style.webkitUserSelect =
             "none";
+
+        pages.style.webkitTouchCallout =
+            "none";
+
 
     } catch (error) {
 
@@ -1409,9 +1472,7 @@ async function openPDFViewer(
 
             </div>
         `;
-
     }
-
 }
 
 
