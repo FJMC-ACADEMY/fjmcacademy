@@ -120,7 +120,7 @@ const COURSES = {
             {
                 type: "pdf",
                 title: "Linear Algebra Notes",
-                url: "./pdf/linear-algebra-notes.pdf"
+                url: "pdf/linear-algebra-notes.pdf"
             },
 
             {
@@ -156,7 +156,7 @@ const COURSES = {
             {
                 type: "pdf",
                 title: "Chapter 3 PDF",
-                url: "./ch03.pdf"
+                url: "ch03.pdf"
             },
 
             {
