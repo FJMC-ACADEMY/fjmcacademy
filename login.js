@@ -18,7 +18,7 @@ import {
 
 const STUDENTS = {
 
-    "rahul@gmail.com": {
+    "fjmcacademy1008@gmail.com": {
         name: "Rahul",
         courses: ["real-analysis"]
     },
