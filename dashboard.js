@@ -1155,472 +1155,303 @@ function openLiveClass(url) {
     );
 }
 
+
 /* =========================================================
-   CLOSE MODAL
+   PDF.js WORKER
    ========================================================= */
 
-function closeModal() {
+if (typeof pdfjsLib !== "undefined") {
 
-    /* ============================================
-       REMOVE FIXED SCREEN WATERMARK
-       ============================================ */
-
-    const watermark =
-        document.getElementById(
-            "fjmcFloatingWatermark"
-        );
-
-    if (watermark) {
-        watermark.remove();
-    }
-
-
-    /* ============================================
-       REMOVE PDF MODAL
-       ============================================ */
-
-    const modal =
-        document.getElementById(
-            "fjmcContentModal"
-        );
-
-    if (modal) {
-        modal.remove();
-    }
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 }
 
 
 /* =========================================================
-   PDF VIEWER
-   FIXED CENTER WATERMARK
+   PROTECTED PDF VIEWER
    ========================================================= */
 
-async function openPDFViewer(
-    url,
-    title
-) {
+async function openPDFViewer(pdfURL, title) {
 
-    /* ============================================
-       CREATE MODAL
-       ============================================ */
+    if (typeof pdfjsLib === "undefined") {
 
-    const modal =
-        createModal();
+        alert("PDF viewer could not load. Please refresh the page.");
+
+        return;
+    }
 
 
-    const modalTitle =
-        document.getElementById(
-            "fjmcModalTitle"
-        );
+    /* Create overlay */
+
+    const overlay = document.createElement("div");
+
+    overlay.id = "pdfFullscreen";
 
 
-    const body =
-        document.getElementById(
-            "fjmcModalBody"
-        );
+  overlay.innerHTML = `
 
+    <div class="pdf-header">
 
-    modalTitle.textContent =
-        title;
+        <div class="pdf-title">
+            ${title}
+        </div>
 
+        <button id="closePDF">
+            ✕ Close
+        </button>
 
-    /* ============================================
-       PDF AREA
-       ============================================ */
+    </div>
 
-    body.innerHTML = `
+    <!-- SCREEN WATERMARK -->
+    <div class="pdf-screen-watermark">
+        <div>FJMC Academy</div>
+        <div>${loggedInEmail}</div>
+    </div>
 
-        <div
-            id="pdfLoading"
-            style="
-                color:white;
-                text-align:center;
-                padding:30px;
-                font-size:16px;
-            "
-        >
+    <div id="pdfScrollArea" class="pdf-scroll-area">
+
+        <div id="pdfLoading" class="pdf-loading">
             Loading PDF...
         </div>
 
-        <div
-            id="pdfPages"
-            style="
-                padding:15px;
-                text-align:center;
-                user-select:none;
-                -webkit-user-select:none;
-                -webkit-touch-callout:none;
-            "
-        >
-        </div>
+        <div id="pdfPages" class="pdf-pages"></div>
 
-    `;
+    </div>
+`;
+
+
+    document.body.appendChild(overlay);
+
+    document.body.classList.add("viewer-open");
+
+
+    /* Close PDF */
+
+    document.getElementById("closePDF").addEventListener("click", closePDFViewer);
 
 
     try {
 
-        /* ========================================
-           CHECK PDF.JS
-           ======================================== */
+        const loadingTask = pdfjsLib.getDocument({
+            url: pdfURL
+        });
 
-        if (
-            typeof pdfjsLib ===
-            "undefined"
-        ) {
 
-            throw new Error(
-                "PDF.js is not loaded."
-            );
+        const pdf = await loadingTask.promise;
 
+
+        const pagesContainer = document.getElementById("pdfPages");
+
+        const loadingMessage = document.getElementById("pdfLoading");
+
+        if (loadingMessage) {
+            loadingMessage.remove();
         }
 
 
-        /* ========================================
-           PDF WORKER
-           ======================================== */
+        /* Render every page */
 
-        pdfjsLib.GlobalWorkerOptions.workerSrc =
-            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
 
-
-        /* ========================================
-           LOAD PDF
-           ======================================== */
-
-        const pdf =
-            await pdfjsLib
-                .getDocument(url)
-                .promise;
-
-
-        const pages =
-            document.getElementById(
-                "pdfPages"
+            await renderPDFPage(
+                pdf,
+                pageNumber,
+                pagesContainer
             );
-
-
-        const loading =
-            document.getElementById(
-                "pdfLoading"
-            );
-
-
-        if (loading) {
-            loading.remove();
-        }
-
-
-        /* ========================================
-           CREATE FIXED SCREEN WATERMARK
-           ======================================== */
-
-        const oldWatermark =
-            document.getElementById(
-                "fjmcFloatingWatermark"
-            );
-
-
-        if (oldWatermark) {
-            oldWatermark.remove();
-        }
-
-
-        const watermark =
-            document.createElement(
-                "div"
-            );
-
-
-        watermark.id =
-            "fjmcFloatingWatermark";
-
-
-        watermark.textContent =
-            "FJMC ACADEMY";
-
-
-        /* ========================================
-           FIXED POSITION
-           ======================================== */
-
-        watermark.style.position =
-            "fixed";
-
-
-        watermark.style.left =
-            "50%";
-
-
-        watermark.style.top =
-            "50%";
-
-
-        watermark.style.transform =
-            "translate(-50%, -50%) rotate(-30deg)";
-
-
-        /* ========================================
-           BLACK / DARK WATERMARK
-           ======================================== */
-
-        watermark.style.color =
-            "rgba(0, 0, 0, 0.32)";
-
-
-        watermark.style.fontSize =
-            "34px";
-
-
-        watermark.style.fontWeight =
-            "800";
-
-
-        watermark.style.letterSpacing =
-            "2px";
-
-
-        watermark.style.whiteSpace =
-            "nowrap";
-
-
-        /* ========================================
-           IMPORTANT
-           WATERMARK PDF PAGE KA PART NAHI HAI
-           ======================================== */
-
-        watermark.style.pointerEvents =
-            "none";
-
-
-        watermark.style.userSelect =
-            "none";
-
-
-        watermark.style.webkitUserSelect =
-            "none";
-
-
-        watermark.style.webkitTouchCallout =
-            "none";
-
-
-        /* ========================================
-           ALWAYS ABOVE PDF
-           ======================================== */
-
-        watermark.style.zIndex =
-            "1000000";
-
-
-        document.body.appendChild(
-            watermark
-        );
-
-
-        /* ========================================
-           RENDER ALL PDF PAGES
-           ======================================== */
-
-        for (
-            let pageNumber = 1;
-            pageNumber <= pdf.numPages;
-            pageNumber++
-        ) {
-
-            const page =
-                await pdf.getPage(
-                    pageNumber
-                );
-
-
-            /* ====================================
-               PAGE SIZE
-               ==================================== */
-
-            const viewport =
-                page.getViewport({
-                    scale: 1.4
-                });
-
-
-            /* ====================================
-               PAGE WRAPPER
-               ==================================== */
-
-            const wrapper =
-                document.createElement(
-                    "div"
-                );
-
-
-            wrapper.style.position =
-                "relative";
-
-
-            wrapper.style.display =
-                "inline-block";
-
-
-            wrapper.style.margin =
-                "0 auto 25px auto";
-
-
-            wrapper.style.maxWidth =
-                "100%";
-
-
-            wrapper.style.background =
-                "#ffffff";
-
-
-            wrapper.style.overflow =
-                "hidden";
-
-
-            /* ====================================
-               CANVAS
-               ==================================== */
-
-            const canvas =
-                document.createElement(
-                    "canvas"
-                );
-
-
-            canvas.width =
-                viewport.width;
-
-
-            canvas.height =
-                viewport.height;
-
-
-            canvas.style.width =
-                "100%";
-
-
-            canvas.style.height =
-                "auto";
-
-
-            canvas.style.display =
-                "block";
-
-
-            canvas.style.userSelect =
-                "none";
-
-
-            canvas.style.webkitUserSelect =
-                "none";
-
-
-            canvas.style.webkitTouchCallout =
-                "none";
-
-
-            wrapper.appendChild(
-                canvas
-            );
-
-
-            pages.appendChild(
-                wrapper
-            );
-
-
-            /* ====================================
-               RENDER PAGE
-               ==================================== */
-
-            const context =
-                canvas.getContext(
-                    "2d"
-                );
-
-
-            await page.render({
-
-                canvasContext:
-                    context,
-
-                viewport:
-                    viewport
-
-            }).promise;
 
         }
-
-
-        /* ========================================
-           PDF TEXT SELECTION OFF
-           ======================================== */
-
-        pages.style.userSelect =
-            "none";
-
-
-        pages.style.webkitUserSelect =
-            "none";
-
-
-        pages.style.webkitTouchCallout =
-            "none";
-
 
     } catch (error) {
 
-        console.error(
-            "PDF error:",
-            error
-        );
+        console.error("PDF Error:", error);
 
 
-        /* ========================================
-           REMOVE WATERMARK IF PDF FAILS
-           ======================================== */
+        const loadingMessage = document.getElementById("pdfLoading");
 
-        const watermark =
-            document.getElementById(
-                "fjmcFloatingWatermark"
-            );
+        if (loadingMessage) {
 
+            loadingMessage.innerHTML = `
+                <div class="pdf-error">
+                    <h3>PDF could not be opened</h3>
+                    <p>Please check the PDF file path.</p>
+                </div>
+            `;
 
-        if (watermark) {
-            watermark.remove();
         }
-
-
-        /* ========================================
-           ERROR MESSAGE
-           ======================================== */
-
-        body.innerHTML = `
-
-            <div
-                style="
-                    color:white;
-                    padding:30px;
-                    text-align:center;
-                "
-            >
-
-                <h3>
-                    PDF could not be opened
-                </h3>
-
-                <p>
-                    ${error.message || ""}
-                </p>
-
-            </div>
-
-        `;
 
     }
 
 }
+
+
+/* =========================================================
+   RENDER ONE PDF PAGE
+   ========================================================= */
+
+async function renderPDFPage(pdf, pageNumber, container) {
+
+    const page = await pdf.getPage(pageNumber);
+
+    /* ===============================
+       PAGE WRAPPER
+       =============================== */
+
+    const wrapper = document.createElement("div");
+
+    wrapper.className = "pdf-page-wrapper";
+
+    wrapper.style.position = "relative";
+    wrapper.style.width = "100%";
+    wrapper.style.display = "flex";
+    wrapper.style.justifyContent = "center";
+    wrapper.style.alignItems = "flex-start";
+
+
+    /* ===============================
+       CANVAS
+       =============================== */
+
+    const canvas = document.createElement("canvas");
+
+    canvas.className = "pdf-page";
+
+    canvas.style.display = "block";
+    canvas.style.margin = "0 auto";
+
+
+    wrapper.appendChild(canvas);
+
+    container.appendChild(wrapper);
+
+
+    /* ===============================
+       ORIGINAL PDF SIZE
+       =============================== */
+
+    const originalViewport = page.getViewport({
+        scale: 1
+    });
+
+
+    /* ===============================
+       SCREEN WIDTH
+       =============================== */
+
+    const screenWidth = window.innerWidth;
+
+
+    /*
+       Mobile:
+       Keep small side margin.
+
+       Laptop:
+       Maximum 1000px.
+    */
+
+    let availableWidth;
+
+
+    if (screenWidth <= 600) {
+
+        availableWidth = screenWidth - 20;
+
+    } else {
+
+        availableWidth =
+            Math.min(screenWidth - 30, 1000);
+
+    }
+
+
+    /* ===============================
+       SCALE
+       =============================== */
+
+    const scale =
+        availableWidth / originalViewport.width;
+
+
+    const viewport = page.getViewport({
+        scale: scale
+    });
+
+
+    /* ===============================
+       HIGH DPI
+       =============================== */
+
+    const devicePixelRatio =
+        Math.min(window.devicePixelRatio || 1, 2);
+
+
+    canvas.width =
+        Math.round(viewport.width * devicePixelRatio);
+
+    canvas.height =
+        Math.round(viewport.height * devicePixelRatio);
+
+
+    /* CSS DISPLAY SIZE */
+
+    canvas.style.width =
+        Math.round(viewport.width) + "px";
+
+    canvas.style.height =
+        Math.round(viewport.height) + "px";
+
+
+    /* ===============================
+       RENDER
+       =============================== */
+
+    const context =
+        canvas.getContext("2d");
+
+
+    const renderContext = {
+
+        canvasContext: context,
+
+        viewport: viewport,
+
+        transform:
+            devicePixelRatio !== 1
+                ? [
+                    devicePixelRatio,
+                    0,
+                    0,
+                    devicePixelRatio,
+                    0,
+                    0
+                ]
+                : null
+    };
+
+
+    await page.render(renderContext).promise;
+}
+/* =========================================================
+   CLOSE PDF
+   ========================================================= */
+
+function closePDFViewer() {
+
+    const pdfViewer =
+        document.getElementById("pdfFullscreen");
+
+
+    if (pdfViewer) {
+
+        pdfViewer.remove();
+
+    }
+
+
+    document.body.classList.remove("viewer-open");
+
+}
+
 /* =========================================================
    LOGOUT
    ========================================================= */
