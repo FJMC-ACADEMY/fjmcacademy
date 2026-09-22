@@ -1,6 +1,7 @@
 /* =========================================================
    FJMC ACADEMY - STUDENT DASHBOARD
    FIREBASE + MAXIMUM 2 DEVICES
+   24-HOUR DEVICE TIMEOUT
    ========================================================= */
 
 import {
@@ -15,6 +16,7 @@ import {
     getDoc,
     setDoc,
     updateDoc,
+    runTransaction,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
@@ -171,7 +173,7 @@ const COURSES = {
 
 
 /* =========================================================
-   SETTINGS
+   DEVICE SETTINGS
    ========================================================= */
 
 const MAX_DEVICES = 2;
@@ -189,6 +191,7 @@ function getDeviceId() {
     let deviceId =
         localStorage.getItem("fjmcDeviceId");
 
+
     if (!deviceId) {
 
         if (
@@ -197,7 +200,8 @@ function getDeviceId() {
         ) {
 
             deviceId =
-                "device-" + crypto.randomUUID();
+                "device-" +
+                crypto.randomUUID();
 
         } else {
 
@@ -211,17 +215,21 @@ function getDeviceId() {
 
         }
 
+
         localStorage.setItem(
             "fjmcDeviceId",
             deviceId
         );
+
     }
+
 
     return deviceId;
 }
 
 
-const deviceId = getDeviceId();
+const deviceId =
+    getDeviceId();
 
 
 /* =========================================================
@@ -229,6 +237,7 @@ const deviceId = getDeviceId();
    ========================================================= */
 
 let currentUser = null;
+
 let deviceHeartbeat = null;
 
 
@@ -237,13 +246,21 @@ let deviceHeartbeat = null;
    ========================================================= */
 
 const coursesContainer =
-    document.getElementById("coursesContainer");
+    document.getElementById(
+        "coursesContainer"
+    );
+
 
 const studentName =
-    document.getElementById("studentName");
+    document.getElementById(
+        "studentName"
+    );
+
 
 const logoutBtn =
-    document.getElementById("logoutBtn");
+    document.getElementById(
+        "logoutBtn"
+    );
 
 
 /* =========================================================
@@ -256,7 +273,8 @@ onAuthStateChanged(
 
         if (!user) {
 
-            window.location.href = "login.html";
+            window.location.href =
+                "login.html";
 
             return;
         }
@@ -266,7 +284,9 @@ onAuthStateChanged(
 
 
         const email =
-            (user.email || "").trim().toLowerCase();
+            (user.email || "")
+                .trim()
+                .toLowerCase();
 
 
         console.log(
@@ -290,10 +310,13 @@ onAuthStateChanged(
                 email
             );
 
+
             await signOut(auth);
+
 
             window.location.href =
                 "login.html";
+
 
             return;
         }
@@ -315,6 +338,26 @@ onAuthStateChanged(
 
         if (!allowed) {
 
+            /*
+             * IMPORTANT:
+             * If device limit is reached,
+             * logout this browser automatically.
+             */
+
+            try {
+
+                await signOut(auth);
+
+            } catch (error) {
+
+                console.error(
+                    "Sign out error:",
+                    error
+                );
+
+            }
+
+
             return;
         }
 
@@ -327,6 +370,7 @@ onAuthStateChanged(
             "loggedInStudent",
             email
         );
+
 
         sessionStorage.setItem(
             "firebaseUID",
@@ -341,7 +385,8 @@ onAuthStateChanged(
         if (studentName) {
 
             studentName.textContent =
-                "Welcome, " + student.name;
+                "Welcome, " +
+                student.name;
 
         }
 
@@ -350,11 +395,13 @@ onAuthStateChanged(
            SHOW COURSES
            ================================================ */
 
-        showStudentCourses(student);
+        showStudentCourses(
+            student
+        );
 
 
         /* ================================================
-           HEARTBEAT
+           START HEARTBEAT
            ================================================ */
 
         startDeviceHeartbeat();
@@ -397,96 +444,195 @@ async function registerDevice(user) {
             );
 
 
+        const devicesRef =
+            collection(
+                db,
+                "users",
+                user.uid,
+                "devices"
+            );
+
+
         const now =
             Date.now();
 
 
-        /* ================================================
-           CURRENT DEVICE
-           ================================================ */
+        /* =================================================
+           FIRESTORE TRANSACTION
+           ================================================= */
 
-        const currentDeviceSnapshot =
-            await getDoc(deviceRef);
+        const result =
+            await runTransaction(
+                db,
+                async function (transaction) {
 
+                    /* ======================================
+                       CHECK CURRENT DEVICE
+                       ====================================== */
 
-        if (
-            currentDeviceSnapshot.exists()
-        ) {
-
-            await setDoc(
-                deviceRef,
-                {
-                    email: user.email,
-                    lastSeen: now,
-                    active: true
-                },
-                {
-                    merge: true
-                }
-            );
+                    const currentDevice =
+                        await transaction.get(
+                            deviceRef
+                        );
 
 
-            return true;
-        }
+                    if (
+                        currentDevice.exists()
+                    ) {
+
+                        const currentData =
+                            currentDevice.data();
 
 
-        /* ================================================
-           ALL DEVICES
-           ================================================ */
-
-        const devicesSnapshot =
-            await getDocs(
-                devicesCollection(user)
-            );
+                        const previousLastSeen =
+                            Number(
+                                currentData.lastSeen || 0
+                            );
 
 
-        let activeDevices = [];
+                        /*
+                         * Existing device is allowed.
+                         *
+                         * Even if it was inactive for more
+                         * than 24 hours, this device can
+                         * reconnect and become active again.
+                         */
+
+                        transaction.set(
+                            deviceRef,
+                            {
+                                email:
+                                    user.email,
+
+                                lastSeen:
+                                    now,
+
+                                active:
+                                    true
+                            },
+                            {
+                                merge:
+                                    true
+                            }
+                        );
 
 
-        devicesSnapshot.forEach(
-            function (deviceDoc) {
+                        return {
+                            allowed:
+                                true
+                        };
 
-                if (
-                    deviceDoc.id === deviceId
-                ) {
-
-                    return;
-                }
+                    }
 
 
-                const data =
-                    deviceDoc.data();
+                    /* ======================================
+                       GET ALL DEVICES
+                       ====================================== */
+
+                    const devicesSnapshot =
+                        await transaction.get(
+                            devicesRef
+                        );
 
 
-                const lastSeen =
-                    Number(data.lastSeen || 0);
+                    let activeCount =
+                        0;
 
 
-                const recentlyActive =
-                    data.active === true &&
-                    (now - lastSeen) <
-                    DEVICE_TIMEOUT;
+                    devicesSnapshot.forEach(
+                        function (deviceDoc) {
+
+                            if (
+                                deviceDoc.id ===
+                                deviceId
+                            ) {
+
+                                return;
+                            }
 
 
-                if (recentlyActive) {
+                            const data =
+                                deviceDoc.data();
 
-                    activeDevices.push(
-                        deviceDoc.id
+
+                            const lastSeen =
+                                Number(
+                                    data.lastSeen || 0
+                                );
+
+
+                            const recentlyActive =
+                                data.active === true &&
+                                now - lastSeen <
+                                DEVICE_TIMEOUT;
+
+
+                            if (
+                                recentlyActive
+                            ) {
+
+                                activeCount++;
+
+                            }
+
+                        }
                     );
 
+
+                    /* ======================================
+                       MAXIMUM 2 DEVICES
+                       ====================================== */
+
+                    if (
+                        activeCount >=
+                        MAX_DEVICES
+                    ) {
+
+                        return {
+                            allowed:
+                                false
+                        };
+
+                    }
+
+
+                    /* ======================================
+                       REGISTER NEW DEVICE
+                       ====================================== */
+
+                    transaction.set(
+                        deviceRef,
+                        {
+                            email:
+                                user.email,
+
+                            lastSeen:
+                                now,
+
+                            active:
+                                true,
+
+                            createdAt:
+                                serverTimestamp()
+                        }
+                    );
+
+
+                    return {
+                        allowed:
+                            true
+                    };
+
                 }
-
-            }
-        );
+            );
 
 
-        /* ================================================
-           MAXIMUM DEVICES
-           ================================================ */
+        /* =================================================
+           CHECK RESULT
+           ================================================= */
 
         if (
-            activeDevices.length >=
-            MAX_DEVICES
+            !result.allowed
         ) {
 
             showDeviceLimitMessage();
@@ -495,22 +641,8 @@ async function registerDevice(user) {
         }
 
 
-        /* ================================================
-           CREATE DEVICE
-           ================================================ */
-
-        await setDoc(
-            deviceRef,
-            {
-                email: user.email,
-                lastSeen: now,
-                active: true,
-                createdAt: serverTimestamp()
-            }
-        );
-
-
         return true;
+
 
     } catch (error) {
 
@@ -556,7 +688,8 @@ function showDeviceLimitMessage() {
 
 
     alert(
-        "Maximum 2 devices are already active for this account.\n\nPlease logout from another device first."
+        "Maximum 2 devices are already active for this account.\n\n" +
+        "Please logout from another device first."
     );
 
 }
@@ -580,6 +713,10 @@ function startDeviceHeartbeat() {
     updateDeviceHeartbeat();
 
 
+    /*
+     * Update every 2 minutes.
+     */
+
     deviceHeartbeat =
         setInterval(
             updateDeviceHeartbeat,
@@ -590,7 +727,7 @@ function startDeviceHeartbeat() {
 
 
 /* =========================================================
-   UPDATE DEVICE
+   UPDATE DEVICE HEARTBEAT
    ========================================================= */
 
 async function updateDeviceHeartbeat() {
@@ -616,10 +753,14 @@ async function updateDeviceHeartbeat() {
         await updateDoc(
             deviceRef,
             {
-                lastSeen: Date.now(),
-                active: true
+                lastSeen:
+                    Date.now(),
+
+                active:
+                    true
             }
         );
+
 
     } catch (error) {
 
@@ -637,7 +778,9 @@ async function updateDeviceHeartbeat() {
    SHOW STUDENT COURSES
    ========================================================= */
 
-function showStudentCourses(student) {
+function showStudentCourses(
+    student
+) {
 
     console.log(
         "STUDENT DATA:",
@@ -655,7 +798,8 @@ function showStudentCourses(student) {
     }
 
 
-    coursesContainer.innerHTML = "";
+    coursesContainer.innerHTML =
+        "";
 
 
     if (
@@ -667,7 +811,9 @@ function showStudentCourses(student) {
 
             <div class="no-course">
 
-                <h3>No Course Assigned</h3>
+                <h3>
+                    No Course Assigned
+                </h3>
 
                 <p>
                     Please contact FJMC Academy.
@@ -700,14 +846,17 @@ function showStudentCourses(student) {
 
 
             const courseCard =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
 
             courseCard.className =
                 "course-card";
 
 
-            let contentHTML = "";
+            let contentHTML =
+                "";
 
 
             course.contents.forEach(
@@ -719,7 +868,8 @@ function showStudentCourses(student) {
                        ====================================== */
 
                     if (
-                        content.type === "video"
+                        content.type ===
+                        "video"
                     ) {
 
                         contentHTML += `
@@ -770,7 +920,8 @@ function showStudentCourses(student) {
                        ====================================== */
 
                     else if (
-                        content.type === "pdf"
+                        content.type ===
+                        "pdf"
                     ) {
 
                         contentHTML += `
@@ -791,11 +942,12 @@ function showStudentCourses(student) {
 
 
                     /* ======================================
-                       LIVE
+                       LIVE CLASS
                        ====================================== */
 
                     else if (
-                        content.type === "live"
+                        content.type ===
+                        "live"
                     ) {
 
                         contentHTML += `
@@ -884,7 +1036,8 @@ function showStudentCourses(student) {
 
 
                     if (
-                        type === "youtube"
+                        type ===
+                        "youtube"
                     ) {
 
                         openYouTubeVideo(
@@ -896,7 +1049,8 @@ function showStudentCourses(student) {
 
 
                     else if (
-                        type === "local"
+                        type ===
+                        "local"
                     ) {
 
                         openLocalVideo(
@@ -908,7 +1062,8 @@ function showStudentCourses(student) {
 
 
                     else if (
-                        type === "pdf"
+                        type ===
+                        "pdf"
                     ) {
 
                         openPDFViewer(
@@ -920,7 +1075,8 @@ function showStudentCourses(student) {
 
 
                     else if (
-                        type === "live"
+                        type ===
+                        "live"
                     ) {
 
                         openLiveClass(
@@ -948,7 +1104,9 @@ function openYouTubeVideo(
 ) {
 
     const overlay =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
 
     overlay.className =
@@ -967,10 +1125,13 @@ function openYouTubeVideo(
 
                 <button
                     class="close-video">
+
                     ✕
+
                 </button>
 
             </div>
+
 
             <div class="video-player-container">
 
@@ -1012,7 +1173,9 @@ function openYouTubeVideo(
 
 
     overlay
-        .querySelector(".close-video")
+        .querySelector(
+            ".close-video"
+        )
         .addEventListener(
             "click",
             function () {
@@ -1039,7 +1202,9 @@ function openLocalVideo(
 ) {
 
     const overlay =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
 
     overlay.className =
@@ -1056,12 +1221,16 @@ function openLocalVideo(
                     ${title}
                 </span>
 
+
                 <button
                     class="close-video">
+
                     ✕
+
                 </button>
 
             </div>
+
 
             <div class="video-player-container">
 
@@ -1103,13 +1272,17 @@ function openLocalVideo(
 
 
     overlay
-        .querySelector(".close-video")
+        .querySelector(
+            ".close-video"
+        )
         .addEventListener(
             "click",
             function () {
 
                 const video =
-                    overlay.querySelector("video");
+                    overlay.querySelector(
+                        "video"
+                    );
 
 
                 if (video) {
@@ -1140,7 +1313,9 @@ function openLocalVideo(
    LIVE CLASS
    ========================================================= */
 
-function openLiveClass(url) {
+function openLiveClass(
+    url
+) {
 
     if (
         !url ||
@@ -1168,7 +1343,8 @@ function openLiveClass(url) {
    ========================================================= */
 
 if (
-    typeof pdfjsLib !== "undefined"
+    typeof pdfjsLib !==
+    "undefined"
 ) {
 
     pdfjsLib.GlobalWorkerOptions.workerSrc =
@@ -1187,7 +1363,8 @@ async function openPDFViewer(
 ) {
 
     if (
-        typeof pdfjsLib === "undefined"
+        typeof pdfjsLib ===
+        "undefined"
     ) {
 
         alert(
@@ -1199,7 +1376,9 @@ async function openPDFViewer(
 
 
     const overlay =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
 
     overlay.id =
@@ -1211,11 +1390,16 @@ async function openPDFViewer(
         <div class="pdf-header">
 
             <div class="pdf-title">
+
                 ${title}
+
             </div>
 
+
             <button id="closePDF">
+
                 ✕ Close
+
             </button>
 
         </div>
@@ -1228,7 +1412,11 @@ async function openPDFViewer(
             </div>
 
             <div>
-                ${currentUser?.email || ""}
+                ${
+                    currentUser
+                        ? currentUser.email
+                        : ""
+                }
             </div>
 
         </div>
@@ -1269,7 +1457,9 @@ async function openPDFViewer(
 
 
     document
-        .getElementById("closePDF")
+        .getElementById(
+            "closePDF"
+        )
         .addEventListener(
             "click",
             closePDFViewer
@@ -1280,7 +1470,8 @@ async function openPDFViewer(
 
         const loadingTask =
             pdfjsLib.getDocument({
-                url: pdfURL
+                url:
+                    pdfURL
             });
 
 
@@ -1309,7 +1500,8 @@ async function openPDFViewer(
 
         for (
             let pageNumber = 1;
-            pageNumber <= pdf.numPages;
+            pageNumber <=
+            pdf.numPages;
             pageNumber++
         ) {
 
@@ -1378,7 +1570,9 @@ async function renderPDFPage(
 
 
     const wrapper =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
 
     wrapper.className =
@@ -1406,7 +1600,9 @@ async function renderPDFPage(
 
 
     const canvas =
-        document.createElement("canvas");
+        document.createElement(
+            "canvas"
+        );
 
 
     canvas.className =
@@ -1469,13 +1665,15 @@ async function renderPDFPage(
 
     const viewport =
         page.getViewport({
-            scale: scale
+            scale:
+                scale
         });
 
 
     const devicePixelRatio =
         Math.min(
-            window.devicePixelRatio || 1,
+            window.devicePixelRatio ||
+                1,
             2
         );
 
@@ -1507,7 +1705,9 @@ async function renderPDFPage(
 
 
     const context =
-        canvas.getContext("2d");
+        canvas.getContext(
+            "2d"
+        );
 
 
     const renderContext = {
@@ -1534,7 +1734,9 @@ async function renderPDFPage(
 
 
     await page
-        .render(renderContext)
+        .render(
+            renderContext
+        )
         .promise;
 
 }
@@ -1576,12 +1778,19 @@ if (logoutBtn) {
         "click",
         async function () {
 
-            logoutBtn.disabled = true;
+            logoutBtn.disabled =
+                true;
 
 
             try {
 
-                if (deviceHeartbeat) {
+                /* ========================================
+                   STOP HEARTBEAT
+                   ======================================== */
+
+                if (
+                    deviceHeartbeat
+                ) {
 
                     clearInterval(
                         deviceHeartbeat
@@ -1593,7 +1802,13 @@ if (logoutBtn) {
                 }
 
 
-                if (currentUser) {
+                /* ========================================
+                   RELEASE DEVICE
+                   ======================================== */
+
+                if (
+                    currentUser
+                ) {
 
                     const deviceRef =
                         doc(
@@ -1610,13 +1825,18 @@ if (logoutBtn) {
                         await updateDoc(
                             deviceRef,
                             {
-                                active: false,
+                                active:
+                                    false,
+
                                 lastSeen:
                                     Date.now()
                             }
                         );
 
-                    } catch (deviceError) {
+
+                    } catch (
+                        deviceError
+                    ) {
 
                         console.error(
                             "Device update error:",
@@ -1628,6 +1848,10 @@ if (logoutBtn) {
                 }
 
 
+                /* ========================================
+                   CLEAR SESSION
+                   ======================================== */
+
                 sessionStorage.removeItem(
                     "loggedInStudent"
                 );
@@ -1638,7 +1862,13 @@ if (logoutBtn) {
                 );
 
 
-                await signOut(auth);
+                /* ========================================
+                   FIREBASE LOGOUT
+                   ======================================== */
+
+                await signOut(
+                    auth
+                );
 
 
                 window.location.href =
@@ -1655,9 +1885,13 @@ if (logoutBtn) {
 
                 try {
 
-                    await signOut(auth);
+                    await signOut(
+                        auth
+                    );
 
-                } catch (signOutError) {
+                } catch (
+                    signOutError
+                ) {
 
                     console.error(
                         signOutError
@@ -1733,8 +1967,10 @@ document.addEventListener(
 
 
         if (
-            (event.ctrlKey ||
-                event.metaKey) &&
+            (
+                event.ctrlKey ||
+                event.metaKey
+            ) &&
             (
                 key === "s" ||
                 key === "p" ||
