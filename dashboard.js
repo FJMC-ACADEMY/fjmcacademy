@@ -1305,7 +1305,7 @@ async function openPDFViewer(
 
 
         watermark.style.transform =
-            "translate(-50%, -50%) rotate(-30deg)";
+            "translate(-50%, -50%) rotate(-20deg)";
 
 
         /* Dark black transparent */
