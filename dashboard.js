@@ -16,7 +16,6 @@ import {
     getDoc,
     setDoc,
     updateDoc,
-    runTransaction,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
@@ -280,7 +279,8 @@ onAuthStateChanged(
         }
 
 
-        currentUser = user;
+        currentUser =
+            user;
 
 
         const email =
@@ -311,7 +311,9 @@ onAuthStateChanged(
             );
 
 
-            await signOut(auth);
+            await signOut(
+                auth
+            );
 
 
             window.location.href =
@@ -327,7 +329,9 @@ onAuthStateChanged(
            ================================================ */
 
         const allowed =
-            await registerDevice(user);
+            await registerDevice(
+                user
+            );
 
 
         console.log(
@@ -338,15 +342,11 @@ onAuthStateChanged(
 
         if (!allowed) {
 
-            /*
-             * IMPORTANT:
-             * If device limit is reached,
-             * logout this browser automatically.
-             */
-
             try {
 
-                await signOut(auth);
+                await signOut(
+                    auth
+                );
 
             } catch (error) {
 
@@ -430,7 +430,9 @@ function devicesCollection(user) {
    REGISTER DEVICE
    ========================================================= */
 
-async function registerDevice(user) {
+async function registerDevice(
+    user
+) {
 
     try {
 
@@ -444,201 +446,142 @@ async function registerDevice(user) {
             );
 
 
-        const devicesRef =
-            collection(
-                db,
-                "users",
-                user.uid,
-                "devices"
-            );
-
-
         const now =
             Date.now();
 
 
-        /* =================================================
-           FIRESTORE TRANSACTION
-           ================================================= */
+        /* ================================================
+           CHECK CURRENT DEVICE
+           ================================================ */
 
-        const result =
-            await runTransaction(
-                db,
-                async function (transaction) {
-
-                    /* ======================================
-                       CHECK CURRENT DEVICE
-                       ====================================== */
-
-                    const currentDevice =
-                        await transaction.get(
-                            deviceRef
-                        );
+        const currentDeviceSnapshot =
+            await getDoc(
+                deviceRef
+            );
 
 
-                    if (
-                        currentDevice.exists()
-                    ) {
+        if (
+            currentDeviceSnapshot.exists()
+        ) {
 
-                        const currentData =
-                            currentDevice.data();
+            await setDoc(
+                deviceRef,
+                {
+                    email:
+                        user.email,
 
+                    lastSeen:
+                        now,
 
-                        const previousLastSeen =
-                            Number(
-                                currentData.lastSeen || 0
-                            );
-
-
-                        /*
-                         * Existing device is allowed.
-                         *
-                         * Even if it was inactive for more
-                         * than 24 hours, this device can
-                         * reconnect and become active again.
-                         */
-
-                        transaction.set(
-                            deviceRef,
-                            {
-                                email:
-                                    user.email,
-
-                                lastSeen:
-                                    now,
-
-                                active:
-                                    true
-                            },
-                            {
-                                merge:
-                                    true
-                            }
-                        );
-
-
-                        return {
-                            allowed:
-                                true
-                        };
-
-                    }
-
-
-                    /* ======================================
-                       GET ALL DEVICES
-                       ====================================== */
-
-                    const devicesSnapshot =
-                        await transaction.get(
-                            devicesRef
-                        );
-
-
-                    let activeCount =
-                        0;
-
-
-                    devicesSnapshot.forEach(
-                        function (deviceDoc) {
-
-                            if (
-                                deviceDoc.id ===
-                                deviceId
-                            ) {
-
-                                return;
-                            }
-
-
-                            const data =
-                                deviceDoc.data();
-
-
-                            const lastSeen =
-                                Number(
-                                    data.lastSeen || 0
-                                );
-
-
-                            const recentlyActive =
-                                data.active === true &&
-                                now - lastSeen <
-                                DEVICE_TIMEOUT;
-
-
-                            if (
-                                recentlyActive
-                            ) {
-
-                                activeCount++;
-
-                            }
-
-                        }
-                    );
-
-
-                    /* ======================================
-                       MAXIMUM 2 DEVICES
-                       ====================================== */
-
-                    if (
-                        activeCount >=
-                        MAX_DEVICES
-                    ) {
-
-                        return {
-                            allowed:
-                                false
-                        };
-
-                    }
-
-
-                    /* ======================================
-                       REGISTER NEW DEVICE
-                       ====================================== */
-
-                    transaction.set(
-                        deviceRef,
-                        {
-                            email:
-                                user.email,
-
-                            lastSeen:
-                                now,
-
-                            active:
-                                true,
-
-                            createdAt:
-                                serverTimestamp()
-                        }
-                    );
-
-
-                    return {
-                        allowed:
-                            true
-                    };
-
+                    active:
+                        true
+                },
+                {
+                    merge:
+                        true
                 }
             );
 
 
-        /* =================================================
-           CHECK RESULT
-           ================================================= */
+            return true;
+        }
+
+
+        /* ================================================
+           GET ALL DEVICES
+           ================================================ */
+
+        const devicesSnapshot =
+            await getDocs(
+                devicesCollection(
+                    user
+                )
+            );
+
+
+        let activeDevices =
+            0;
+
+
+        devicesSnapshot.forEach(
+            function (deviceDoc) {
+
+                if (
+                    deviceDoc.id ===
+                    deviceId
+                ) {
+
+                    return;
+                }
+
+
+                const data =
+                    deviceDoc.data();
+
+
+                const lastSeen =
+                    Number(
+                        data.lastSeen ||
+                        0
+                    );
+
+
+                const recentlyActive =
+                    data.active === true &&
+                    (
+                        now -
+                        lastSeen
+                    ) <
+                    DEVICE_TIMEOUT;
+
+
+                if (
+                    recentlyActive
+                ) {
+
+                    activeDevices++;
+
+                }
+
+            }
+        );
+
+
+        /* ================================================
+           MAXIMUM 2 DEVICES
+           ================================================ */
 
         if (
-            !result.allowed
+            activeDevices >=
+            MAX_DEVICES
         ) {
 
             showDeviceLimitMessage();
 
             return false;
         }
+
+
+        /* ================================================
+           CREATE DEVICE
+           ================================================ */
+
+        await setDoc(
+            deviceRef,
+            {
+                email:
+                    user.email,
+
+                lastSeen:
+                    now,
+
+                active:
+                    true,
+
+                createdAt:
+                    serverTimestamp()
+            }
+        );
 
 
         return true;
@@ -654,9 +597,15 @@ async function registerDevice(user) {
 
         alert(
             "Firebase Error:\n\n" +
-            error.code +
+            (
+                error.code ||
+                "Unknown error"
+            ) +
             "\n\n" +
-            error.message
+            (
+                error.message ||
+                "Unknown Firebase error"
+            )
         );
 
 
@@ -713,10 +662,6 @@ function startDeviceHeartbeat() {
     updateDeviceHeartbeat();
 
 
-    /*
-     * Update every 2 minutes.
-     */
-
     deviceHeartbeat =
         setInterval(
             updateDeviceHeartbeat,
@@ -727,7 +672,7 @@ function startDeviceHeartbeat() {
 
 
 /* =========================================================
-   UPDATE DEVICE HEARTBEAT
+   UPDATE DEVICE
    ========================================================= */
 
 async function updateDeviceHeartbeat() {
@@ -942,7 +887,7 @@ function showStudentCourses(
 
 
                     /* ======================================
-                       LIVE CLASS
+                       LIVE
                        ====================================== */
 
                     else if (
@@ -982,6 +927,7 @@ function showStudentCourses(
                     </p>
 
                 </div>
+
 
                 <div class="course-content">
 
@@ -1072,916 +1018,3 @@ function showStudentCourses(
                         );
 
                     }
-
-
-                    else if (
-                        type ===
-                        "live"
-                    ) {
-
-                        openLiveClass(
-                            url
-                        );
-
-                    }
-
-                }
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   YOUTUBE VIDEO
-   ========================================================= */
-
-function openYouTubeVideo(
-    url,
-    title
-) {
-
-    const overlay =
-        document.createElement(
-            "div"
-        );
-
-
-    overlay.className =
-        "video-overlay";
-
-
-    overlay.innerHTML = `
-
-        <div class="video-window">
-
-            <div class="video-header">
-
-                <span>
-                    ${title}
-                </span>
-
-                <button
-                    class="close-video">
-
-                    ✕
-
-                </button>
-
-            </div>
-
-
-            <div class="video-player-container">
-
-                <iframe
-
-                    src="${url}"
-
-                    title="${title}"
-
-                    allow="
-                        accelerometer;
-                        autoplay;
-                        clipboard-write;
-                        encrypted-media;
-                        gyroscope;
-                        picture-in-picture;
-                        fullscreen
-                    "
-
-                    allowfullscreen>
-
-                </iframe>
-
-            </div>
-
-        </div>
-
-    `;
-
-
-    document.body.appendChild(
-        overlay
-    );
-
-
-    document.body.classList.add(
-        "viewer-open"
-    );
-
-
-    overlay
-        .querySelector(
-            ".close-video"
-        )
-        .addEventListener(
-            "click",
-            function () {
-
-                overlay.remove();
-
-                document.body.classList.remove(
-                    "viewer-open"
-                );
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   LOCAL VIDEO
-   ========================================================= */
-
-function openLocalVideo(
-    url,
-    title
-) {
-
-    const overlay =
-        document.createElement(
-            "div"
-        );
-
-
-    overlay.className =
-        "video-overlay";
-
-
-    overlay.innerHTML = `
-
-        <div class="video-window">
-
-            <div class="video-header">
-
-                <span>
-                    ${title}
-                </span>
-
-
-                <button
-                    class="close-video">
-
-                    ✕
-
-                </button>
-
-            </div>
-
-
-            <div class="video-player-container">
-
-                <video
-
-                    controls
-
-                    controlsList="nodownload"
-
-                    disablePictureInPicture
-
-                    playsinline
-
-                    preload="metadata">
-
-                    <source
-                        src="${url}"
-                        type="video/mp4">
-
-                    Your browser does not support video.
-
-                </video>
-
-            </div>
-
-        </div>
-
-    `;
-
-
-    document.body.appendChild(
-        overlay
-    );
-
-
-    document.body.classList.add(
-        "viewer-open"
-    );
-
-
-    overlay
-        .querySelector(
-            ".close-video"
-        )
-        .addEventListener(
-            "click",
-            function () {
-
-                const video =
-                    overlay.querySelector(
-                        "video"
-                    );
-
-
-                if (video) {
-
-                    video.pause();
-
-                    video.removeAttribute(
-                        "src"
-                    );
-
-                }
-
-
-                overlay.remove();
-
-
-                document.body.classList.remove(
-                    "viewer-open"
-                );
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   LIVE CLASS
-   ========================================================= */
-
-function openLiveClass(
-    url
-) {
-
-    if (
-        !url ||
-        url === "#"
-    ) {
-
-        alert(
-            "Live class link will be available here."
-        );
-
-        return;
-    }
-
-
-    window.open(
-        url,
-        "_blank"
-    );
-
-}
-
-
-/* =========================================================
-   PDF.js WORKER
-   ========================================================= */
-
-if (
-    typeof pdfjsLib !==
-    "undefined"
-) {
-
-    pdfjsLib.GlobalWorkerOptions.workerSrc =
-        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-
-}
-
-
-/* =========================================================
-   PDF VIEWER
-   ========================================================= */
-
-async function openPDFViewer(
-    pdfURL,
-    title
-) {
-
-    if (
-        typeof pdfjsLib ===
-        "undefined"
-    ) {
-
-        alert(
-            "PDF viewer could not load. Please refresh the page."
-        );
-
-        return;
-    }
-
-
-    const overlay =
-        document.createElement(
-            "div"
-        );
-
-
-    overlay.id =
-        "pdfFullscreen";
-
-
-    overlay.innerHTML = `
-
-        <div class="pdf-header">
-
-            <div class="pdf-title">
-
-                ${title}
-
-            </div>
-
-
-            <button id="closePDF">
-
-                ✕ Close
-
-            </button>
-
-        </div>
-
-
-        <div class="pdf-screen-watermark">
-
-            <div>
-                FJMC Academy
-            </div>
-
-            <div>
-                ${
-                    currentUser
-                        ? currentUser.email
-                        : ""
-                }
-            </div>
-
-        </div>
-
-
-        <div
-            id="pdfScrollArea"
-            class="pdf-scroll-area">
-
-            <div
-                id="pdfLoading"
-                class="pdf-loading">
-
-                Loading PDF...
-
-            </div>
-
-
-            <div
-                id="pdfPages"
-                class="pdf-pages">
-
-            </div>
-
-        </div>
-
-    `;
-
-
-    document.body.appendChild(
-        overlay
-    );
-
-
-    document.body.classList.add(
-        "viewer-open"
-    );
-
-
-    document
-        .getElementById(
-            "closePDF"
-        )
-        .addEventListener(
-            "click",
-            closePDFViewer
-        );
-
-
-    try {
-
-        const loadingTask =
-            pdfjsLib.getDocument({
-                url:
-                    pdfURL
-            });
-
-
-        const pdf =
-            await loadingTask.promise;
-
-
-        const pagesContainer =
-            document.getElementById(
-                "pdfPages"
-            );
-
-
-        const loadingMessage =
-            document.getElementById(
-                "pdfLoading"
-            );
-
-
-        if (loadingMessage) {
-
-            loadingMessage.remove();
-
-        }
-
-
-        for (
-            let pageNumber = 1;
-            pageNumber <=
-            pdf.numPages;
-            pageNumber++
-        ) {
-
-            await renderPDFPage(
-                pdf,
-                pageNumber,
-                pagesContainer
-            );
-
-        }
-
-
-    } catch (error) {
-
-        console.error(
-            "PDF Error:",
-            error
-        );
-
-
-        const loadingMessage =
-            document.getElementById(
-                "pdfLoading"
-            );
-
-
-        if (loadingMessage) {
-
-            loadingMessage.innerHTML = `
-
-                <div class="pdf-error">
-
-                    <h3>
-                        PDF could not be opened
-                    </h3>
-
-                    <p>
-                        Please check the PDF file path.
-                    </p>
-
-                </div>
-
-            `;
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-   RENDER PDF PAGE
-   ========================================================= */
-
-async function renderPDFPage(
-    pdf,
-    pageNumber,
-    container
-) {
-
-    const page =
-        await pdf.getPage(
-            pageNumber
-        );
-
-
-    const wrapper =
-        document.createElement(
-            "div"
-        );
-
-
-    wrapper.className =
-        "pdf-page-wrapper";
-
-
-    wrapper.style.position =
-        "relative";
-
-
-    wrapper.style.width =
-        "100%";
-
-
-    wrapper.style.display =
-        "flex";
-
-
-    wrapper.style.justifyContent =
-        "center";
-
-
-    wrapper.style.alignItems =
-        "flex-start";
-
-
-    const canvas =
-        document.createElement(
-            "canvas"
-        );
-
-
-    canvas.className =
-        "pdf-page";
-
-
-    canvas.style.display =
-        "block";
-
-
-    canvas.style.margin =
-        "0 auto";
-
-
-    wrapper.appendChild(
-        canvas
-    );
-
-
-    container.appendChild(
-        wrapper
-    );
-
-
-    const originalViewport =
-        page.getViewport({
-            scale: 1
-        });
-
-
-    const screenWidth =
-        window.innerWidth;
-
-
-    let availableWidth;
-
-
-    if (
-        screenWidth <= 600
-    ) {
-
-        availableWidth =
-            screenWidth - 20;
-
-    } else {
-
-        availableWidth =
-            Math.min(
-                screenWidth - 30,
-                1000
-            );
-
-    }
-
-
-    const scale =
-        availableWidth /
-        originalViewport.width;
-
-
-    const viewport =
-        page.getViewport({
-            scale:
-                scale
-        });
-
-
-    const devicePixelRatio =
-        Math.min(
-            window.devicePixelRatio ||
-                1,
-            2
-        );
-
-
-    canvas.width =
-        Math.round(
-            viewport.width *
-            devicePixelRatio
-        );
-
-
-    canvas.height =
-        Math.round(
-            viewport.height *
-            devicePixelRatio
-        );
-
-
-    canvas.style.width =
-        Math.round(
-            viewport.width
-        ) + "px";
-
-
-    canvas.style.height =
-        Math.round(
-            viewport.height
-        ) + "px";
-
-
-    const context =
-        canvas.getContext(
-            "2d"
-        );
-
-
-    const renderContext = {
-
-        canvasContext:
-            context,
-
-        viewport:
-            viewport,
-
-        transform:
-            devicePixelRatio !== 1
-                ? [
-                    devicePixelRatio,
-                    0,
-                    0,
-                    devicePixelRatio,
-                    0,
-                    0
-                ]
-                : null
-
-    };
-
-
-    await page
-        .render(
-            renderContext
-        )
-        .promise;
-
-}
-
-
-/* =========================================================
-   CLOSE PDF
-   ========================================================= */
-
-function closePDFViewer() {
-
-    const pdfViewer =
-        document.getElementById(
-            "pdfFullscreen"
-        );
-
-
-    if (pdfViewer) {
-
-        pdfViewer.remove();
-
-    }
-
-
-    document.body.classList.remove(
-        "viewer-open"
-    );
-
-}
-
-
-/* =========================================================
-   LOGOUT
-   ========================================================= */
-
-if (logoutBtn) {
-
-    logoutBtn.addEventListener(
-        "click",
-        async function () {
-
-            logoutBtn.disabled =
-                true;
-
-
-            try {
-
-                /* ========================================
-                   STOP HEARTBEAT
-                   ======================================== */
-
-                if (
-                    deviceHeartbeat
-                ) {
-
-                    clearInterval(
-                        deviceHeartbeat
-                    );
-
-                    deviceHeartbeat =
-                        null;
-
-                }
-
-
-                /* ========================================
-                   RELEASE DEVICE
-                   ======================================== */
-
-                if (
-                    currentUser
-                ) {
-
-                    const deviceRef =
-                        doc(
-                            db,
-                            "users",
-                            currentUser.uid,
-                            "devices",
-                            deviceId
-                        );
-
-
-                    try {
-
-                        await updateDoc(
-                            deviceRef,
-                            {
-                                active:
-                                    false,
-
-                                lastSeen:
-                                    Date.now()
-                            }
-                        );
-
-
-                    } catch (
-                        deviceError
-                    ) {
-
-                        console.error(
-                            "Device update error:",
-                            deviceError
-                        );
-
-                    }
-
-                }
-
-
-                /* ========================================
-                   CLEAR SESSION
-                   ======================================== */
-
-                sessionStorage.removeItem(
-                    "loggedInStudent"
-                );
-
-
-                sessionStorage.removeItem(
-                    "firebaseUID"
-                );
-
-
-                /* ========================================
-                   FIREBASE LOGOUT
-                   ======================================== */
-
-                await signOut(
-                    auth
-                );
-
-
-                window.location.href =
-                    "login.html";
-
-
-            } catch (error) {
-
-                console.error(
-                    "Logout error:",
-                    error
-                );
-
-
-                try {
-
-                    await signOut(
-                        auth
-                    );
-
-                } catch (
-                    signOutError
-                ) {
-
-                    console.error(
-                        signOutError
-                    );
-
-                }
-
-
-                sessionStorage.clear();
-
-
-                window.location.href =
-                    "login.html";
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   BASIC PROTECTION
-   ========================================================= */
-
-document.addEventListener(
-    "contextmenu",
-    function (event) {
-
-        event.preventDefault();
-
-    }
-);
-
-
-document.addEventListener(
-    "copy",
-    function (event) {
-
-        event.preventDefault();
-
-    }
-);
-
-
-document.addEventListener(
-    "cut",
-    function (event) {
-
-        event.preventDefault();
-
-    }
-);
-
-
-document.addEventListener(
-    "selectstart",
-    function (event) {
-
-        event.preventDefault();
-
-    }
-);
-
-
-document.addEventListener(
-    "keydown",
-    function (event) {
-
-        const key =
-            event.key.toLowerCase();
-
-
-        if (
-            (
-                event.ctrlKey ||
-                event.metaKey
-            ) &&
-            (
-                key === "s" ||
-                key === "p" ||
-                key === "u" ||
-                key === "c"
-            )
-        ) {
-
-            event.preventDefault();
-
-        }
-
-    }
-);
