@@ -1156,8 +1156,44 @@ function openLiveClass(url) {
 }
 
 /* =========================================================
+   CLOSE MODAL
+   ========================================================= */
+
+function closeModal() {
+
+    /* ============================================
+       REMOVE FIXED SCREEN WATERMARK
+       ============================================ */
+
+    const watermark =
+        document.getElementById(
+            "fjmcFloatingWatermark"
+        );
+
+    if (watermark) {
+        watermark.remove();
+    }
+
+
+    /* ============================================
+       REMOVE PDF MODAL
+       ============================================ */
+
+    const modal =
+        document.getElementById(
+            "fjmcContentModal"
+        );
+
+    if (modal) {
+        modal.remove();
+    }
+
+}
+
+
+/* =========================================================
    PDF VIEWER
-   CENTER + DARKER FJMC WATERMARK
+   FIXED CENTER WATERMARK
    ========================================================= */
 
 async function openPDFViewer(
@@ -1165,20 +1201,33 @@ async function openPDFViewer(
     title
 ) {
 
+    /* ============================================
+       CREATE MODAL
+       ============================================ */
+
     const modal =
         createModal();
+
 
     const modalTitle =
         document.getElementById(
             "fjmcModalTitle"
         );
 
+
     const body =
         document.getElementById(
             "fjmcModalBody"
         );
 
-    modalTitle.textContent = title;
+
+    modalTitle.textContent =
+        title;
+
+
+    /* ============================================
+       PDF AREA
+       ============================================ */
 
     body.innerHTML = `
 
@@ -1188,6 +1237,7 @@ async function openPDFViewer(
                 color:white;
                 text-align:center;
                 padding:30px;
+                font-size:16px;
             "
         >
             Loading PDF...
@@ -1200,12 +1250,19 @@ async function openPDFViewer(
                 text-align:center;
                 user-select:none;
                 -webkit-user-select:none;
+                -webkit-touch-callout:none;
             "
         >
         </div>
+
     `;
 
+
     try {
+
+        /* ========================================
+           CHECK PDF.JS
+           ======================================== */
 
         if (
             typeof pdfjsLib ===
@@ -1215,11 +1272,21 @@ async function openPDFViewer(
             throw new Error(
                 "PDF.js is not loaded."
             );
+
         }
+
+
+        /* ========================================
+           PDF WORKER
+           ======================================== */
 
         pdfjsLib.GlobalWorkerOptions.workerSrc =
             "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
+
+        /* ========================================
+           LOAD PDF
+           ======================================== */
 
         const pdf =
             await pdfjsLib
@@ -1232,19 +1299,128 @@ async function openPDFViewer(
                 "pdfPages"
             );
 
+
         const loading =
             document.getElementById(
                 "pdfLoading"
             );
+
 
         if (loading) {
             loading.remove();
         }
 
 
-        /* ================================================
-           RENDER EVERY PDF PAGE
-           ================================================ */
+        /* ========================================
+           CREATE FIXED SCREEN WATERMARK
+           ======================================== */
+
+        const oldWatermark =
+            document.getElementById(
+                "fjmcFloatingWatermark"
+            );
+
+
+        if (oldWatermark) {
+            oldWatermark.remove();
+        }
+
+
+        const watermark =
+            document.createElement(
+                "div"
+            );
+
+
+        watermark.id =
+            "fjmcFloatingWatermark";
+
+
+        watermark.textContent =
+            "FJMC ACADEMY";
+
+
+        /* ========================================
+           FIXED POSITION
+           ======================================== */
+
+        watermark.style.position =
+            "fixed";
+
+
+        watermark.style.left =
+            "50%";
+
+
+        watermark.style.top =
+            "50%";
+
+
+        watermark.style.transform =
+            "translate(-50%, -50%) rotate(-30deg)";
+
+
+        /* ========================================
+           BLACK / DARK WATERMARK
+           ======================================== */
+
+        watermark.style.color =
+            "rgba(0, 0, 0, 0.32)";
+
+
+        watermark.style.fontSize =
+            "34px";
+
+
+        watermark.style.fontWeight =
+            "800";
+
+
+        watermark.style.letterSpacing =
+            "2px";
+
+
+        watermark.style.whiteSpace =
+            "nowrap";
+
+
+        /* ========================================
+           IMPORTANT
+           WATERMARK PDF PAGE KA PART NAHI HAI
+           ======================================== */
+
+        watermark.style.pointerEvents =
+            "none";
+
+
+        watermark.style.userSelect =
+            "none";
+
+
+        watermark.style.webkitUserSelect =
+            "none";
+
+
+        watermark.style.webkitTouchCallout =
+            "none";
+
+
+        /* ========================================
+           ALWAYS ABOVE PDF
+           ======================================== */
+
+        watermark.style.zIndex =
+            "1000000";
+
+
+        document.body.appendChild(
+            watermark
+        );
+
+
+        /* ========================================
+           RENDER ALL PDF PAGES
+           ======================================== */
 
         for (
             let pageNumber = 1;
@@ -1258,68 +1434,89 @@ async function openPDFViewer(
                 );
 
 
+            /* ====================================
+               PAGE SIZE
+               ==================================== */
+
             const viewport =
                 page.getViewport({
                     scale: 1.4
                 });
 
 
-            /* ============================================
+            /* ====================================
                PAGE WRAPPER
-               ============================================ */
+               ==================================== */
 
             const wrapper =
                 document.createElement(
                     "div"
                 );
 
+
             wrapper.style.position =
                 "relative";
+
 
             wrapper.style.display =
                 "inline-block";
 
+
             wrapper.style.margin =
                 "0 auto 25px auto";
+
 
             wrapper.style.maxWidth =
                 "100%";
 
-            wrapper.style.overflow =
-                "hidden";
 
             wrapper.style.background =
                 "#ffffff";
 
 
-            /* ============================================
+            wrapper.style.overflow =
+                "hidden";
+
+
+            /* ====================================
                CANVAS
-               ============================================ */
+               ==================================== */
 
             const canvas =
                 document.createElement(
                     "canvas"
                 );
 
+
             canvas.width =
                 viewport.width;
+
 
             canvas.height =
                 viewport.height;
 
+
             canvas.style.width =
                 "100%";
+
 
             canvas.style.height =
                 "auto";
 
+
             canvas.style.display =
                 "block";
+
 
             canvas.style.userSelect =
                 "none";
 
+
             canvas.style.webkitUserSelect =
+                "none";
+
+
+            canvas.style.webkitTouchCallout =
                 "none";
 
 
@@ -1328,88 +1525,14 @@ async function openPDFViewer(
             );
 
 
-            /* ============================================
-               WATERMARK
-               EXACT CENTER
-               ============================================ */
-
-            const watermark =
-                document.createElement(
-                    "div"
-                );
-
-            watermark.textContent =
-                "FJMC ACADEMY";
-
-
-            watermark.style.position =
-                "absolute";
-
-            watermark.style.left =
-                "50%";
-
-            watermark.style.top =
-                "50%";
-
-
-            watermark.style.transform =
-                "translate(-50%, -50%) rotate(-30deg)";
-
-
-            /* DARKER THAN BEFORE */
-
-            watermark.style.color =
-                "rgba(100, 100, 100, 0.38)";
-
-
-            watermark.style.fontSize =
-                "32px";
-
-            watermark.style.fontWeight =
-                "700";
-
-            watermark.style.letterSpacing =
-                "2px";
-
-            watermark.style.whiteSpace =
-                "nowrap";
-
-
-            /* WATERMARK ABOVE PDF */
-
-            watermark.style.zIndex =
-                "10";
-
-
-            /* USER CANNOT SELECT IT */
-
-            watermark.style.pointerEvents =
-                "none";
-
-            watermark.style.userSelect =
-                "none";
-
-            watermark.style.webkitUserSelect =
-                "none";
-
-
-            wrapper.appendChild(
-                watermark
-            );
-
-
-            /* ============================================
-               ADD PAGE
-               ============================================ */
-
             pages.appendChild(
                 wrapper
             );
 
 
-            /* ============================================
-               RENDER PDF
-               ============================================ */
+            /* ====================================
+               RENDER PAGE
+               ==================================== */
 
             const context =
                 canvas.getContext(
@@ -1430,15 +1553,17 @@ async function openPDFViewer(
         }
 
 
-        /* ================================================
-           EXTRA PDF PROTECTION
-           ================================================ */
+        /* ========================================
+           PDF TEXT SELECTION OFF
+           ======================================== */
 
         pages.style.userSelect =
             "none";
 
+
         pages.style.webkitUserSelect =
             "none";
+
 
         pages.style.webkitTouchCallout =
             "none";
@@ -1451,6 +1576,25 @@ async function openPDFViewer(
             error
         );
 
+
+        /* ========================================
+           REMOVE WATERMARK IF PDF FAILS
+           ======================================== */
+
+        const watermark =
+            document.getElementById(
+                "fjmcFloatingWatermark"
+            );
+
+
+        if (watermark) {
+            watermark.remove();
+        }
+
+
+        /* ========================================
+           ERROR MESSAGE
+           ======================================== */
 
         body.innerHTML = `
 
@@ -1471,11 +1615,12 @@ async function openPDFViewer(
                 </p>
 
             </div>
+
         `;
+
     }
+
 }
-
-
 /* =========================================================
    LOGOUT
    ========================================================= */
