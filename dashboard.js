@@ -628,23 +628,9 @@ async function updateDeviceHeartbeat() {
 
 function showStudentCourses(student) {
 
-    if (!coursesContainer) {
-
-        console.error(
-            "coursesContainer not found"
-        );
-
-        return;
-    }
-
-
     coursesContainer.innerHTML = "";
 
-
-    if (
-        !student.courses ||
-        student.courses.length === 0
-    ) {
+    if (!student.courses || student.courses.length === 0) {
 
         coursesContainer.innerHTML = `
             <div class="no-course">
@@ -657,193 +643,96 @@ function showStudentCourses(student) {
     }
 
 
-    student.courses.forEach(function (courseId) {
+    student.courses.forEach(courseId => {
 
-        const course =
-            COURSES[courseId];
+        const course = COURSES[courseId];
 
-
-        if (!course) {
-            return;
-        }
+        if (!course) return;
 
 
-        const courseCard =
-            document.createElement("div");
+        const courseCard = document.createElement("div");
 
-
-        courseCard.className =
-            "course-card";
+        courseCard.className = "course-card";
 
 
         let contentHTML = "";
 
 
-        course.contents.forEach(
-            function (content) {
+        course.contents.forEach((content, index) => {
 
-                if (content.type === "video") {
+            /* ================= VIDEO ================= */
 
-                    contentHTML += `
-                        <button
-                            class="content-button video-button"
-                            data-type="youtube"
-                            data-url="${encodeURIComponent(content.url)}"
-                            data-title="${encodeURIComponent(content.title)}">
-                            ▶ ${content.title}
-                        </button>
-                    `;
-                }
+            if (content.type === "video") {
 
-
-                else if (
-                    content.type === "local-video"
-                ) {
-
-                    contentHTML += `
-                        <button
-                            class="content-button video-button"
-                            data-type="local"
-                            data-url="${encodeURIComponent(content.url)}"
-                            data-title="${encodeURIComponent(content.title)}">
-                            ▶ ${content.title}
-                        </button>
-                    `;
-                }
-
-
-                else if (
-                    content.type === "pdf"
-                ) {
-
-                    contentHTML += `
-                        <button
-                            class="content-button pdf-button"
-                            data-type="pdf"
-                            data-url="${encodeURIComponent(content.url)}"
-                            data-title="${encodeURIComponent(content.title)}">
-                            📄 ${content.title}
-                        </button>
-                    `;
-                }
-
-
-                else if (
-                    content.type === "live"
-                ) {
-
-                    contentHTML += `
-                        <button
-                            class="content-button live-button"
-                            data-type="live"
-                            data-url="${encodeURIComponent(content.url)}">
-                            🔴 ${content.title}
-                        </button>
-                    `;
-                }
-
+                contentHTML += `
+                    <button
+                        class="content-button video-button"
+                        onclick="openYouTubeVideo('${escapeAttribute(content.url)}', '${escapeAttribute(content.title)}')">
+                        ▶ ${content.title}
+                    </button>
+                `;
             }
-        );
+
+
+            /* ================= LOCAL VIDEO ================= */
+
+            else if (content.type === "local-video") {
+
+                contentHTML += `
+                    <button
+                        class="content-button video-button"
+                        onclick="openLocalVideo('${escapeAttribute(content.url)}', '${escapeAttribute(content.title)}')">
+                        ▶ ${content.title}
+                    </button>
+                `;
+            }
+
+
+            /* ================= PDF ================= */
+
+            else if (content.type === "pdf") {
+
+                contentHTML += `
+                    <button
+                        class="content-button pdf-button"
+                        onclick="openPDFViewer('${escapeAttribute(content.url)}', '${escapeAttribute(content.title)}')">
+                        📄 ${content.title}
+                    </button>
+                `;
+            }
+
+
+            /* ================= LIVE CLASS ================= */
+
+            else if (content.type === "live") {
+
+                contentHTML += `
+                    <button
+                        class="content-button live-button"
+                        onclick="openLiveClass('${escapeAttribute(content.url)}')">
+                        🔴 ${content.title}
+                    </button>
+                `;
+            }
+
+        });
 
 
         courseCard.innerHTML = `
 
             <div class="course-title">
-
-                <h3>
-                    ${course.title}
-                </h3>
-
-                <p>
-                    ${course.description}
-                </p>
-
+                <h3>${course.title}</h3>
+                <p>${course.description}</p>
             </div>
 
             <div class="course-content">
-
                 ${contentHTML}
-
             </div>
+
         `;
 
 
-        coursesContainer.appendChild(
-            courseCard
-        );
-
-    });
-
-
-    /* =====================================================
-       BUTTON EVENTS
-       ===================================================== */
-
-    const buttons =
-        coursesContainer.querySelectorAll(
-            ".content-button"
-        );
-
-
-    buttons.forEach(function (button) {
-
-        button.addEventListener(
-            "click",
-            function () {
-
-                const type =
-                    button.dataset.type;
-
-
-                const url =
-                    decodeURIComponent(
-                        button.dataset.url
-                    );
-
-
-                const title =
-                    button.dataset.title
-                        ? decodeURIComponent(
-                            button.dataset.title
-                        )
-                        : "";
-
-
-                if (type === "youtube") {
-
-                    openYouTubeVideo(
-                        url,
-                        title
-                    );
-                }
-
-
-                else if (type === "local") {
-
-                    openLocalVideo(
-                        url,
-                        title
-                    );
-                }
-
-
-                else if (type === "pdf") {
-
-                    openPDFViewer(
-                        url,
-                        title
-                    );
-                }
-
-
-                else if (type === "live") {
-
-                    openLiveClass(url);
-
-                }
-
-            }
-        );
+        coursesContainer.appendChild(courseCard);
 
     });
 
@@ -851,161 +740,15 @@ function showStudentCourses(student) {
 
 
 /* =========================================================
-   CREATE MODAL
+   SAFE ATTRIBUTE TEXT
    ========================================================= */
 
-function createModal() {
+function escapeAttribute(text) {
 
-    let modal =
-        document.getElementById(
-            "fjmcContentModal"
-        );
-
-
-    if (modal) {
-        return modal;
-    }
-
-
-    modal =
-        document.createElement("div");
-
-
-    modal.id =
-        "fjmcContentModal";
-
-
-    modal.innerHTML = `
-
-        <div
-            id="fjmcModalOverlay"
-            style="
-                position:fixed;
-                inset:0;
-                background:rgba(0,0,0,.85);
-                z-index:999999;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                padding:15px;
-            "
-        >
-
-            <div
-                style="
-                    width:100%;
-                    max-width:1100px;
-                    max-height:95vh;
-                    background:#111;
-                    border-radius:12px;
-                    overflow:hidden;
-                    position:relative;
-                    display:flex;
-                    flex-direction:column;
-                "
-            >
-
-                <div
-                    style="
-                        display:flex;
-                        align-items:center;
-                        justify-content:space-between;
-                        padding:10px 15px;
-                        background:#182033;
-                        color:white;
-                    "
-                >
-
-                    <strong
-                        id="fjmcModalTitle">
-                    </strong>
-
-                    <button
-                        id="fjmcModalClose"
-                        style="
-                            border:0;
-                            background:#e63946;
-                            color:white;
-                            width:38px;
-                            height:38px;
-                            border-radius:50%;
-                            font-size:20px;
-                            cursor:pointer;
-                        "
-                    >
-                        ×
-                    </button>
-
-                </div>
-
-
-                <div
-                    id="fjmcModalBody"
-                    style="
-                        flex:1;
-                        overflow:auto;
-                        background:#111;
-                    "
-                >
-                </div>
-
-            </div>
-
-        </div>
-    `;
-
-
-    document.body.appendChild(modal);
-
-
-    document
-        .getElementById("fjmcModalClose")
-        .addEventListener(
-            "click",
-            closeModal
-        );
-
-
-    document
-        .getElementById("fjmcModalOverlay")
-        .addEventListener(
-            "click",
-            function (event) {
-
-                if (
-                    event.target.id ===
-                    "fjmcModalOverlay"
-                ) {
-
-                    closeModal();
-
-                }
-
-            }
-        );
-
-
-    return modal;
-}
-
-
-/* =========================================================
-   CLOSE MODAL
-   ========================================================= */
-
-function closeModal() {
-
-    const modal =
-        document.getElementById(
-            "fjmcContentModal"
-        );
-
-
-    if (modal) {
-
-        modal.remove();
-
-    }
+    return String(text)
+        .replace(/\\/g, "\\\\")
+        .replace(/'/g, "\\'")
+        .replace(/"/g, "&quot;");
 
 }
 
@@ -1014,63 +757,48 @@ function closeModal() {
    YOUTUBE VIDEO
    ========================================================= */
 
-function openYouTubeVideo(
-    url,
-    title
-) {
+function openYouTubeVideo(url, title) {
 
-    const modal =
-        createModal();
+    const overlay = document.createElement("div");
+
+    overlay.className = "video-overlay";
 
 
-    const modalTitle =
-        document.getElementById(
-            "fjmcModalTitle"
-        );
+    overlay.innerHTML = `
+
+        <div class="video-window">
+
+            <div class="video-header">
+
+                <span>${title}</span>
+
+                <button class="close-video"
+                        onclick="this.closest('.video-overlay').remove(); document.body.classList.remove('viewer-open');">
+                    ✕
+                </button>
+
+            </div>
 
 
-    const body =
-        document.getElementById(
-            "fjmcModalBody"
-        );
+            <div class="video-player-container">
 
+                <iframe
+                    src="${url}"
+                    title="${title}"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                    allowfullscreen>
+                </iframe>
 
-    modalTitle.textContent =
-        title;
-
-
-    body.innerHTML = `
-
-        <div
-            style="
-                width:100%;
-                aspect-ratio:16/9;
-                background:#000;
-            "
-        >
-
-            <iframe
-                src="${url}"
-                title="${title}"
-                style="
-                    width:100%;
-                    height:100%;
-                    border:0;
-                "
-                allow="
-                    accelerometer;
-                    autoplay;
-                    clipboard-write;
-                    encrypted-media;
-                    gyroscope;
-                    picture-in-picture;
-                    web-share
-                "
-                allowfullscreen>
-            </iframe>
+            </div>
 
         </div>
+
     `;
+
+
+    document.body.appendChild(overlay);
+
+    document.body.classList.add("viewer-open");
 
 }
 
@@ -1079,55 +807,54 @@ function openYouTubeVideo(
    LOCAL VIDEO
    ========================================================= */
 
-function openLocalVideo(
-    url,
-    title
-) {
+function openLocalVideo(url, title) {
 
-    const modal =
-        createModal();
+    const overlay = document.createElement("div");
+
+    overlay.className = "video-overlay";
 
 
-    const modalTitle =
-        document.getElementById(
-            "fjmcModalTitle"
-        );
+    overlay.innerHTML = `
+
+        <div class="video-window">
+
+            <div class="video-header">
+
+                <span>${title}</span>
+
+                <button class="close-video"
+                        onclick="this.closest('.video-overlay').remove(); document.body.classList.remove('viewer-open');">
+                    ✕
+                </button>
+
+            </div>
 
 
-    const body =
-        document.getElementById(
-            "fjmcModalBody"
-        );
+            <div class="video-player-container">
 
+                <video
+                    controls
+                    controlsList="nodownload"
+                    disablePictureInPicture
+                    playsinline
+                    preload="metadata">
 
-    modalTitle.textContent =
-        title;
+                    <source src="${url}" type="video/mp4">
 
+                    Your browser does not support video.
 
-    body.innerHTML = `
+                </video>
 
-        <video
-            controls
-            controlsList="nodownload"
-            disablePictureInPicture
-            playsinline
-            style="
-                width:100%;
-                max-height:80vh;
-                display:block;
-                background:#000;
-            "
-        >
+            </div>
 
-            <source
-                src="${url}"
-                type="video/mp4"
-            >
+        </div>
 
-            Your browser does not support video.
-
-        </video>
     `;
+
+
+    document.body.appendChild(overlay);
+
+    document.body.classList.add("viewer-open");
 
 }
 
@@ -1140,280 +867,311 @@ function openLiveClass(url) {
 
     if (!url || url === "#") {
 
-        alert(
-            "Live class link is not available yet."
-        );
+        alert("Live class link will be available here.");
+
+        return;
+    }
+
+    window.open(url, "_blank");
+
+}
+
+
+/* =========================================================
+   PDF.js WORKER
+   ========================================================= */
+
+if (typeof pdfjsLib !== "undefined") {
+
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+}
+
+
+/* =========================================================
+   PROTECTED PDF VIEWER
+   ========================================================= */
+
+async function openPDFViewer(pdfURL, title) {
+
+    if (typeof pdfjsLib === "undefined") {
+
+        alert("PDF viewer could not load. Please refresh the page.");
 
         return;
     }
 
 
-    window.open(
-        url,
-        "_blank",
-        "noopener,noreferrer"
-    );
-}
+    /* Create overlay */
+
+    const overlay = document.createElement("div");
+
+    overlay.id = "pdfFullscreen";
 
 
-/* =========================================================
-   PDF VIEWER
-   ========================================================= */
+  overlay.innerHTML = `
 
-async function openPDFViewer(
-    url,
-    title
-) {
+    <div class="pdf-header">
 
-    const modal =
-        createModal();
+        <div class="pdf-title">
+            ${title}
+        </div>
 
+        <button id="closePDF">
+            ✕ Close
+        </button>
 
-    const modalTitle =
-        document.getElementById(
-            "fjmcModalTitle"
-        );
+    </div>
 
+    <!-- SCREEN WATERMARK -->
+    <div class="pdf-screen-watermark">
+        <div>FJMC Academy</div>
+        <div>${loggedInEmail}</div>
+    </div>
 
-    const body =
-        document.getElementById(
-            "fjmcModalBody"
-        );
+    <div id="pdfScrollArea" class="pdf-scroll-area">
 
-
-    modalTitle.textContent =
-        title;
-
-
-    body.innerHTML = `
-
-        <div
-            id="pdfLoading"
-            style="
-                color:white;
-                text-align:center;
-                padding:30px;
-            "
-        >
+        <div id="pdfLoading" class="pdf-loading">
             Loading PDF...
         </div>
 
-        <div
-            id="pdfPages"
-            style="
-                padding:15px;
-                text-align:center;
-            "
-        >
-        </div>
-    `;
+        <div id="pdfPages" class="pdf-pages"></div>
+
+    </div>
+`;
+
+
+    document.body.appendChild(overlay);
+
+    document.body.classList.add("viewer-open");
+
+
+    /* Close PDF */
+
+    document.getElementById("closePDF").addEventListener("click", closePDFViewer);
 
 
     try {
 
-        if (
-            typeof pdfjsLib ===
-            "undefined"
-        ) {
+        const loadingTask = pdfjsLib.getDocument({
+            url: pdfURL
+        });
 
-            throw new Error(
-                "PDF.js is not loaded."
-            );
+
+        const pdf = await loadingTask.promise;
+
+
+        const pagesContainer = document.getElementById("pdfPages");
+
+        const loadingMessage = document.getElementById("pdfLoading");
+
+        if (loadingMessage) {
+            loadingMessage.remove();
         }
 
 
-        pdfjsLib.GlobalWorkerOptions.workerSrc =
-            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+        /* Render every page */
 
+        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
 
-        const pdf =
-            await pdfjsLib.getDocument(
-                url
-            ).promise;
-
-
-        const pages =
-            document.getElementById(
-                "pdfPages"
+            await renderPDFPage(
+                pdf,
+                pageNumber,
+                pagesContainer
             );
-
-
-        const loading =
-            document.getElementById(
-                "pdfLoading"
-            );
-
-
-        if (loading) {
-            loading.remove();
-        }
-
-
-        for (
-            let pageNumber = 1;
-            pageNumber <= pdf.numPages;
-            pageNumber++
-        ) {
-
-            const page =
-                await pdf.getPage(
-                    pageNumber
-                );
-
-
-            const viewport =
-                page.getViewport({
-                    scale: 1.4
-                });
-
-
-            const wrapper =
-                document.createElement(
-                    "div"
-                );
-
-
-            wrapper.style.position =
-                "relative";
-
-            wrapper.style.display =
-                "inline-block";
-
-            wrapper.style.margin =
-                "0 auto 20px auto";
-
-
-            const canvas =
-                document.createElement(
-                    "canvas"
-                );
-
-
-            canvas.width =
-                viewport.width;
-
-            canvas.height =
-                viewport.height;
-
-
-            canvas.style.maxWidth =
-                "100%";
-
-            canvas.style.height =
-                "auto";
-
-            canvas.style.display =
-                "block";
-
-
-            wrapper.appendChild(
-                canvas
-            );
-
-
-            const watermark =
-                document.createElement(
-                    "div"
-                );
-
-
-            watermark.textContent =
-                "FJMC ACADEMY";
-
-
-            watermark.style.position =
-                "absolute";
-
-            watermark.style.left =
-                "50%";
-
-            watermark.style.top =
-                "50%";
-
-            watermark.style.transform =
-                "translate(-50%,-50%) rotate(-30deg)";
-
-            watermark.style.color =
-                "rgba(180,180,180,.25)";
-
-            watermark.style.fontSize =
-                "28px";
-
-            watermark.style.fontWeight =
-                "bold";
-
-            watermark.style.pointerEvents =
-                "none";
-
-            watermark.style.whiteSpace =
-                "nowrap";
-
-
-            wrapper.appendChild(
-                watermark
-            );
-
-
-            pages.appendChild(
-                wrapper
-            );
-
-
-            const context =
-                canvas.getContext(
-                    "2d"
-                );
-
-
-            await page.render({
-                canvasContext: context,
-                viewport: viewport
-            }).promise;
 
         }
-
-
-        /* Disable selection inside PDF */
-
-        pages.style.userSelect =
-            "none";
-
-        pages.style.webkitUserSelect =
-            "none";
 
     } catch (error) {
 
-        console.error(
-            "PDF error:",
-            error
-        );
+        console.error("PDF Error:", error);
 
 
-        body.innerHTML = `
+        const loadingMessage = document.getElementById("pdfLoading");
 
-            <div
-                style="
-                    color:white;
-                    padding:30px;
-                    text-align:center;
-                "
-            >
+        if (loadingMessage) {
 
-                <h3>
-                    PDF could not be opened
-                </h3>
+            loadingMessage.innerHTML = `
+                <div class="pdf-error">
+                    <h3>PDF could not be opened</h3>
+                    <p>Please check the PDF file path.</p>
+                </div>
+            `;
 
-                <p>
-                    ${error.message || ""}
-                </p>
-
-            </div>
-        `;
+        }
 
     }
 
 }
 
+
+/* =========================================================
+   RENDER ONE PDF PAGE
+   ========================================================= */
+
+async function renderPDFPage(pdf, pageNumber, container) {
+
+    const page = await pdf.getPage(pageNumber);
+
+    /* ===============================
+       PAGE WRAPPER
+       =============================== */
+
+    const wrapper = document.createElement("div");
+
+    wrapper.className = "pdf-page-wrapper";
+
+    wrapper.style.position = "relative";
+    wrapper.style.width = "100%";
+    wrapper.style.display = "flex";
+    wrapper.style.justifyContent = "center";
+    wrapper.style.alignItems = "flex-start";
+
+
+    /* ===============================
+       CANVAS
+       =============================== */
+
+    const canvas = document.createElement("canvas");
+
+    canvas.className = "pdf-page";
+
+    canvas.style.display = "block";
+    canvas.style.margin = "0 auto";
+
+
+    wrapper.appendChild(canvas);
+
+    container.appendChild(wrapper);
+
+
+    /* ===============================
+       ORIGINAL PDF SIZE
+       =============================== */
+
+    const originalViewport = page.getViewport({
+        scale: 1
+    });
+
+
+    /* ===============================
+       SCREEN WIDTH
+       =============================== */
+
+    const screenWidth = window.innerWidth;
+
+
+    /*
+       Mobile:
+       Keep small side margin.
+
+       Laptop:
+       Maximum 1000px.
+    */
+
+    let availableWidth;
+
+
+    if (screenWidth <= 600) {
+
+        availableWidth = screenWidth - 20;
+
+    } else {
+
+        availableWidth =
+            Math.min(screenWidth - 30, 1000);
+
+    }
+
+
+    /* ===============================
+       SCALE
+       =============================== */
+
+    const scale =
+        availableWidth / originalViewport.width;
+
+
+    const viewport = page.getViewport({
+        scale: scale
+    });
+
+
+    /* ===============================
+       HIGH DPI
+       =============================== */
+
+    const devicePixelRatio =
+        Math.min(window.devicePixelRatio || 1, 2);
+
+
+    canvas.width =
+        Math.round(viewport.width * devicePixelRatio);
+
+    canvas.height =
+        Math.round(viewport.height * devicePixelRatio);
+
+
+    /* CSS DISPLAY SIZE */
+
+    canvas.style.width =
+        Math.round(viewport.width) + "px";
+
+    canvas.style.height =
+        Math.round(viewport.height) + "px";
+
+
+    /* ===============================
+       RENDER
+       =============================== */
+
+    const context =
+        canvas.getContext("2d");
+
+
+    const renderContext = {
+
+        canvasContext: context,
+
+        viewport: viewport,
+
+        transform:
+            devicePixelRatio !== 1
+                ? [
+                    devicePixelRatio,
+                    0,
+                    0,
+                    devicePixelRatio,
+                    0,
+                    0
+                ]
+                : null
+    };
+
+
+    await page.render(renderContext).promise;
+}
+/* =========================================================
+   CLOSE PDF
+   ========================================================= */
+
+function closePDFViewer() {
+
+    const pdfViewer =
+        document.getElementById("pdfFullscreen");
+
+
+    if (pdfViewer) {
+
+        pdfViewer.remove();
+
+    }
+
+
+    document.body.classList.remove("viewer-open");
+
+}
 
 /* =========================================================
    LOGOUT
