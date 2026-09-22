@@ -694,6 +694,8 @@ async function updateDeviceHeartbeat() {
 
 function showStudentCourses(student) {
 
+    console.log("STUDENT:", student);
+
     if (!coursesContainer) {
 
         console.error(
