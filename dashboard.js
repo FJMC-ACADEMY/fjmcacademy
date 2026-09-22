@@ -1,9 +1,7 @@
 /* =========================================================
    FJMC ACADEMY - STUDENT DASHBOARD
-   Firebase Authentication + Firestore
-   Maximum 2 Devices
-   Device Timeout = 24 Hours
-========================================================= */
+   FIREBASE + MAXIMUM 2 DEVICES
+   ========================================================= */
 
 import {
     onAuthStateChanged,
@@ -13,8 +11,8 @@ import {
 import {
     collection,
     doc,
-    getDoc,
     getDocs,
+    getDoc,
     setDoc,
     deleteDoc,
     updateDoc,
@@ -28,8 +26,8 @@ import {
 
 
 /* =========================================================
-   STUDENTS
-========================================================= */
+   STUDENT DATA
+   ========================================================= */
 
 const STUDENTS = {
 
@@ -52,8 +50,8 @@ const STUDENTS = {
 
 
 /* =========================================================
-   COURSES
-========================================================= */
+   COURSE DATA
+   ========================================================= */
 
 const COURSES = {
 
@@ -61,49 +59,47 @@ const COURSES = {
 
         title: "Real Analysis",
 
-        description:
-            "Complete Real Analysis course with lectures, notes and live classes.",
+        description: "Complete Real Analysis Course",
 
-        lessons: [
-
-            {
-                title: "Lecture 1",
-                type: "youtube",
-                url: "https://www.youtube.com/embed/dQw4w9WgXcQ"
-            },
+        contents: [
 
             {
-                title: "Lecture 2",
-                type: "youtube",
-                url: "https://www.youtube.com/embed/dQw4w9WgXcQ"
-            },
-
-            {
-                title: "Lecture 3",
                 type: "video",
+                title: "Lecture 1",
+                url: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+            },
+
+            {
+                type: "video",
+                title: "Lecture 2",
+                url: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+            },
+
+            {
+                type: "local-video",
+                title: "Lecture 3",
                 url: "./real-analysis-lecture-3.mp4"
             },
 
             {
-                title: "Lecture 4 Notes",
                 type: "pdf",
+                title: "Lecture 1 PDF",
                 url: "./321581555.PDF"
             },
 
             {
-                title: "Chapter 3 Notes",
                 type: "pdf",
+                title: "Lecture 2 PDF",
                 url: "./ch03.pdf"
             },
 
             {
-                title: "Live Class",
                 type: "live",
+                title: "Live Class",
                 url: "#"
             }
 
         ]
-
     },
 
 
@@ -111,37 +107,29 @@ const COURSES = {
 
         title: "Linear Algebra",
 
-        description:
-            "Linear Algebra lectures, notes and live classes.",
+        description: "Complete Linear Algebra Course",
 
-        lessons: [
+        contents: [
 
             {
+                type: "video",
                 title: "Lecture 1",
-                type: "youtube",
                 url: "https://www.youtube.com/embed/dQw4w9WgXcQ"
             },
 
             {
-                title: "Lecture 2",
-                type: "youtube",
-                url: "https://www.youtube.com/embed/dQw4w9WgXcQ"
-            },
-
-            {
-                title: "Linear Algebra Notes",
                 type: "pdf",
+                title: "Linear Algebra Notes",
                 url: "./pdf/linear-algebra-notes.pdf"
             },
 
             {
-                title: "Live Class",
                 type: "live",
+                title: "Live Class",
                 url: "#"
             }
 
         ]
-
     },
 
 
@@ -149,50 +137,49 @@ const COURSES = {
 
         title: "Calculus",
 
-        description:
-            "Calculus lectures, notes and live classes.",
+        description: "Complete Calculus Course",
 
-        lessons: [
+        contents: [
 
             {
+                type: "video",
                 title: "Lecture 1",
-                type: "youtube",
                 url: "https://www.youtube.com/embed/dQw4w9WgXcQ"
             },
 
             {
+                type: "local-video",
                 title: "Lecture 2",
-                type: "video",
                 url: "./videos/calculus-lecture-2.mp4"
             },
 
             {
-                title: "Chapter 3 Notes",
                 type: "pdf",
+                title: "Chapter 3 PDF",
                 url: "./ch03.pdf"
             },
 
             {
-                title: "Live Class",
                 type: "live",
+                title: "Live Class",
                 url: "#"
             }
 
         ]
-
     }
 
 };
 
 
 /* =========================================================
-   DEVICE SETTINGS
-========================================================= */
+   SETTINGS
+   ========================================================= */
 
 const MAX_DEVICES = 2;
 
 /*
-   Device ko 24 hours tak active maana jayega.
+   Device 24 hours tak inactive na ho
+   to active maana jayega.
 */
 
 const DEVICE_TIMEOUT =
@@ -200,38 +187,29 @@ const DEVICE_TIMEOUT =
 
 
 /* =========================================================
-   GLOBAL VARIABLES
-========================================================= */
-
-let currentUser = null;
-let currentStudent = null;
-let deviceId = null;
-let heartbeatInterval = null;
-
-
-/* =========================================================
-   GET DEVICE ID
-========================================================= */
+   DEVICE ID
+   ========================================================= */
 
 function getDeviceId() {
 
-    let id =
+    let deviceId =
         localStorage.getItem("fjmcDeviceId");
 
-    if (!id) {
+
+    if (!deviceId) {
 
         if (
             typeof crypto !== "undefined" &&
-            crypto.randomUUID
+            typeof crypto.randomUUID === "function"
         ) {
 
-            id =
+            deviceId =
                 "device-" +
                 crypto.randomUUID();
 
         } else {
 
-            id =
+            deviceId =
                 "device-" +
                 Date.now() +
                 "-" +
@@ -241,21 +219,154 @@ function getDeviceId() {
 
         }
 
+
         localStorage.setItem(
             "fjmcDeviceId",
-            id
+            deviceId
         );
+
     }
 
-    return id;
+
+    return deviceId;
 }
 
-deviceId = getDeviceId();
+
+const deviceId =
+    getDeviceId();
+
+
+/* =========================================================
+   GLOBAL DEVICE STATE
+   ========================================================= */
+
+let currentUser = null;
+
+let deviceHeartbeat = null;
+
+
+/* =========================================================
+   HTML ELEMENTS
+   ========================================================= */
+
+const coursesContainer =
+    document.getElementById(
+        "coursesContainer"
+    );
+
+const studentName =
+    document.getElementById(
+        "studentName"
+    );
+
+const logoutBtn =
+    document.getElementById(
+        "logoutBtn"
+    );
+
+
+/* =========================================================
+   FIREBASE AUTH CHECK
+   ========================================================= */
+
+onAuthStateChanged(
+    auth,
+    async function (user) {
+
+        if (!user) {
+
+            window.location.href =
+                "login.html";
+
+            return;
+        }
+
+
+        currentUser =
+            user;
+
+
+        const email =
+            (
+                user.email || ""
+            ).toLowerCase();
+
+
+        if (!STUDENTS[email]) {
+
+            await signOut(auth);
+
+            window.location.href =
+                "login.html";
+
+            return;
+        }
+
+
+        /*
+           Check / register device
+        */
+
+        const allowed =
+            await registerDevice(user);
+
+
+        if (!allowed) {
+
+            return;
+        }
+
+
+        /*
+           Save login information
+        */
+
+        sessionStorage.setItem(
+            "loggedInStudent",
+            email
+        );
+
+        sessionStorage.setItem(
+            "firebaseUID",
+            user.uid
+        );
+
+
+        /*
+           Show student dashboard
+        */
+
+        const student =
+            STUDENTS[email];
+
+
+        if (studentName) {
+
+            studentName.textContent =
+                "Welcome, " +
+                student.name;
+
+        }
+
+
+        showStudentCourses(
+            student
+        );
+
+
+        /*
+           Start heartbeat
+        */
+
+        startDeviceHeartbeat();
+
+    }
+);
 
 
 /* =========================================================
    DEVICE COLLECTION
-========================================================= */
+   ========================================================= */
 
 function devicesCollection(user) {
 
@@ -271,16 +382,12 @@ function devicesCollection(user) {
 
 /* =========================================================
    REGISTER DEVICE
-   IMPORTANT:
-   getDocs() transaction ke andar nahi hai.
-========================================================= */
+   FIXED VERSION
+   ========================================================= */
 
 async function registerDevice(user) {
 
     try {
-
-        const devicesRef =
-            devicesCollection(user);
 
         const deviceRef =
             doc(
@@ -291,19 +398,29 @@ async function registerDevice(user) {
                 deviceId
             );
 
+
         const now =
             Date.now();
 
 
-        /* -------------------------------------------------
-           CURRENT DEVICE ALREADY REGISTERED
-        ------------------------------------------------- */
+        /* =================================================
+           CHECK CURRENT DEVICE
+        ================================================= */
 
-        const currentDeviceSnap =
-            await getDoc(deviceRef);
+        const currentDeviceSnapshot =
+            await getDoc(
+                deviceRef
+            );
 
 
-        if (currentDeviceSnap.exists()) {
+        /*
+           Agar ye device pehle se registered hai,
+           to sirf lastSeen update karo.
+        */
+
+        if (
+            currentDeviceSnapshot.exists()
+        ) {
 
             await setDoc(
                 deviceRef,
@@ -317,17 +434,21 @@ async function registerDevice(user) {
                 }
             );
 
+
             return true;
         }
 
 
-        /* -------------------------------------------------
+        /* =================================================
            GET ALL DEVICES
-           Transaction ke bahar
-        ------------------------------------------------- */
+           IMPORTANT:
+           Ye transaction ke bahar hai.
+        ================================================= */
 
         const devicesSnapshot =
-            await getDocs(devicesRef);
+            await getDocs(
+                devicesCollection(user)
+            );
 
 
         let activeDevices = [];
@@ -336,8 +457,23 @@ async function registerDevice(user) {
         devicesSnapshot.forEach(
             function (deviceDoc) {
 
+                /*
+                   Apne current device ko count
+                   karne ki zarurat nahi.
+                */
+
+                if (
+                    deviceDoc.id ===
+                    deviceId
+                ) {
+
+                    return;
+                }
+
+
                 const data =
                     deviceDoc.data();
+
 
                 const lastSeen =
                     Number(
@@ -347,11 +483,13 @@ async function registerDevice(user) {
 
                 const recentlyActive =
                     data.active === true &&
-                    (now - lastSeen)
-                    < DEVICE_TIMEOUT;
+                    (now - lastSeen) <
+                    DEVICE_TIMEOUT;
 
 
-                if (recentlyActive) {
+                if (
+                    recentlyActive
+                ) {
 
                     activeDevices.push(
                         deviceDoc.id
@@ -363,9 +501,9 @@ async function registerDevice(user) {
         );
 
 
-        /* -------------------------------------------------
-           MAXIMUM 2 ACTIVE DEVICES
-        ------------------------------------------------- */
+        /* =================================================
+           MAXIMUM 2 DEVICES
+        ================================================= */
 
         if (
             activeDevices.length >=
@@ -378,16 +516,19 @@ async function registerDevice(user) {
         }
 
 
-        /* -------------------------------------------------
+        /* =================================================
            REGISTER NEW DEVICE
-        ------------------------------------------------- */
+        ================================================= */
 
         await setDoc(
             deviceRef,
             {
                 email: user.email,
+
                 lastSeen: now,
+
                 active: true,
+
                 createdAt:
                     serverTimestamp()
             }
@@ -406,9 +547,16 @@ async function registerDevice(user) {
 
 
         alert(
-            "Unable to verify this device. Please refresh and try again."
+            "Unable to verify this device. Please try again."
         );
 
+
+        /*
+           IMPORTANT:
+           Error hone par user ko forcibly logout
+           nahi kar rahe. Isse dashboard blank/loading
+           state me atakne se bachenge.
+        */
 
         return false;
     }
@@ -418,73 +566,65 @@ async function registerDevice(user) {
 
 /* =========================================================
    DEVICE LIMIT MESSAGE
-========================================================= */
+   ========================================================= */
 
 function showDeviceLimitMessage() {
 
     const message =
-        "This account is already active on 2 devices.\n\n" +
-        "Please logout from one of your other devices and try again.";
+        document.getElementById(
+            "deviceLimitMessage"
+        );
 
-    alert(message);
+
+    if (message) {
+
+        message.textContent =
+            "Maximum 2 devices are already active for this account. Please logout from another device first.";
+
+        return;
+    }
+
+
+    alert(
+        "Maximum 2 devices are already active for this account.\n\nPlease logout from another device first."
+    );
 
 }
 
 
 /* =========================================================
    HEARTBEAT
-   Har 2 minute me lastSeen update
-========================================================= */
+   ========================================================= */
 
-function startHeartbeat() {
+function startDeviceHeartbeat() {
 
-    stopHeartbeat();
+    /*
+       Purana heartbeat ho to pehle stop
+    */
+
+    if (deviceHeartbeat) {
+
+        clearInterval(
+            deviceHeartbeat
+        );
+
+    }
 
 
-    heartbeatInterval =
+    /*
+       Update immediately
+    */
+
+    updateDeviceHeartbeat();
+
+
+    /*
+       Every 2 minutes
+    */
+
+    deviceHeartbeat =
         setInterval(
-            async function () {
-
-                if (
-                    !currentUser ||
-                    !deviceId
-                ) {
-                    return;
-                }
-
-
-                try {
-
-                    const deviceRef =
-                        doc(
-                            db,
-                            "users",
-                            currentUser.uid,
-                            "devices",
-                            deviceId
-                        );
-
-
-                    await updateDoc(
-                        deviceRef,
-                        {
-                            lastSeen:
-                                Date.now(),
-                            active: true
-                        }
-                    );
-
-
-                } catch (error) {
-
-                    console.error(
-                        "Heartbeat error:",
-                        error
-                    );
-
-                }
-
-            },
+            updateDeviceHeartbeat,
             2 * 60 * 1000
         );
 
@@ -492,222 +632,68 @@ function startHeartbeat() {
 
 
 /* =========================================================
-   STOP HEARTBEAT
-========================================================= */
+   UPDATE DEVICE
+   ========================================================= */
 
-function stopHeartbeat() {
+async function updateDeviceHeartbeat() {
 
-    if (heartbeatInterval) {
+    if (!currentUser) {
 
-        clearInterval(
-            heartbeatInterval
+        return;
+    }
+
+
+    try {
+
+        const deviceRef =
+            doc(
+                db,
+                "users",
+                currentUser.uid,
+                "devices",
+                deviceId
+            );
+
+
+        await updateDoc(
+            deviceRef,
+            {
+                lastSeen: Date.now(),
+                active: true
+            }
         );
 
-        heartbeatInterval = null;
+
+    } catch (error) {
+
+        console.error(
+            "Heartbeat error:",
+            error
+        );
+
     }
 
 }
 
 
 /* =========================================================
-   AUTH STATE
-========================================================= */
-
-onAuthStateChanged(
-    auth,
-    async function (user) {
-
-        try {
-
-            /* ---------------------------------------------
-               USER NOT LOGGED IN
-            --------------------------------------------- */
-
-            if (!user) {
-
-                window.location.href =
-                    "login.html";
-
-                return;
-            }
-
-
-            currentUser = user;
-
-
-            const email =
-                (
-                    user.email || ""
-                ).toLowerCase();
-
-
-            /* ---------------------------------------------
-               CHECK STUDENT
-            --------------------------------------------- */
-
-            const student =
-                STUDENTS[email];
-
-
-            if (!student) {
-
-                alert(
-                    "Your account is not assigned to any course."
-                );
-
-                await signOut(auth);
-
-                window.location.href =
-                    "login.html";
-
-                return;
-            }
-
-
-            currentStudent =
-                student;
-
-
-            /* ---------------------------------------------
-               DEVICE CHECK
-            --------------------------------------------- */
-
-            const deviceAllowed =
-                await registerDevice(user);
-
-
-            if (!deviceAllowed) {
-
-                stopHeartbeat();
-
-                await signOut(auth);
-
-                return;
-            }
-
-
-            /* ---------------------------------------------
-               SAVE SESSION
-            --------------------------------------------- */
-
-            sessionStorage.setItem(
-                "loggedInStudent",
-                email
-            );
-
-            sessionStorage.setItem(
-                "firebaseUID",
-                user.uid
-            );
-
-
-            /* ---------------------------------------------
-               SHOW NAME
-            --------------------------------------------- */
-
-            const studentName =
-                document.getElementById(
-                    "studentName"
-                );
-
-
-            if (studentName) {
-
-                studentName.textContent =
-                    student.name;
-
-            }
-
-
-            /* ---------------------------------------------
-               SHOW COURSES
-            --------------------------------------------- */
-
-            showStudentCourses(
-                student
-            );
-
-
-            /* ---------------------------------------------
-               START HEARTBEAT
-            --------------------------------------------- */
-
-            startHeartbeat();
-
-
-        } catch (error) {
-
-            console.error(
-                "Authentication error:",
-                error
-            );
-
-
-            const container =
-                document.getElementById(
-                    "coursesContainer"
-                );
-
-
-            if (container) {
-
-                container.innerHTML =
-                    `
-                    <div style="
-                        padding:30px;
-                        text-align:center;
-                        color:#c62828;
-                        background:#fff;
-                        border-radius:12px;
-                        margin:20px;
-                    ">
-                        <h3>Unable to load courses</h3>
-
-                        <p>
-                            Please refresh the page
-                            and try again.
-                        </p>
-
-                        <p style="
-                            font-size:12px;
-                            color:#777;
-                        ">
-                            ${error.message || ""}
-                        </p>
-                    </div>
-                    `;
-
-            }
-
-        }
-
-    }
-);
-
-
-/* =========================================================
    SHOW STUDENT COURSES
-========================================================= */
+   ========================================================= */
 
 function showStudentCourses(student) {
 
-    const container =
-        document.getElementById(
-            "coursesContainer"
-        );
-
-
-    if (!container) {
+    if (!coursesContainer) {
 
         console.error(
-            "coursesContainer not found."
+            "coursesContainer not found in dashboard.html"
         );
 
         return;
     }
 
 
-    container.innerHTML = "";
+    coursesContainer.innerHTML =
+        "";
 
 
     if (
@@ -715,15 +701,19 @@ function showStudentCourses(student) {
         student.courses.length === 0
     ) {
 
-        container.innerHTML =
-            `
-            <div style="
-                text-align:center;
-                padding:30px;
-            ">
-                No courses assigned.
+        coursesContainer.innerHTML = `
+
+            <div class="no-course">
+
+                <h3>No Course Assigned</h3>
+
+                <p>
+                    Please contact FJMC Academy.
+                </p>
+
             </div>
-            `;
+
+        `;
 
         return;
     }
@@ -738,69 +728,156 @@ function showStudentCourses(student) {
 
             if (!course) {
 
-                console.warn(
-                    "Course not found:",
-                    courseId
-                );
-
                 return;
             }
 
 
-            const card =
+            const courseCard =
                 document.createElement(
                     "div"
                 );
 
 
-            card.className =
+            courseCard.className =
                 "course-card";
 
 
-            card.innerHTML =
-                `
-                <div class="course-card-inner">
+            let contentHTML =
+                "";
 
-                    <h2>
+
+            course.contents.forEach(
+                function (content) {
+
+
+                    /* ================= VIDEO ================= */
+
+                    if (
+                        content.type ===
+                        "video"
+                    ) {
+
+                        contentHTML += `
+
+                            <button
+                                class="content-button video-button"
+                                onclick="openYouTubeVideo(
+                                    '${escapeAttribute(content.url)}',
+                                    '${escapeAttribute(content.title)}'
+                                )">
+
+                                ▶ ${content.title}
+
+                            </button>
+
+                        `;
+
+                    }
+
+
+                    /* ================= LOCAL VIDEO ================= */
+
+                    else if (
+                        content.type ===
+                        "local-video"
+                    ) {
+
+                        contentHTML += `
+
+                            <button
+                                class="content-button video-button"
+                                onclick="openLocalVideo(
+                                    '${escapeAttribute(content.url)}',
+                                    '${escapeAttribute(content.title)}'
+                                )">
+
+                                ▶ ${content.title}
+
+                            </button>
+
+                        `;
+
+                    }
+
+
+                    /* ================= PDF ================= */
+
+                    else if (
+                        content.type ===
+                        "pdf"
+                    ) {
+
+                        contentHTML += `
+
+                            <button
+                                class="content-button pdf-button"
+                                onclick="openPDFViewer(
+                                    '${escapeAttribute(content.url)}',
+                                    '${escapeAttribute(content.title)}'
+                                )">
+
+                                📄 ${content.title}
+
+                            </button>
+
+                        `;
+
+                    }
+
+
+                    /* ================= LIVE ================= */
+
+                    else if (
+                        content.type ===
+                        "live"
+                    ) {
+
+                        contentHTML += `
+
+                            <button
+                                class="content-button live-button"
+                                onclick="openLiveClass(
+                                    '${escapeAttribute(content.url)}'
+                                )">
+
+                                🔴 ${content.title}
+
+                            </button>
+
+                        `;
+
+                    }
+
+                }
+            );
+
+
+            courseCard.innerHTML = `
+
+                <div class="course-title">
+
+                    <h3>
                         ${course.title}
-                    </h2>
+                    </h3>
 
                     <p>
                         ${course.description}
                     </p>
 
-                    <button
-                        class="open-course-btn"
-                        type="button"
-                    >
-                        Open Course
-                    </button>
+                </div>
+
+
+                <div class="course-content">
+
+                    ${contentHTML}
 
                 </div>
-                `;
+
+            `;
 
 
-            const button =
-                card.querySelector(
-                    ".open-course-btn"
-                );
-
-
-            button.addEventListener(
-                "click",
-                function () {
-
-                    openCourse(
-                        courseId,
-                        course
-                    );
-
-                }
-            );
-
-
-            container.appendChild(
-                card
+            coursesContainer.appendChild(
+                courseCard
             );
 
         }
@@ -810,503 +887,642 @@ function showStudentCourses(student) {
 
 
 /* =========================================================
-   OPEN COURSE
-========================================================= */
+   ESCAPE ATTRIBUTE
+   ========================================================= */
 
-function openCourse(
-    courseId,
-    course
+function escapeAttribute(text) {
+
+    return String(text)
+
+        .replace(
+            /\\/g,
+            "\\\\"
+        )
+
+        .replace(
+            /'/g,
+            "\\'"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        );
+
+}
+
+
+/* =========================================================
+   YOUTUBE VIDEO
+   ========================================================= */
+
+function openYouTubeVideo(
+    url,
+    title
 ) {
 
-    const container =
-        document.getElementById(
-            "coursesContainer"
+    const overlay =
+        document.createElement(
+            "div"
         );
 
 
-    if (!container) {
-        return;
-    }
+    overlay.className =
+        "video-overlay";
 
 
-    container.innerHTML =
-        `
-        <div class="course-view">
+    overlay.innerHTML = `
 
-            <button
-                id="backToCourses"
-                type="button"
-                style="
-                    margin-bottom:20px;
-                    padding:10px 18px;
-                    border:none;
-                    border-radius:8px;
-                    cursor:pointer;
-                "
-            >
-                ← Back to Courses
-            </button>
+        <div class="video-window">
 
+            <div class="video-header">
 
-            <h1>
-                ${course.title}
-            </h1>
+                <span>
+                    ${title}
+                </span>
 
+                <button
+                    class="close-video"
+                    onclick="
+                        this.closest('.video-overlay').remove();
+                        document.body.classList.remove('viewer-open');
+                    ">
 
-            <p>
-                ${course.description}
-            </p>
+                    ✕
+
+                </button>
+
+            </div>
 
 
-            <div
-                id="lessonContainer"
-                style="
-                    margin-top:25px;
-                "
-            ></div>
+            <div class="video-player-container">
+
+                <iframe
+
+                    src="${url}"
+
+                    title="${title}"
+
+                    allow="
+                        accelerometer;
+                        autoplay;
+                        clipboard-write;
+                        encrypted-media;
+                        gyroscope;
+                        picture-in-picture;
+                        fullscreen
+                    "
+
+                    allowfullscreen>
+
+                </iframe>
+
+            </div>
 
         </div>
-        `;
+
+    `;
 
 
-    const backButton =
-        document.getElementById(
-            "backToCourses"
-        );
-
-
-    backButton.addEventListener(
-        "click",
-        function () {
-
-            showStudentCourses(
-                currentStudent
-            );
-
-        }
+    document.body.appendChild(
+        overlay
     );
 
 
-    const lessonContainer =
-        document.getElementById(
-            "lessonContainer"
-        );
-
-
-    course.lessons.forEach(
-        function (lesson, index) {
-
-            const lessonBox =
-                document.createElement(
-                    "div"
-                );
-
-
-            lessonBox.style.marginBottom =
-                "18px";
-
-
-            lessonBox.style.padding =
-                "18px";
-
-
-            lessonBox.style.borderRadius =
-                "12px";
-
-
-            lessonBox.style.background =
-                "#f5f7fb";
-
-
-            lessonBox.innerHTML =
-                `
-                <h3>
-                    ${index + 1}. ${lesson.title}
-                </h3>
-
-                <div
-                    class="lesson-content"
-                    style="margin-top:12px;"
-                ></div>
-                `;
-
-
-            const content =
-                lessonBox.querySelector(
-                    ".lesson-content"
-                );
-
-
-            createLessonContent(
-                lesson,
-                content
-            );
-
-
-            lessonContainer.appendChild(
-                lessonBox
-            );
-
-        }
+    document.body.classList.add(
+        "viewer-open"
     );
 
 }
 
 
 /* =========================================================
-   CREATE LESSON CONTENT
-========================================================= */
+   LOCAL VIDEO
+   ========================================================= */
 
-function createLessonContent(
-    lesson,
-    container
+function openLocalVideo(
+    url,
+    title
 ) {
 
+    const overlay =
+        document.createElement(
+            "div"
+        );
 
-    /* =====================================================
-       YOUTUBE
-    ===================================================== */
+
+    overlay.className =
+        "video-overlay";
+
+
+    overlay.innerHTML = `
+
+        <div class="video-window">
+
+            <div class="video-header">
+
+                <span>
+                    ${title}
+                </span>
+
+                <button
+                    class="close-video"
+                    onclick="
+                        this.closest('.video-overlay').remove();
+                        document.body.classList.remove('viewer-open');
+                    ">
+
+                    ✕
+
+                </button>
+
+            </div>
+
+
+            <div class="video-player-container">
+
+                <video
+
+                    controls
+
+                    controlsList="nodownload"
+
+                    disablePictureInPicture
+
+                    playsinline
+
+                    preload="metadata">
+
+                    <source
+                        src="${url}"
+                        type="video/mp4">
+
+                    Your browser does not support video.
+
+                </video>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        overlay
+    );
+
+
+    document.body.classList.add(
+        "viewer-open"
+    );
+
+}
+
+
+/* =========================================================
+   LIVE CLASS
+   ========================================================= */
+
+function openLiveClass(url) {
 
     if (
-        lesson.type ===
-        "youtube"
+        !url ||
+        url === "#"
     ) {
 
-        const iframe =
-            document.createElement(
-                "iframe"
-            );
-
-
-        iframe.src =
-            lesson.url;
-
-
-        iframe.width =
-            "100%";
-
-
-        iframe.height =
-            "400";
-
-
-        iframe.frameBorder =
-            "0";
-
-
-        iframe.allow =
-            "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-
-
-        iframe.allowFullscreen =
-            true;
-
-
-        iframe.style.borderRadius =
-            "12px";
-
-
-        iframe.style.maxWidth =
-            "900px";
-
-
-        container.appendChild(
-            iframe
+        alert(
+            "Live class link will be available here."
         );
 
         return;
     }
 
 
-    /* =====================================================
-       LOCAL VIDEO
-    ===================================================== */
+    window.open(
+        url,
+        "_blank"
+    );
 
-    if (
-        lesson.type ===
-        "video"
-    ) {
+}
 
-        const video =
-            document.createElement(
-                "video"
-            );
 
+/* =========================================================
+   PDF.js WORKER
+   ========================================================= */
 
-        video.src =
-            lesson.url;
+if (
+    typeof pdfjsLib !==
+    "undefined"
+) {
 
-
-        video.controls =
-            true;
-
-
-        video.controlsList =
-            "nodownload";
-
-
-        video.disablePictureInPicture =
-            true;
-
-
-        video.playsInline =
-            true;
-
-
-        video.style.width =
-            "100%";
-
-
-        video.style.maxWidth =
-            "900px";
-
-
-        video.style.borderRadius =
-            "12px";
-
-
-        video.addEventListener(
-            "contextmenu",
-            function (e) {
-
-                e.preventDefault();
-
-            }
-        );
-
-
-        container.appendChild(
-            video
-        );
-
-        return;
-    }
-
-
-    /* =====================================================
-       PDF
-    ===================================================== */
-
-    if (
-        lesson.type ===
-        "pdf"
-    ) {
-
-        const button =
-            document.createElement(
-                "button"
-            );
-
-
-        button.textContent =
-            "📄 Open Notes";
-
-
-        button.style.padding =
-            "12px 20px";
-
-
-        button.style.border =
-            "none";
-
-
-        button.style.borderRadius =
-            "8px";
-
-
-        button.style.cursor =
-            "pointer";
-
-
-        button.addEventListener(
-            "click",
-            function () {
-
-                openPDF(
-                    lesson.url
-                );
-
-            }
-        );
-
-
-        container.appendChild(
-            button
-        );
-
-        return;
-    }
-
-
-    /* =====================================================
-       LIVE CLASS
-    ===================================================== */
-
-    if (
-        lesson.type ===
-        "live"
-    ) {
-
-        const button =
-            document.createElement(
-                "button"
-            );
-
-
-        button.textContent =
-            "🔴 Join Live Class";
-
-
-        button.style.padding =
-            "12px 20px";
-
-
-        button.style.border =
-            "none";
-
-
-        button.style.borderRadius =
-            "8px";
-
-
-        button.style.cursor =
-            "pointer";
-
-
-        button.addEventListener(
-            "click",
-            function () {
-
-                if (
-                    !lesson.url ||
-                    lesson.url === "#"
-                ) {
-
-                    alert(
-                        "Live class link will be available here."
-                    );
-
-                    return;
-                }
-
-
-                window.location.href =
-                    lesson.url;
-
-            }
-        );
-
-
-        container.appendChild(
-            button
-        );
-
-    }
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 }
 
 
 /* =========================================================
    PDF VIEWER
-========================================================= */
+   ========================================================= */
 
-function openPDF(url) {
+async function openPDFViewer(
+    pdfURL,
+    title
+) {
 
-    const viewer =
+    if (
+        typeof pdfjsLib ===
+        "undefined"
+    ) {
+
+        alert(
+            "PDF viewer could not load. Please refresh the page."
+        );
+
+        return;
+    }
+
+
+    const overlay =
         document.createElement(
             "div"
         );
 
 
-    viewer.style.position =
-        "fixed";
+    overlay.id =
+        "pdfFullscreen";
 
 
-    viewer.style.inset =
-        "0";
+    overlay.innerHTML = `
 
+        <div class="pdf-header">
 
-    viewer.style.background =
-        "#111";
+            <div class="pdf-title">
+                ${title}
+            </div>
 
-
-    viewer.style.zIndex =
-        "99999";
-
-
-    viewer.innerHTML =
-        `
-        <div style="
-            height:60px;
-            background:#182033;
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            padding:0 15px;
-            color:white;
-        ">
-
-            <strong>
-                FJMC Academy Notes
-            </strong>
-
-            <button
-                id="closePdfViewer"
-                style="
-                    padding:8px 15px;
-                    border:none;
-                    border-radius:6px;
-                    cursor:pointer;
-                "
-            >
+            <button id="closePDF">
                 ✕ Close
             </button>
 
         </div>
 
 
-        <iframe
-            src="${url}"
-            style="
-                width:100%;
-                height:calc(100% - 60px);
-                border:none;
-                background:white;
-            "
-        ></iframe>
-        `;
+        <div class="pdf-screen-watermark">
+
+            <div>
+                FJMC Academy
+            </div>
+
+            <div>
+                ${currentUser?.email || ""}
+            </div>
+
+        </div>
+
+
+        <div
+            id="pdfScrollArea"
+            class="pdf-scroll-area">
+
+            <div
+                id="pdfLoading"
+                class="pdf-loading">
+
+                Loading PDF...
+
+            </div>
+
+
+            <div
+                id="pdfPages"
+                class="pdf-pages">
+
+            </div>
+
+        </div>
+
+    `;
 
 
     document.body.appendChild(
-        viewer
+        overlay
+    );
+
+
+    document.body.classList.add(
+        "viewer-open"
     );
 
 
     document
-        .getElementById(
-            "closePdfViewer"
-        )
+        .getElementById("closePDF")
         .addEventListener(
             "click",
-            function () {
-
-                viewer.remove();
-
-            }
+            closePDFViewer
         );
+
+
+    try {
+
+        const loadingTask =
+            pdfjsLib.getDocument({
+                url: pdfURL
+            });
+
+
+        const pdf =
+            await loadingTask.promise;
+
+
+        const pagesContainer =
+            document.getElementById(
+                "pdfPages"
+            );
+
+
+        const loadingMessage =
+            document.getElementById(
+                "pdfLoading"
+            );
+
+
+        if (loadingMessage) {
+
+            loadingMessage.remove();
+
+        }
+
+
+        for (
+            let pageNumber = 1;
+            pageNumber <= pdf.numPages;
+            pageNumber++
+        ) {
+
+            await renderPDFPage(
+                pdf,
+                pageNumber,
+                pagesContainer
+            );
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "PDF Error:",
+            error
+        );
+
+
+        const loadingMessage =
+            document.getElementById(
+                "pdfLoading"
+            );
+
+
+        if (loadingMessage) {
+
+            loadingMessage.innerHTML = `
+
+                <div class="pdf-error">
+
+                    <h3>
+                        PDF could not be opened
+                    </h3>
+
+                    <p>
+                        Please check the PDF file path.
+                    </p>
+
+                </div>
+
+            `;
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   RENDER PDF PAGE
+   ========================================================= */
+
+async function renderPDFPage(
+    pdf,
+    pageNumber,
+    container
+) {
+
+    const page =
+        await pdf.getPage(
+            pageNumber
+        );
+
+
+    const wrapper =
+        document.createElement(
+            "div"
+        );
+
+
+    wrapper.className =
+        "pdf-page-wrapper";
+
+
+    wrapper.style.position =
+        "relative";
+
+
+    wrapper.style.width =
+        "100%";
+
+
+    wrapper.style.display =
+        "flex";
+
+
+    wrapper.style.justifyContent =
+        "center";
+
+
+    wrapper.style.alignItems =
+        "flex-start";
+
+
+    const canvas =
+        document.createElement(
+            "canvas"
+        );
+
+
+    canvas.className =
+        "pdf-page";
+
+
+    canvas.style.display =
+        "block";
+
+
+    canvas.style.margin =
+        "0 auto";
+
+
+    wrapper.appendChild(
+        canvas
+    );
+
+
+    container.appendChild(
+        wrapper
+    );
+
+
+    const originalViewport =
+        page.getViewport({
+            scale: 1
+        });
+
+
+    const screenWidth =
+        window.innerWidth;
+
+
+    let availableWidth;
+
+
+    if (
+        screenWidth <= 600
+    ) {
+
+        availableWidth =
+            screenWidth - 20;
+
+    } else {
+
+        availableWidth =
+            Math.min(
+                screenWidth - 30,
+                1000
+            );
+
+    }
+
+
+    const scale =
+        availableWidth /
+        originalViewport.width;
+
+
+    const viewport =
+        page.getViewport({
+            scale: scale
+        });
+
+
+    const devicePixelRatio =
+        Math.min(
+            window.devicePixelRatio || 1,
+            2
+        );
+
+
+    canvas.width =
+        Math.round(
+            viewport.width *
+            devicePixelRatio
+        );
+
+
+    canvas.height =
+        Math.round(
+            viewport.height *
+            devicePixelRatio
+        );
+
+
+    canvas.style.width =
+        Math.round(
+            viewport.width
+        ) + "px";
+
+
+    canvas.style.height =
+        Math.round(
+            viewport.height
+        ) + "px";
+
+
+    const context =
+        canvas.getContext(
+            "2d"
+        );
+
+
+    const renderContext = {
+
+        canvasContext:
+            context,
+
+        viewport:
+            viewport,
+
+        transform:
+            devicePixelRatio !== 1
+                ? [
+                    devicePixelRatio,
+                    0,
+                    0,
+                    devicePixelRatio,
+                    0,
+                    0
+                ]
+                : null
+
+    };
+
+
+    await page
+        .render(renderContext)
+        .promise;
+
+}
+
+
+/* =========================================================
+   CLOSE PDF
+   ========================================================= */
+
+function closePDFViewer() {
+
+    const pdfViewer =
+        document.getElementById(
+            "pdfFullscreen"
+        );
+
+
+    if (pdfViewer) {
+
+        pdfViewer.remove();
+
+    }
+
+
+    document.body.classList.remove(
+        "viewer-open"
+    );
 
 }
 
 
 /* =========================================================
    LOGOUT
-========================================================= */
-
-const logoutBtn =
-    document.getElementById(
-        "logoutBtn"
-    );
-
+   ========================================================= */
 
 if (logoutBtn) {
 
@@ -1314,12 +1530,37 @@ if (logoutBtn) {
         "click",
         async function () {
 
+            /*
+               Button ko double click se bachao
+            */
+
+            logoutBtn.disabled =
+                true;
+
+
             try {
 
-                if (
-                    currentUser &&
-                    deviceId
-                ) {
+                /*
+                   Heartbeat pehle stop
+                */
+
+                if (deviceHeartbeat) {
+
+                    clearInterval(
+                        deviceHeartbeat
+                    );
+
+                    deviceHeartbeat =
+                        null;
+
+                }
+
+
+                /*
+                   Device ko inactive karo
+                */
+
+                if (currentUser) {
 
                     const deviceRef =
                         doc(
@@ -1331,46 +1572,101 @@ if (logoutBtn) {
                         );
 
 
-                    await updateDoc(
-                        deviceRef,
-                        {
-                            active: false,
-                            lastSeen:
-                                Date.now()
-                        }
-                    );
+                    try {
+
+                        await updateDoc(
+                            deviceRef,
+                            {
+                                active: false,
+                                lastSeen:
+                                    Date.now()
+                            }
+                        );
+
+                    } catch (deviceError) {
+
+                        console.error(
+                            "Device update error:",
+                            deviceError
+                        );
+
+                    }
 
                 }
+
+
+                /*
+                   Session clear
+                */
+
+                sessionStorage.removeItem(
+                    "loggedInStudent"
+                );
+
+
+                sessionStorage.removeItem(
+                    "firebaseUID"
+                );
+
+
+                /*
+                   Firebase logout
+                */
+
+                await signOut(
+                    auth
+                );
+
+
+                /*
+                   Login page
+                */
+
+                window.location.href =
+                    "login.html";
 
 
             } catch (error) {
 
                 console.error(
-                    "Logout device update error:",
+                    "Logout error:",
                     error
                 );
 
+
+                /*
+                   Logout ko fail mat hone do
+                */
+
+                try {
+
+                    await signOut(
+                        auth
+                    );
+
+                } catch (signOutError) {
+
+                    console.error(
+                        signOutError
+                    );
+
+                }
+
+
+                sessionStorage.removeItem(
+                    "loggedInStudent"
+                );
+
+
+                sessionStorage.removeItem(
+                    "firebaseUID"
+                );
+
+
+                window.location.href =
+                    "login.html";
+
             }
-
-
-            stopHeartbeat();
-
-
-            sessionStorage.removeItem(
-                "loggedInStudent"
-            );
-
-
-            sessionStorage.removeItem(
-                "firebaseUID"
-            );
-
-
-            await signOut(auth);
-
-
-            window.location.href =
-                "login.html";
 
         }
     );
@@ -1379,8 +1675,8 @@ if (logoutBtn) {
 
 
 /* =========================================================
-   BASIC PAGE PROTECTION
-========================================================= */
+   BASIC PROTECTION
+   ========================================================= */
 
 document.addEventListener(
     "contextmenu",
@@ -1426,15 +1722,14 @@ document.addEventListener(
     "keydown",
     function (event) {
 
-        const key =
-            event.key.toLowerCase();
-
-
-        /* Ctrl + S */
+        /*
+           Ctrl + S
+        */
 
         if (
-            event.ctrlKey &&
-            key === "s"
+            (event.ctrlKey ||
+                event.metaKey) &&
+            event.key.toLowerCase() === "s"
         ) {
 
             event.preventDefault();
@@ -1442,11 +1737,14 @@ document.addEventListener(
         }
 
 
-        /* Ctrl + U */
+        /*
+           Ctrl + P
+        */
 
         if (
-            event.ctrlKey &&
-            key === "u"
+            (event.ctrlKey ||
+                event.metaKey) &&
+            event.key.toLowerCase() === "p"
         ) {
 
             event.preventDefault();
@@ -1454,11 +1752,14 @@ document.addEventListener(
         }
 
 
-        /* Ctrl + P */
+        /*
+           Ctrl + U
+        */
 
         if (
-            event.ctrlKey &&
-            key === "p"
+            (event.ctrlKey ||
+                event.metaKey) &&
+            event.key.toLowerCase() === "u"
         ) {
 
             event.preventDefault();
@@ -1466,11 +1767,14 @@ document.addEventListener(
         }
 
 
-        /* Ctrl + C */
+        /*
+           Ctrl + C
+        */
 
         if (
-            event.ctrlKey &&
-            key === "c"
+            (event.ctrlKey ||
+                event.metaKey) &&
+            event.key.toLowerCase() === "c"
         ) {
 
             event.preventDefault();
@@ -1479,20 +1783,3 @@ document.addEventListener(
 
     }
 );
-
-
-/* =========================================================
-   PDF.JS WORKER
-========================================================= */
-
-if (
-    window.pdfjsLib &&
-    window.pdfjsLib.GlobalWorkerOptions
-) {
-
-    window.pdfjsLib
-        .GlobalWorkerOptions
-        .workerSrc =
-        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
-
-}
