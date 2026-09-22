@@ -1,6 +1,6 @@
 /* =========================================================
    FJMC ACADEMY - STUDENT DASHBOARD
-   FIREBASE + MAXIMUM 2 DEVICES
+   FAST LOAD + MAXIMUM 2 DEVICES
    24-HOUR DEVICE TIMEOUT
    ========================================================= */
 
@@ -58,7 +58,6 @@ const COURSES = {
     "real-analysis": {
 
         title: "Real Analysis",
-
         description: "Complete Real Analysis Course",
 
         contents: [
@@ -106,7 +105,6 @@ const COURSES = {
     "linear-algebra": {
 
         title: "Linear Algebra",
-
         description: "Complete Linear Algebra Course",
 
         contents: [
@@ -136,7 +134,6 @@ const COURSES = {
     "calculus": {
 
         title: "Calculus",
-
         description: "Complete Calculus Course",
 
         contents: [
@@ -187,48 +184,39 @@ const DEVICE_TIMEOUT =
 
 function getDeviceId() {
 
-    let deviceId =
-        localStorage.getItem("fjmcDeviceId");
+    let id = localStorage.getItem("fjmcDeviceId");
 
-
-    if (!deviceId) {
+    if (!id) {
 
         if (
             typeof crypto !== "undefined" &&
             typeof crypto.randomUUID === "function"
         ) {
 
-            deviceId =
-                "device-" +
-                crypto.randomUUID();
+            id = "device-" + crypto.randomUUID();
 
         } else {
 
-            deviceId =
+            id =
                 "device-" +
                 Date.now() +
                 "-" +
                 Math.random()
                     .toString(36)
                     .substring(2);
-
         }
-
 
         localStorage.setItem(
             "fjmcDeviceId",
-            deviceId
+            id
         );
-
     }
 
-
-    return deviceId;
+    return id;
 }
 
 
-const deviceId =
-    getDeviceId();
+const deviceId = getDeviceId();
 
 
 /* =========================================================
@@ -236,7 +224,6 @@ const deviceId =
    ========================================================= */
 
 let currentUser = null;
-
 let deviceHeartbeat = null;
 
 
@@ -245,25 +232,17 @@ let deviceHeartbeat = null;
    ========================================================= */
 
 const coursesContainer =
-    document.getElementById(
-        "coursesContainer"
-    );
-
+    document.getElementById("coursesContainer");
 
 const studentName =
-    document.getElementById(
-        "studentName"
-    );
-
+    document.getElementById("studentName");
 
 const logoutBtn =
-    document.getElementById(
-        "logoutBtn"
-    );
+    document.getElementById("logoutBtn");
 
 
 /* =========================================================
-   FIREBASE AUTH
+   FAST FIREBASE AUTH
    ========================================================= */
 
 onAuthStateChanged(
@@ -279,8 +258,7 @@ onAuthStateChanged(
         }
 
 
-        currentUser =
-            user;
+        currentUser = user;
 
 
         const email =
@@ -290,18 +268,18 @@ onAuthStateChanged(
 
 
         console.log(
-            "Logged in email:",
+            "Logged in:",
             email
         );
 
 
-        /* ================================================
-           CHECK STUDENT
-           ================================================ */
-
         const student =
             STUDENTS[email];
 
+
+        /* =================================================
+           STUDENT CHECK
+           ================================================= */
 
         if (!student) {
 
@@ -310,67 +288,23 @@ onAuthStateChanged(
                 email
             );
 
-
-            await signOut(
-                auth
-            );
-
+            await signOut(auth);
 
             window.location.href =
                 "login.html";
 
-
             return;
         }
 
 
-        /* ================================================
-           REGISTER / CHECK DEVICE
-           ================================================ */
-
-        const allowed =
-            await registerDevice(
-                user
-            );
-
-
-        console.log(
-            "Device allowed:",
-            allowed
-        );
-
-
-        if (!allowed) {
-
-            try {
-
-                await signOut(
-                    auth
-                );
-
-            } catch (error) {
-
-                console.error(
-                    "Sign out error:",
-                    error
-                );
-
-            }
-
-
-            return;
-        }
-
-
-        /* ================================================
-           SESSION
-           ================================================ */
+        /* =================================================
+           SAVE SESSION
+           ================================================= */
 
         sessionStorage.setItem(
             "loggedInStudent",
             email
         );
-
 
         sessionStorage.setItem(
             "firebaseUID",
@@ -378,33 +312,56 @@ onAuthStateChanged(
         );
 
 
-        /* ================================================
-           WELCOME
-           ================================================ */
+        /* =================================================
+           SHOW WELCOME IMMEDIATELY
+           ================================================= */
 
         if (studentName) {
 
             studentName.textContent =
                 "Welcome, " +
                 student.name;
-
         }
 
 
-        /* ================================================
-           SHOW COURSES
-           ================================================ */
+        /* =================================================
+           SHOW COURSES IMMEDIATELY
+           ================================================= */
 
-        showStudentCourses(
-            student
-        );
+        showStudentCourses(student);
 
 
-        /* ================================================
-           START HEARTBEAT
-           ================================================ */
+        /* =================================================
+           DEVICE CHECK
+           BACKGROUND
+           ================================================= */
 
-        startDeviceHeartbeat();
+        registerDevice(user)
+            .then(function (allowed) {
+
+                console.log(
+                    "Device allowed:",
+                    allowed
+                );
+
+                if (!allowed) {
+
+                    signOut(auth);
+
+                    return;
+                }
+
+                startDeviceHeartbeat();
+
+            })
+            .catch(function (error) {
+
+                console.error(
+                    "Background device error:",
+                    error
+                );
+
+            });
 
     }
 );
@@ -422,17 +379,14 @@ function devicesCollection(user) {
         user.uid,
         "devices"
     );
-
 }
 
 
 /* =========================================================
-   REGISTER DEVICE
+   REGISTER / CHECK DEVICE
    ========================================================= */
 
-async function registerDevice(
-    user
-) {
+async function registerDevice(user) {
 
     try {
 
@@ -446,115 +400,84 @@ async function registerDevice(
             );
 
 
-        const now =
-            Date.now();
+        const now = Date.now();
 
 
-        /* ================================================
-           CHECK CURRENT DEVICE
-           ================================================ */
+        /* =================================================
+           CURRENT DEVICE
+           ================================================= */
 
-        const currentDeviceSnapshot =
-            await getDoc(
-                deviceRef
-            );
+        const currentDevice =
+            await getDoc(deviceRef);
 
 
-        if (
-            currentDeviceSnapshot.exists()
-        ) {
+        if (currentDevice.exists()) {
 
             await setDoc(
                 deviceRef,
                 {
-                    email:
-                        user.email,
-
-                    lastSeen:
-                        now,
-
-                    active:
-                        true
+                    email: user.email,
+                    lastSeen: now,
+                    active: true
                 },
                 {
-                    merge:
-                        true
+                    merge: true
                 }
             );
-
 
             return true;
         }
 
 
-        /* ================================================
-           GET ALL DEVICES
-           ================================================ */
+        /* =================================================
+           CHECK OTHER DEVICES
+           ================================================= */
 
-        const devicesSnapshot =
+        const devices =
             await getDocs(
-                devicesCollection(
-                    user
-                )
+                devicesCollection(user)
             );
 
 
-        let activeDevices =
-            0;
+        let activeDevices = 0;
 
 
-        devicesSnapshot.forEach(
-            function (deviceDoc) {
+        devices.forEach(function (deviceDoc) {
 
-                if (
-                    deviceDoc.id ===
-                    deviceId
-                ) {
-
-                    return;
-                }
-
-
-                const data =
-                    deviceDoc.data();
-
-
-                const lastSeen =
-                    Number(
-                        data.lastSeen ||
-                        0
-                    );
-
-
-                const recentlyActive =
-                    data.active === true &&
-                    (
-                        now -
-                        lastSeen
-                    ) <
-                    DEVICE_TIMEOUT;
-
-
-                if (
-                    recentlyActive
-                ) {
-
-                    activeDevices++;
-
-                }
-
+            if (deviceDoc.id === deviceId) {
+                return;
             }
-        );
 
 
-        /* ================================================
-           MAXIMUM 2 DEVICES
-           ================================================ */
+            const data =
+                deviceDoc.data();
 
-        if (
-            activeDevices >=
-            MAX_DEVICES
-        ) {
+
+            const lastSeen =
+                Number(
+                    data.lastSeen || 0
+                );
+
+
+            const active =
+                data.active === true &&
+                (
+                    now - lastSeen
+                ) < DEVICE_TIMEOUT;
+
+
+            if (active) {
+                activeDevices++;
+            }
+
+        });
+
+
+        /* =================================================
+           MAXIMUM 2
+           ================================================= */
+
+        if (activeDevices >= MAX_DEVICES) {
 
             showDeviceLimitMessage();
 
@@ -562,30 +485,22 @@ async function registerDevice(
         }
 
 
-        /* ================================================
+        /* =================================================
            CREATE DEVICE
-           ================================================ */
+           ================================================= */
 
         await setDoc(
             deviceRef,
             {
-                email:
-                    user.email,
-
-                lastSeen:
-                    now,
-
-                active:
-                    true,
-
-                createdAt:
-                    serverTimestamp()
+                email: user.email,
+                lastSeen: now,
+                active: true,
+                createdAt: serverTimestamp()
             }
         );
 
 
         return true;
-
 
     } catch (error) {
 
@@ -595,28 +510,26 @@ async function registerDevice(
         );
 
 
-        alert(
-            "Firebase Error:\n\n" +
-            (
-                error.code ||
-                "Unknown error"
-            ) +
-            "\n\n" +
-            (
-                error.message ||
-                "Unknown Firebase error"
-            )
+        /*
+           IMPORTANT:
+           Dashboard already loaded.
+           Do not freeze the courses.
+        */
+
+        console.error(
+            "Firebase device check failed:",
+            error.code,
+            error.message
         );
 
 
-        return false;
+        return true;
     }
-
 }
 
 
 /* =========================================================
-   DEVICE LIMIT MESSAGE
+   DEVICE LIMIT
    ========================================================= */
 
 function showDeviceLimitMessage() {
@@ -640,7 +553,6 @@ function showDeviceLimitMessage() {
         "Maximum 2 devices are already active for this account.\n\n" +
         "Please logout from another device first."
     );
-
 }
 
 
@@ -655,7 +567,6 @@ function startDeviceHeartbeat() {
         clearInterval(
             deviceHeartbeat
         );
-
     }
 
 
@@ -667,7 +578,6 @@ function startDeviceHeartbeat() {
             updateDeviceHeartbeat,
             2 * 60 * 1000
         );
-
 }
 
 
@@ -678,7 +588,6 @@ function startDeviceHeartbeat() {
 async function updateDeviceHeartbeat() {
 
     if (!currentUser) {
-
         return;
     }
 
@@ -698,14 +607,10 @@ async function updateDeviceHeartbeat() {
         await updateDoc(
             deviceRef,
             {
-                lastSeen:
-                    Date.now(),
-
-                active:
-                    true
+                lastSeen: Date.now(),
+                active: true
             }
         );
-
 
     } catch (error) {
 
@@ -713,9 +618,7 @@ async function updateDeviceHeartbeat() {
             "Heartbeat error:",
             error
         );
-
     }
-
 }
 
 
@@ -723,15 +626,7 @@ async function updateDeviceHeartbeat() {
    SHOW STUDENT COURSES
    ========================================================= */
 
-function showStudentCourses(
-    student
-) {
-
-    console.log(
-        "STUDENT DATA:",
-        student
-    );
-
+function showStudentCourses(student) {
 
     if (!coursesContainer) {
 
@@ -743,8 +638,7 @@ function showStudentCourses(
     }
 
 
-    coursesContainer.innerHTML =
-        "";
+    coursesContainer.innerHTML = "";
 
 
     if (
@@ -753,197 +647,132 @@ function showStudentCourses(
     ) {
 
         coursesContainer.innerHTML = `
-
             <div class="no-course">
-
-                <h3>
-                    No Course Assigned
-                </h3>
-
-                <p>
-                    Please contact FJMC Academy.
-                </p>
-
+                <h3>No Course Assigned</h3>
+                <p>Please contact FJMC Academy.</p>
             </div>
-
         `;
 
         return;
     }
 
 
-    student.courses.forEach(
-        function (courseId) {
+    student.courses.forEach(function (courseId) {
 
-            const course =
-                COURSES[courseId];
+        const course =
+            COURSES[courseId];
 
 
-            if (!course) {
-
-                console.error(
-                    "Course not found:",
-                    courseId
-                );
-
-                return;
-            }
-
-
-            const courseCard =
-                document.createElement(
-                    "div"
-                );
-
-
-            courseCard.className =
-                "course-card";
-
-
-            let contentHTML =
-                "";
-
-
-            course.contents.forEach(
-                function (content) {
-
-
-                    /* ======================================
-                       YOUTUBE VIDEO
-                       ====================================== */
-
-                    if (
-                        content.type ===
-                        "video"
-                    ) {
-
-                        contentHTML += `
-
-                            <button
-                                class="content-button video-button"
-                                data-type="youtube"
-                                data-url="${encodeURIComponent(content.url)}"
-                                data-title="${encodeURIComponent(content.title)}">
-
-                                ▶ ${content.title}
-
-                            </button>
-
-                        `;
-
-                    }
-
-
-                    /* ======================================
-                       LOCAL VIDEO
-                       ====================================== */
-
-                    else if (
-                        content.type ===
-                        "local-video"
-                    ) {
-
-                        contentHTML += `
-
-                            <button
-                                class="content-button video-button"
-                                data-type="local"
-                                data-url="${encodeURIComponent(content.url)}"
-                                data-title="${encodeURIComponent(content.title)}">
-
-                                ▶ ${content.title}
-
-                            </button>
-
-                        `;
-
-                    }
-
-
-                    /* ======================================
-                       PDF
-                       ====================================== */
-
-                    else if (
-                        content.type ===
-                        "pdf"
-                    ) {
-
-                        contentHTML += `
-
-                            <button
-                                class="content-button pdf-button"
-                                data-type="pdf"
-                                data-url="${encodeURIComponent(content.url)}"
-                                data-title="${encodeURIComponent(content.title)}">
-
-                                📄 ${content.title}
-
-                            </button>
-
-                        `;
-
-                    }
-
-
-                    /* ======================================
-                       LIVE
-                       ====================================== */
-
-                    else if (
-                        content.type ===
-                        "live"
-                    ) {
-
-                        contentHTML += `
-
-                            <button
-                                class="content-button live-button"
-                                data-type="live"
-                                data-url="${encodeURIComponent(content.url)}">
-
-                                🔴 ${content.title}
-
-                            </button>
-
-                        `;
-
-                    }
-
-                }
-            );
-
-
-            courseCard.innerHTML = `
-
-                <div class="course-title">
-
-                    <h3>
-                        ${course.title}
-                    </h3>
-
-                    <p>
-                        ${course.description}
-                    </p>
-
-                </div>
-
-
-                <div class="course-content">
-
-                    ${contentHTML}
-
-                </div>
-
-            `;
-
-
-            coursesContainer.appendChild(
-                courseCard
-            );
-
+        if (!course) {
+            return;
         }
-    );
+
+
+        const courseCard =
+            document.createElement("div");
+
+
+        courseCard.className =
+            "course-card";
+
+
+        let contentHTML = "";
+
+
+        course.contents.forEach(
+            function (content) {
+
+                if (content.type === "video") {
+
+                    contentHTML += `
+                        <button
+                            class="content-button video-button"
+                            data-type="youtube"
+                            data-url="${encodeURIComponent(content.url)}"
+                            data-title="${encodeURIComponent(content.title)}">
+                            ▶ ${content.title}
+                        </button>
+                    `;
+                }
+
+
+                else if (
+                    content.type === "local-video"
+                ) {
+
+                    contentHTML += `
+                        <button
+                            class="content-button video-button"
+                            data-type="local"
+                            data-url="${encodeURIComponent(content.url)}"
+                            data-title="${encodeURIComponent(content.title)}">
+                            ▶ ${content.title}
+                        </button>
+                    `;
+                }
+
+
+                else if (
+                    content.type === "pdf"
+                ) {
+
+                    contentHTML += `
+                        <button
+                            class="content-button pdf-button"
+                            data-type="pdf"
+                            data-url="${encodeURIComponent(content.url)}"
+                            data-title="${encodeURIComponent(content.title)}">
+                            📄 ${content.title}
+                        </button>
+                    `;
+                }
+
+
+                else if (
+                    content.type === "live"
+                ) {
+
+                    contentHTML += `
+                        <button
+                            class="content-button live-button"
+                            data-type="live"
+                            data-url="${encodeURIComponent(content.url)}">
+                            🔴 ${content.title}
+                        </button>
+                    `;
+                }
+
+            }
+        );
+
+
+        courseCard.innerHTML = `
+
+            <div class="course-title">
+
+                <h3>
+                    ${course.title}
+                </h3>
+
+                <p>
+                    ${course.description}
+                </p>
+
+            </div>
+
+            <div class="course-content">
+
+                ${contentHTML}
+
+            </div>
+        `;
+
+
+        coursesContainer.appendChild(
+            courseCard
+        );
+
+    });
 
 
     /* =====================================================
@@ -956,65 +785,787 @@ function showStudentCourses(
         );
 
 
-    buttons.forEach(
-        function (button) {
+    buttons.forEach(function (button) {
 
-            button.addEventListener(
-                "click",
-                function () {
+        button.addEventListener(
+            "click",
+            function () {
 
-                    const type =
-                        button.dataset.type;
+                const type =
+                    button.dataset.type;
 
 
-                    const url =
-                        decodeURIComponent(
-                            button.dataset.url
+                const url =
+                    decodeURIComponent(
+                        button.dataset.url
+                    );
+
+
+                const title =
+                    button.dataset.title
+                        ? decodeURIComponent(
+                            button.dataset.title
+                        )
+                        : "";
+
+
+                if (type === "youtube") {
+
+                    openYouTubeVideo(
+                        url,
+                        title
+                    );
+                }
+
+
+                else if (type === "local") {
+
+                    openLocalVideo(
+                        url,
+                        title
+                    );
+                }
+
+
+                else if (type === "pdf") {
+
+                    openPDFViewer(
+                        url,
+                        title
+                    );
+                }
+
+
+                else if (type === "live") {
+
+                    openLiveClass(url);
+
+                }
+
+            }
+        );
+
+    });
+
+}
+
+
+/* =========================================================
+   CREATE MODAL
+   ========================================================= */
+
+function createModal() {
+
+    let modal =
+        document.getElementById(
+            "fjmcContentModal"
+        );
+
+
+    if (modal) {
+        return modal;
+    }
+
+
+    modal =
+        document.createElement("div");
+
+
+    modal.id =
+        "fjmcContentModal";
+
+
+    modal.innerHTML = `
+
+        <div
+            id="fjmcModalOverlay"
+            style="
+                position:fixed;
+                inset:0;
+                background:rgba(0,0,0,.85);
+                z-index:999999;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                padding:15px;
+            "
+        >
+
+            <div
+                style="
+                    width:100%;
+                    max-width:1100px;
+                    max-height:95vh;
+                    background:#111;
+                    border-radius:12px;
+                    overflow:hidden;
+                    position:relative;
+                    display:flex;
+                    flex-direction:column;
+                "
+            >
+
+                <div
+                    style="
+                        display:flex;
+                        align-items:center;
+                        justify-content:space-between;
+                        padding:10px 15px;
+                        background:#182033;
+                        color:white;
+                    "
+                >
+
+                    <strong
+                        id="fjmcModalTitle">
+                    </strong>
+
+                    <button
+                        id="fjmcModalClose"
+                        style="
+                            border:0;
+                            background:#e63946;
+                            color:white;
+                            width:38px;
+                            height:38px;
+                            border-radius:50%;
+                            font-size:20px;
+                            cursor:pointer;
+                        "
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="fjmcModalBody"
+                    style="
+                        flex:1;
+                        overflow:auto;
+                        background:#111;
+                    "
+                >
+                </div>
+
+            </div>
+
+        </div>
+    `;
+
+
+    document.body.appendChild(modal);
+
+
+    document
+        .getElementById("fjmcModalClose")
+        .addEventListener(
+            "click",
+            closeModal
+        );
+
+
+    document
+        .getElementById("fjmcModalOverlay")
+        .addEventListener(
+            "click",
+            function (event) {
+
+                if (
+                    event.target.id ===
+                    "fjmcModalOverlay"
+                ) {
+
+                    closeModal();
+
+                }
+
+            }
+        );
+
+
+    return modal;
+}
+
+
+/* =========================================================
+   CLOSE MODAL
+   ========================================================= */
+
+function closeModal() {
+
+    const modal =
+        document.getElementById(
+            "fjmcContentModal"
+        );
+
+
+    if (modal) {
+
+        modal.remove();
+
+    }
+
+}
+
+
+/* =========================================================
+   YOUTUBE VIDEO
+   ========================================================= */
+
+function openYouTubeVideo(
+    url,
+    title
+) {
+
+    const modal =
+        createModal();
+
+
+    const modalTitle =
+        document.getElementById(
+            "fjmcModalTitle"
+        );
+
+
+    const body =
+        document.getElementById(
+            "fjmcModalBody"
+        );
+
+
+    modalTitle.textContent =
+        title;
+
+
+    body.innerHTML = `
+
+        <div
+            style="
+                width:100%;
+                aspect-ratio:16/9;
+                background:#000;
+            "
+        >
+
+            <iframe
+                src="${url}"
+                title="${title}"
+                style="
+                    width:100%;
+                    height:100%;
+                    border:0;
+                "
+                allow="
+                    accelerometer;
+                    autoplay;
+                    clipboard-write;
+                    encrypted-media;
+                    gyroscope;
+                    picture-in-picture;
+                    web-share
+                "
+                allowfullscreen>
+            </iframe>
+
+        </div>
+    `;
+
+}
+
+
+/* =========================================================
+   LOCAL VIDEO
+   ========================================================= */
+
+function openLocalVideo(
+    url,
+    title
+) {
+
+    const modal =
+        createModal();
+
+
+    const modalTitle =
+        document.getElementById(
+            "fjmcModalTitle"
+        );
+
+
+    const body =
+        document.getElementById(
+            "fjmcModalBody"
+        );
+
+
+    modalTitle.textContent =
+        title;
+
+
+    body.innerHTML = `
+
+        <video
+            controls
+            controlsList="nodownload"
+            disablePictureInPicture
+            playsinline
+            style="
+                width:100%;
+                max-height:80vh;
+                display:block;
+                background:#000;
+            "
+        >
+
+            <source
+                src="${url}"
+                type="video/mp4"
+            >
+
+            Your browser does not support video.
+
+        </video>
+    `;
+
+}
+
+
+/* =========================================================
+   LIVE CLASS
+   ========================================================= */
+
+function openLiveClass(url) {
+
+    if (!url || url === "#") {
+
+        alert(
+            "Live class link is not available yet."
+        );
+
+        return;
+    }
+
+
+    window.open(
+        url,
+        "_blank",
+        "noopener,noreferrer"
+    );
+}
+
+
+/* =========================================================
+   PDF VIEWER
+   ========================================================= */
+
+async function openPDFViewer(
+    url,
+    title
+) {
+
+    const modal =
+        createModal();
+
+
+    const modalTitle =
+        document.getElementById(
+            "fjmcModalTitle"
+        );
+
+
+    const body =
+        document.getElementById(
+            "fjmcModalBody"
+        );
+
+
+    modalTitle.textContent =
+        title;
+
+
+    body.innerHTML = `
+
+        <div
+            id="pdfLoading"
+            style="
+                color:white;
+                text-align:center;
+                padding:30px;
+            "
+        >
+            Loading PDF...
+        </div>
+
+        <div
+            id="pdfPages"
+            style="
+                padding:15px;
+                text-align:center;
+            "
+        >
+        </div>
+    `;
+
+
+    try {
+
+        if (
+            typeof pdfjsLib ===
+            "undefined"
+        ) {
+
+            throw new Error(
+                "PDF.js is not loaded."
+            );
+        }
+
+
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+
+        const pdf =
+            await pdfjsLib.getDocument(
+                url
+            ).promise;
+
+
+        const pages =
+            document.getElementById(
+                "pdfPages"
+            );
+
+
+        const loading =
+            document.getElementById(
+                "pdfLoading"
+            );
+
+
+        if (loading) {
+            loading.remove();
+        }
+
+
+        for (
+            let pageNumber = 1;
+            pageNumber <= pdf.numPages;
+            pageNumber++
+        ) {
+
+            const page =
+                await pdf.getPage(
+                    pageNumber
+                );
+
+
+            const viewport =
+                page.getViewport({
+                    scale: 1.4
+                });
+
+
+            const wrapper =
+                document.createElement(
+                    "div"
+                );
+
+
+            wrapper.style.position =
+                "relative";
+
+            wrapper.style.display =
+                "inline-block";
+
+            wrapper.style.margin =
+                "0 auto 20px auto";
+
+
+            const canvas =
+                document.createElement(
+                    "canvas"
+                );
+
+
+            canvas.width =
+                viewport.width;
+
+            canvas.height =
+                viewport.height;
+
+
+            canvas.style.maxWidth =
+                "100%";
+
+            canvas.style.height =
+                "auto";
+
+            canvas.style.display =
+                "block";
+
+
+            wrapper.appendChild(
+                canvas
+            );
+
+
+            const watermark =
+                document.createElement(
+                    "div"
+                );
+
+
+            watermark.textContent =
+                "FJMC ACADEMY";
+
+
+            watermark.style.position =
+                "absolute";
+
+            watermark.style.left =
+                "50%";
+
+            watermark.style.top =
+                "50%";
+
+            watermark.style.transform =
+                "translate(-50%,-50%) rotate(-30deg)";
+
+            watermark.style.color =
+                "rgba(180,180,180,.25)";
+
+            watermark.style.fontSize =
+                "28px";
+
+            watermark.style.fontWeight =
+                "bold";
+
+            watermark.style.pointerEvents =
+                "none";
+
+            watermark.style.whiteSpace =
+                "nowrap";
+
+
+            wrapper.appendChild(
+                watermark
+            );
+
+
+            pages.appendChild(
+                wrapper
+            );
+
+
+            const context =
+                canvas.getContext(
+                    "2d"
+                );
+
+
+            await page.render({
+                canvasContext: context,
+                viewport: viewport
+            }).promise;
+
+        }
+
+
+        /* Disable selection inside PDF */
+
+        pages.style.userSelect =
+            "none";
+
+        pages.style.webkitUserSelect =
+            "none";
+
+    } catch (error) {
+
+        console.error(
+            "PDF error:",
+            error
+        );
+
+
+        body.innerHTML = `
+
+            <div
+                style="
+                    color:white;
+                    padding:30px;
+                    text-align:center;
+                "
+            >
+
+                <h3>
+                    PDF could not be opened
+                </h3>
+
+                <p>
+                    ${error.message || ""}
+                </p>
+
+            </div>
+        `;
+
+    }
+
+}
+
+
+/* =========================================================
+   LOGOUT
+   ========================================================= */
+
+if (logoutBtn) {
+
+    logoutBtn.addEventListener(
+        "click",
+        async function () {
+
+            try {
+
+                if (currentUser) {
+
+                    const deviceRef =
+                        doc(
+                            db,
+                            "users",
+                            currentUser.uid,
+                            "devices",
+                            deviceId
                         );
 
 
-                    const title =
-                        button.dataset.title
-                            ? decodeURIComponent(
-                                button.dataset.title
-                            )
-                            : "";
+                    await updateDoc(
+                        deviceRef,
+                        {
+                            active: false,
+                            lastSeen: Date.now()
+                        }
+                    );
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Logout device update:",
+                    error
+                );
+
+            }
 
 
-                    if (
-                        type ===
-                        "youtube"
-                    ) {
+            if (deviceHeartbeat) {
 
-                        openYouTubeVideo(
-                            url,
-                            title
-                        );
+                clearInterval(
+                    deviceHeartbeat
+                );
 
-                    }
+                deviceHeartbeat =
+                    null;
+            }
 
 
-                    else if (
-                        type ===
-                        "local"
-                    ) {
+            sessionStorage.removeItem(
+                "loggedInStudent"
+            );
 
-                        openLocalVideo(
-                            url,
-                            title
-                        );
-
-                    }
+            sessionStorage.removeItem(
+                "firebaseUID"
+            );
 
 
-                    else if (
-                        type ===
-                        "pdf"
-                    ) {
+            try {
 
-                        openPDFViewer(
-                            url,
-                            title
-                        );
+                await signOut(auth);
 
-                    }
+            } catch (error) {
+
+                console.error(
+                    "Sign out:",
+                    error
+                );
+
+            }
+
+
+            window.location.href =
+                "login.html";
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   BASIC CONTENT PROTECTION
+   ========================================================= */
+
+document.addEventListener(
+    "contextmenu",
+    function (event) {
+
+        event.preventDefault();
+
+    }
+);
+
+
+document.addEventListener(
+    "copy",
+    function (event) {
+
+        event.preventDefault();
+
+    }
+);
+
+
+document.addEventListener(
+    "cut",
+    function (event) {
+
+        event.preventDefault();
+
+    }
+);
+
+
+document.addEventListener(
+    "selectstart",
+    function (event) {
+
+        event.preventDefault();
+
+    }
+);
+
+
+document.addEventListener(
+    "keydown",
+    function (event) {
+
+        const key =
+            event.key.toLowerCase();
+
+
+        if (
+            (event.ctrlKey || event.metaKey) &&
+            (
+                key === "s" ||
+                key === "p" ||
+                key === "u" ||
+                key === "c"
+            )
+        ) {
+
+            event.preventDefault();
+
+        }
+
+    }
+);
