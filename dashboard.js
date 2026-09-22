@@ -628,9 +628,23 @@ async function updateDeviceHeartbeat() {
 
 function showStudentCourses(student) {
 
+    if (!coursesContainer) {
+
+        console.error(
+            "coursesContainer not found"
+        );
+
+        return;
+    }
+
+
     coursesContainer.innerHTML = "";
 
-    if (!student.courses || student.courses.length === 0) {
+
+    if (
+        !student.courses ||
+        student.courses.length === 0
+    ) {
 
         coursesContainer.innerHTML = `
             <div class="no-course">
