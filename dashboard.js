@@ -14,7 +14,6 @@ import {
     getDocs,
     getDoc,
     setDoc,
-    deleteDoc,
     updateDoc,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
@@ -177,11 +176,6 @@ const COURSES = {
 
 const MAX_DEVICES = 2;
 
-/*
-   Device 24 hours tak inactive na ho
-   to active maana jayega.
-*/
-
 const DEVICE_TIMEOUT =
     24 * 60 * 60 * 1000;
 
@@ -195,7 +189,6 @@ function getDeviceId() {
     let deviceId =
         localStorage.getItem("fjmcDeviceId");
 
-
     if (!deviceId) {
 
         if (
@@ -204,8 +197,7 @@ function getDeviceId() {
         ) {
 
             deviceId =
-                "device-" +
-                crypto.randomUUID();
+                "device-" + crypto.randomUUID();
 
         } else {
 
@@ -219,29 +211,24 @@ function getDeviceId() {
 
         }
 
-
         localStorage.setItem(
             "fjmcDeviceId",
             deviceId
         );
-
     }
-
 
     return deviceId;
 }
 
 
-const deviceId =
-    getDeviceId();
+const deviceId = getDeviceId();
 
 
 /* =========================================================
-   GLOBAL DEVICE STATE
+   GLOBAL STATE
    ========================================================= */
 
 let currentUser = null;
-
 let deviceHeartbeat = null;
 
 
@@ -250,23 +237,17 @@ let deviceHeartbeat = null;
    ========================================================= */
 
 const coursesContainer =
-    document.getElementById(
-        "coursesContainer"
-    );
+    document.getElementById("coursesContainer");
 
 const studentName =
-    document.getElementById(
-        "studentName"
-    );
+    document.getElementById("studentName");
 
 const logoutBtn =
-    document.getElementById(
-        "logoutBtn"
-    );
+    document.getElementById("logoutBtn");
 
 
 /* =========================================================
-   FIREBASE AUTH CHECK
+   FIREBASE AUTH
    ========================================================= */
 
 onAuthStateChanged(
@@ -275,24 +256,39 @@ onAuthStateChanged(
 
         if (!user) {
 
-            window.location.href =
-                "login.html";
+            window.location.href = "login.html";
 
             return;
         }
 
 
-        currentUser =
-            user;
+        currentUser = user;
 
 
         const email =
-            (
-                user.email || ""
-            ).toLowerCase();
+            (user.email || "").trim().toLowerCase();
 
 
-        if (!STUDENTS[email]) {
+        console.log(
+            "Logged in email:",
+            email
+        );
+
+
+        /* ================================================
+           CHECK STUDENT
+           ================================================ */
+
+        const student =
+            STUDENTS[email];
+
+
+        if (!student) {
+
+            console.error(
+                "Student not found:",
+                email
+            );
 
             await signOut(auth);
 
@@ -303,12 +299,18 @@ onAuthStateChanged(
         }
 
 
-        /*
-           Check / register device
-        */
+        /* ================================================
+           REGISTER / CHECK DEVICE
+           ================================================ */
 
         const allowed =
             await registerDevice(user);
+
+
+        console.log(
+            "Device allowed:",
+            allowed
+        );
 
 
         if (!allowed) {
@@ -317,9 +319,9 @@ onAuthStateChanged(
         }
 
 
-        /*
-           Save login information
-        */
+        /* ================================================
+           SESSION
+           ================================================ */
 
         sessionStorage.setItem(
             "loggedInStudent",
@@ -332,31 +334,28 @@ onAuthStateChanged(
         );
 
 
-        /*
-           Show student dashboard
-        */
-
-        const student =
-            STUDENTS[email];
-
+        /* ================================================
+           WELCOME
+           ================================================ */
 
         if (studentName) {
 
             studentName.textContent =
-                "Welcome, " +
-                student.name;
+                "Welcome, " + student.name;
 
         }
 
 
-        showStudentCourses(
-            student
-        );
+        /* ================================================
+           SHOW COURSES
+           ================================================ */
+
+        showStudentCourses(student);
 
 
-        /*
-           Start heartbeat
-        */
+        /* ================================================
+           HEARTBEAT
+           ================================================ */
 
         startDeviceHeartbeat();
 
@@ -365,7 +364,7 @@ onAuthStateChanged(
 
 
 /* =========================================================
-   DEVICE COLLECTION
+   DEVICES COLLECTION
    ========================================================= */
 
 function devicesCollection(user) {
@@ -382,7 +381,6 @@ function devicesCollection(user) {
 
 /* =========================================================
    REGISTER DEVICE
-   FIXED VERSION
    ========================================================= */
 
 async function registerDevice(user) {
@@ -403,20 +401,13 @@ async function registerDevice(user) {
             Date.now();
 
 
-        /* =================================================
-           CHECK CURRENT DEVICE
-        ================================================= */
+        /* ================================================
+           CURRENT DEVICE
+           ================================================ */
 
         const currentDeviceSnapshot =
-            await getDoc(
-                deviceRef
-            );
+            await getDoc(deviceRef);
 
-
-        /*
-           Agar ye device pehle se registered hai,
-           to sirf lastSeen update karo.
-        */
 
         if (
             currentDeviceSnapshot.exists()
@@ -439,11 +430,9 @@ async function registerDevice(user) {
         }
 
 
-        /* =================================================
-           GET ALL DEVICES
-           IMPORTANT:
-           Ye transaction ke bahar hai.
-        ================================================= */
+        /* ================================================
+           ALL DEVICES
+           ================================================ */
 
         const devicesSnapshot =
             await getDocs(
@@ -457,14 +446,8 @@ async function registerDevice(user) {
         devicesSnapshot.forEach(
             function (deviceDoc) {
 
-                /*
-                   Apne current device ko count
-                   karne ki zarurat nahi.
-                */
-
                 if (
-                    deviceDoc.id ===
-                    deviceId
+                    deviceDoc.id === deviceId
                 ) {
 
                     return;
@@ -476,9 +459,7 @@ async function registerDevice(user) {
 
 
                 const lastSeen =
-                    Number(
-                        data.lastSeen || 0
-                    );
+                    Number(data.lastSeen || 0);
 
 
                 const recentlyActive =
@@ -487,9 +468,7 @@ async function registerDevice(user) {
                     DEVICE_TIMEOUT;
 
 
-                if (
-                    recentlyActive
-                ) {
+                if (recentlyActive) {
 
                     activeDevices.push(
                         deviceDoc.id
@@ -501,9 +480,9 @@ async function registerDevice(user) {
         );
 
 
-        /* =================================================
-           MAXIMUM 2 DEVICES
-        ================================================= */
+        /* ================================================
+           MAXIMUM DEVICES
+           ================================================ */
 
         if (
             activeDevices.length >=
@@ -516,27 +495,22 @@ async function registerDevice(user) {
         }
 
 
-        /* =================================================
-           REGISTER NEW DEVICE
-        ================================================= */
+        /* ================================================
+           CREATE DEVICE
+           ================================================ */
 
         await setDoc(
             deviceRef,
             {
                 email: user.email,
-
                 lastSeen: now,
-
                 active: true,
-
-                createdAt:
-                    serverTimestamp()
+                createdAt: serverTimestamp()
             }
         );
 
 
         return true;
-
 
     } catch (error) {
 
@@ -547,28 +521,12 @@ async function registerDevice(user) {
 
 
         alert(
-            } catch (error) {
-
-    console.error("Device registration error:", error);
-
-    alert(
-        "Firebase Error:\n\n" +
-        error.code +
-        "\n\n" +
-        error.message
-    );
-
-    return false;
-    }
+            "Firebase Error:\n\n" +
+            error.code +
+            "\n\n" +
+            error.message
         );
 
-
-        /*
-           IMPORTANT:
-           Error hone par user ko forcibly logout
-           nahi kar rahe. Isse dashboard blank/loading
-           state me atakne se bachenge.
-        */
 
         return false;
     }
@@ -610,10 +568,6 @@ function showDeviceLimitMessage() {
 
 function startDeviceHeartbeat() {
 
-    /*
-       Purana heartbeat ho to pehle stop
-    */
-
     if (deviceHeartbeat) {
 
         clearInterval(
@@ -623,16 +577,8 @@ function startDeviceHeartbeat() {
     }
 
 
-    /*
-       Update immediately
-    */
-
     updateDeviceHeartbeat();
 
-
-    /*
-       Every 2 minutes
-    */
 
     deviceHeartbeat =
         setInterval(
@@ -675,7 +621,6 @@ async function updateDeviceHeartbeat() {
             }
         );
 
-
     } catch (error) {
 
         console.error(
@@ -694,20 +639,23 @@ async function updateDeviceHeartbeat() {
 
 function showStudentCourses(student) {
 
-    console.log("STUDENT:", student);
+    console.log(
+        "STUDENT DATA:",
+        student
+    );
+
 
     if (!coursesContainer) {
 
         console.error(
-            "coursesContainer not found in dashboard.html"
+            "coursesContainer not found"
         );
 
         return;
     }
 
 
-    coursesContainer.innerHTML =
-        "";
+    coursesContainer.innerHTML = "";
 
 
     if (
@@ -742,43 +690,45 @@ function showStudentCourses(student) {
 
             if (!course) {
 
+                console.error(
+                    "Course not found:",
+                    courseId
+                );
+
                 return;
             }
 
 
             const courseCard =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
 
             courseCard.className =
                 "course-card";
 
 
-            let contentHTML =
-                "";
+            let contentHTML = "";
 
 
             course.contents.forEach(
                 function (content) {
 
 
-                    /* ================= VIDEO ================= */
+                    /* ======================================
+                       YOUTUBE VIDEO
+                       ====================================== */
 
                     if (
-                        content.type ===
-                        "video"
+                        content.type === "video"
                     ) {
 
                         contentHTML += `
 
                             <button
                                 class="content-button video-button"
-                                onclick="openYouTubeVideo(
-                                    '${escapeAttribute(content.url)}',
-                                    '${escapeAttribute(content.title)}'
-                                )">
+                                data-type="youtube"
+                                data-url="${encodeURIComponent(content.url)}"
+                                data-title="${encodeURIComponent(content.title)}">
 
                                 ▶ ${content.title}
 
@@ -789,7 +739,9 @@ function showStudentCourses(student) {
                     }
 
 
-                    /* ================= LOCAL VIDEO ================= */
+                    /* ======================================
+                       LOCAL VIDEO
+                       ====================================== */
 
                     else if (
                         content.type ===
@@ -800,10 +752,9 @@ function showStudentCourses(student) {
 
                             <button
                                 class="content-button video-button"
-                                onclick="openLocalVideo(
-                                    '${escapeAttribute(content.url)}',
-                                    '${escapeAttribute(content.title)}'
-                                )">
+                                data-type="local"
+                                data-url="${encodeURIComponent(content.url)}"
+                                data-title="${encodeURIComponent(content.title)}">
 
                                 ▶ ${content.title}
 
@@ -814,21 +765,21 @@ function showStudentCourses(student) {
                     }
 
 
-                    /* ================= PDF ================= */
+                    /* ======================================
+                       PDF
+                       ====================================== */
 
                     else if (
-                        content.type ===
-                        "pdf"
+                        content.type === "pdf"
                     ) {
 
                         contentHTML += `
 
                             <button
                                 class="content-button pdf-button"
-                                onclick="openPDFViewer(
-                                    '${escapeAttribute(content.url)}',
-                                    '${escapeAttribute(content.title)}'
-                                )">
+                                data-type="pdf"
+                                data-url="${encodeURIComponent(content.url)}"
+                                data-title="${encodeURIComponent(content.title)}">
 
                                 📄 ${content.title}
 
@@ -839,20 +790,20 @@ function showStudentCourses(student) {
                     }
 
 
-                    /* ================= LIVE ================= */
+                    /* ======================================
+                       LIVE
+                       ====================================== */
 
                     else if (
-                        content.type ===
-                        "live"
+                        content.type === "live"
                     ) {
 
                         contentHTML += `
 
                             <button
                                 class="content-button live-button"
-                                onclick="openLiveClass(
-                                    '${escapeAttribute(content.url)}'
-                                )">
+                                data-type="live"
+                                data-url="${encodeURIComponent(content.url)}">
 
                                 🔴 ${content.title}
 
@@ -880,7 +831,6 @@ function showStudentCourses(student) {
 
                 </div>
 
-
                 <div class="course-content">
 
                     ${contentHTML}
@@ -897,31 +847,93 @@ function showStudentCourses(student) {
         }
     );
 
-}
 
+    /* =====================================================
+       BUTTON EVENTS
+       ===================================================== */
 
-/* =========================================================
-   ESCAPE ATTRIBUTE
-   ========================================================= */
-
-function escapeAttribute(text) {
-
-    return String(text)
-
-        .replace(
-            /\\/g,
-            "\\\\"
-        )
-
-        .replace(
-            /'/g,
-            "\\'"
-        )
-
-        .replace(
-            /"/g,
-            "&quot;"
+    const buttons =
+        coursesContainer.querySelectorAll(
+            ".content-button"
         );
+
+
+    buttons.forEach(
+        function (button) {
+
+            button.addEventListener(
+                "click",
+                function () {
+
+                    const type =
+                        button.dataset.type;
+
+
+                    const url =
+                        decodeURIComponent(
+                            button.dataset.url
+                        );
+
+
+                    const title =
+                        button.dataset.title
+                            ? decodeURIComponent(
+                                button.dataset.title
+                            )
+                            : "";
+
+
+                    if (
+                        type === "youtube"
+                    ) {
+
+                        openYouTubeVideo(
+                            url,
+                            title
+                        );
+
+                    }
+
+
+                    else if (
+                        type === "local"
+                    ) {
+
+                        openLocalVideo(
+                            url,
+                            title
+                        );
+
+                    }
+
+
+                    else if (
+                        type === "pdf"
+                    ) {
+
+                        openPDFViewer(
+                            url,
+                            title
+                        );
+
+                    }
+
+
+                    else if (
+                        type === "live"
+                    ) {
+
+                        openLiveClass(
+                            url
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+    );
 
 }
 
@@ -936,9 +948,7 @@ function openYouTubeVideo(
 ) {
 
     const overlay =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
 
     overlay.className =
@@ -956,18 +966,11 @@ function openYouTubeVideo(
                 </span>
 
                 <button
-                    class="close-video"
-                    onclick="
-                        this.closest('.video-overlay').remove();
-                        document.body.classList.remove('viewer-open');
-                    ">
-
+                    class="close-video">
                     ✕
-
                 </button>
 
             </div>
-
 
             <div class="video-player-container">
 
@@ -1007,6 +1010,22 @@ function openYouTubeVideo(
         "viewer-open"
     );
 
+
+    overlay
+        .querySelector(".close-video")
+        .addEventListener(
+            "click",
+            function () {
+
+                overlay.remove();
+
+                document.body.classList.remove(
+                    "viewer-open"
+                );
+
+            }
+        );
+
 }
 
 
@@ -1020,9 +1039,7 @@ function openLocalVideo(
 ) {
 
     const overlay =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
 
     overlay.className =
@@ -1040,18 +1057,11 @@ function openLocalVideo(
                 </span>
 
                 <button
-                    class="close-video"
-                    onclick="
-                        this.closest('.video-overlay').remove();
-                        document.body.classList.remove('viewer-open');
-                    ">
-
+                    class="close-video">
                     ✕
-
                 </button>
 
             </div>
-
 
             <div class="video-player-container">
 
@@ -1091,6 +1101,38 @@ function openLocalVideo(
         "viewer-open"
     );
 
+
+    overlay
+        .querySelector(".close-video")
+        .addEventListener(
+            "click",
+            function () {
+
+                const video =
+                    overlay.querySelector("video");
+
+
+                if (video) {
+
+                    video.pause();
+
+                    video.removeAttribute(
+                        "src"
+                    );
+
+                }
+
+
+                overlay.remove();
+
+
+                document.body.classList.remove(
+                    "viewer-open"
+                );
+
+            }
+        );
+
 }
 
 
@@ -1126,8 +1168,7 @@ function openLiveClass(url) {
    ========================================================= */
 
 if (
-    typeof pdfjsLib !==
-    "undefined"
+    typeof pdfjsLib !== "undefined"
 ) {
 
     pdfjsLib.GlobalWorkerOptions.workerSrc =
@@ -1146,8 +1187,7 @@ async function openPDFViewer(
 ) {
 
     if (
-        typeof pdfjsLib ===
-        "undefined"
+        typeof pdfjsLib === "undefined"
     ) {
 
         alert(
@@ -1159,9 +1199,7 @@ async function openPDFViewer(
 
 
     const overlay =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
 
     overlay.id =
@@ -1340,9 +1378,7 @@ async function renderPDFPage(
 
 
     const wrapper =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
 
     wrapper.className =
@@ -1370,9 +1406,7 @@ async function renderPDFPage(
 
 
     const canvas =
-        document.createElement(
-            "canvas"
-        );
+        document.createElement("canvas");
 
 
     canvas.className =
@@ -1473,9 +1507,7 @@ async function renderPDFPage(
 
 
     const context =
-        canvas.getContext(
-            "2d"
-        );
+        canvas.getContext("2d");
 
 
     const renderContext = {
@@ -1544,19 +1576,10 @@ if (logoutBtn) {
         "click",
         async function () {
 
-            /*
-               Button ko double click se bachao
-            */
-
-            logoutBtn.disabled =
-                true;
+            logoutBtn.disabled = true;
 
 
             try {
-
-                /*
-                   Heartbeat pehle stop
-                */
 
                 if (deviceHeartbeat) {
 
@@ -1569,10 +1592,6 @@ if (logoutBtn) {
 
                 }
 
-
-                /*
-                   Device ko inactive karo
-                */
 
                 if (currentUser) {
 
@@ -1609,10 +1628,6 @@ if (logoutBtn) {
                 }
 
 
-                /*
-                   Session clear
-                */
-
                 sessionStorage.removeItem(
                     "loggedInStudent"
                 );
@@ -1623,18 +1638,8 @@ if (logoutBtn) {
                 );
 
 
-                /*
-                   Firebase logout
-                */
+                await signOut(auth);
 
-                await signOut(
-                    auth
-                );
-
-
-                /*
-                   Login page
-                */
 
                 window.location.href =
                     "login.html";
@@ -1648,15 +1653,9 @@ if (logoutBtn) {
                 );
 
 
-                /*
-                   Logout ko fail mat hone do
-                */
-
                 try {
 
-                    await signOut(
-                        auth
-                    );
+                    await signOut(auth);
 
                 } catch (signOutError) {
 
@@ -1667,14 +1666,7 @@ if (logoutBtn) {
                 }
 
 
-                sessionStorage.removeItem(
-                    "loggedInStudent"
-                );
-
-
-                sessionStorage.removeItem(
-                    "firebaseUID"
-                );
+                sessionStorage.clear();
 
 
                 window.location.href =
@@ -1736,59 +1728,19 @@ document.addEventListener(
     "keydown",
     function (event) {
 
-        /*
-           Ctrl + S
-        */
+        const key =
+            event.key.toLowerCase();
+
 
         if (
             (event.ctrlKey ||
                 event.metaKey) &&
-            event.key.toLowerCase() === "s"
-        ) {
-
-            event.preventDefault();
-
-        }
-
-
-        /*
-           Ctrl + P
-        */
-
-        if (
-            (event.ctrlKey ||
-                event.metaKey) &&
-            event.key.toLowerCase() === "p"
-        ) {
-
-            event.preventDefault();
-
-        }
-
-
-        /*
-           Ctrl + U
-        */
-
-        if (
-            (event.ctrlKey ||
-                event.metaKey) &&
-            event.key.toLowerCase() === "u"
-        ) {
-
-            event.preventDefault();
-
-        }
-
-
-        /*
-           Ctrl + C
-        */
-
-        if (
-            (event.ctrlKey ||
-                event.metaKey) &&
-            event.key.toLowerCase() === "c"
+            (
+                key === "s" ||
+                key === "p" ||
+                key === "u" ||
+                key === "c"
+            )
         ) {
 
             event.preventDefault();
