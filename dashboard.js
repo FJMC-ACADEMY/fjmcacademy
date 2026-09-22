@@ -547,7 +547,19 @@ async function registerDevice(user) {
 
 
         alert(
-            "Unable to verify this device. Please try again."
+            } catch (error) {
+
+    console.error("Device registration error:", error);
+
+    alert(
+        "Firebase Error:\n\n" +
+        error.code +
+        "\n\n" +
+        error.message
+    );
+
+    return false;
+    }
         );
 
 
