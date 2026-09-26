@@ -300,6 +300,476 @@ const TESTS = {
 
     }
 
+},
+   "real-analysis-test-2": {
+
+    title: "Real Analysis Test - 2",
+
+    duration: 30,
+
+    questions: [
+
+        {
+            question:
+                "Which of the following sequences converges to 0?",
+
+            options: [
+
+                {
+                    text: "1/n",
+
+                    correct: true,
+
+                    solution:
+                        "The sequence 1/n approaches 0 as n tends to infinity. Therefore, it converges to 0."
+                },
+
+                {
+                    text: "n",
+
+                    correct: false,
+
+                    solution:
+                        "The sequence n increases without bound, so it does not converge to a finite real number."
+                },
+
+                {
+                    text: "(-1)^n",
+
+                    correct: false,
+
+                    solution:
+                        "The sequence (-1)^n oscillates between -1 and 1 and therefore does not converge."
+                },
+
+                {
+                    text: "n^2",
+
+                    correct: false,
+
+                    solution:
+                        "The sequence n^2 tends to infinity and does not converge to a finite real number."
+                }
+
+            ]
+        },
+
+
+        {
+            question:
+                "Which of the following sequences is bounded?",
+
+            options: [
+
+                {
+                    text: "(-1)^n",
+
+                    correct: true,
+
+                    solution:
+                        "The sequence (-1)^n takes only the values -1 and 1, so it is bounded."
+                },
+
+                {
+                    text: "n",
+
+                    correct: false,
+
+                    solution:
+                        "The sequence n is unbounded because its terms increase without limit."
+                },
+
+                {
+                    text: "n^2",
+
+                    correct: false,
+
+                    solution:
+                        "The sequence n^2 is unbounded."
+                },
+
+                {
+                    text: "2^n",
+
+                    correct: false,
+
+                    solution:
+                        "The sequence 2^n grows without bound and is therefore unbounded."
+                }
+
+            ]
+        },
+
+
+        {
+            question:
+                "What is the infimum of the set (0,1)?",
+
+            options: [
+
+                {
+                    text: "0",
+
+                    correct: true,
+
+                    solution:
+                        "0 is a lower bound of (0,1), and no number greater than 0 is a lower bound. Hence inf(0,1)=0."
+                },
+
+                {
+                    text: "1",
+
+                    correct: false,
+
+                    solution:
+                        "1 is the supremum of (0,1), not the infimum."
+                },
+
+                {
+                    text: "1/2",
+
+                    correct: false,
+
+                    solution:
+                        "1/2 is not a lower bound of (0,1)."
+                },
+
+                {
+                    text: "There is no infimum",
+
+                    correct: false,
+
+                    solution:
+                        "The set (0,1) has infimum 0."
+                }
+
+            ]
+        },
+
+
+        {
+            question:
+                "Which of the following is true for every convergent sequence of real numbers?",
+
+            options: [
+
+                {
+                    text: "It is bounded",
+
+                    correct: true,
+
+                    solution:
+                        "Every convergent sequence of real numbers is bounded."
+                },
+
+                {
+                    text: "It is strictly increasing",
+
+                    correct: false,
+
+                    solution:
+                        "A convergent sequence need not be increasing."
+                },
+
+                {
+                    text: "It is strictly decreasing",
+
+                    correct: false,
+
+                    solution:
+                        "A convergent sequence need not be decreasing."
+                },
+
+                {
+                    text: "It contains only positive terms",
+
+                    correct: false,
+
+                    solution:
+                        "A convergent sequence can contain negative terms."
+                }
+
+            ]
+        },
+
+
+        {
+            question:
+                "Which sequence is monotone increasing?",
+
+            options: [
+
+                {
+                    text: "a_n = n",
+
+                    correct: true,
+
+                    solution:
+                        "Since a_(n+1) = n+1 > n = a_n, the sequence is increasing."
+                },
+
+                {
+                    text: "a_n = (-1)^n",
+
+                    correct: false,
+
+                    solution:
+                        "The sequence alternates between -1 and 1, so it is not monotone."
+                },
+
+                {
+                    text: "a_n = 1/n",
+
+                    correct: false,
+
+                    solution:
+                        "The sequence 1/n is decreasing."
+                },
+
+                {
+                    text: "a_n = (-1)^n/n",
+
+                    correct: false,
+
+                    solution:
+                        "The signs alternate, so the sequence is not monotone."
+                }
+
+            ]
+        },
+
+
+        {
+            question:
+                "If a sequence is convergent, then it is necessarily:",
+
+            options: [
+
+                {
+                    text: "Cauchy",
+
+                    correct: true,
+
+                    solution:
+                        "Every convergent sequence in R is a Cauchy sequence."
+                },
+
+                {
+                    text: "Unbounded",
+
+                    correct: false,
+
+                    solution:
+                        "Every convergent sequence is bounded."
+                },
+
+                {
+                    text: "Divergent",
+
+                    correct: false,
+
+                    solution:
+                        "A convergent sequence cannot be divergent."
+                },
+
+                {
+                    text: "Strictly increasing",
+
+                    correct: false,
+
+                    solution:
+                        "Convergence does not imply monotonicity."
+                }
+
+            ]
+        },
+
+
+        {
+            question:
+                "What is the supremum of the set {1, 2, 3, 4}?",
+
+            options: [
+
+                {
+                    text: "4",
+
+                    correct: true,
+
+                    solution:
+                        "The largest element of the set is 4, so its supremum is 4."
+                },
+
+                {
+                    text: "1",
+
+                    correct: false,
+
+                    solution:
+                        "1 is the minimum element, not the supremum."
+                },
+
+                {
+                    text: "3",
+
+                    correct: false,
+
+                    solution:
+                        "3 is not an upper bound because 4 belongs to the set."
+                },
+
+                {
+                    text: "5",
+
+                    correct: false,
+
+                    solution:
+                        "5 is an upper bound, but it is not the least upper bound."
+                }
+
+            ]
+        },
+
+
+        {
+            question:
+                "Which theorem states that every bounded sequence in R has a convergent subsequence?",
+
+            options: [
+
+                {
+                    text: "Bolzano-Weierstrass Theorem",
+
+                    correct: true,
+
+                    solution:
+                        "The Bolzano-Weierstrass Theorem states that every bounded sequence in R has a convergent subsequence."
+                },
+
+                {
+                    text: "Mean Value Theorem",
+
+                    correct: false,
+
+                    solution:
+                        "The Mean Value Theorem concerns derivatives of functions."
+                },
+
+                {
+                    text: "Intermediate Value Theorem",
+
+                    correct: false,
+
+                    solution:
+                        "The Intermediate Value Theorem concerns continuous functions."
+                },
+
+                {
+                    text: "Monotone Convergence Theorem",
+
+                    correct: false,
+
+                    solution:
+                        "The Monotone Convergence Theorem concerns bounded monotone sequences."
+                }
+
+            ]
+        },
+
+
+        {
+            question:
+                "If a_n = 1/n, then lim(n→∞) a_n is:",
+
+            options: [
+
+                {
+                    text: "0",
+
+                    correct: true,
+
+                    solution:
+                        "As n becomes arbitrarily large, 1/n approaches 0."
+                },
+
+                {
+                    text: "1",
+
+                    correct: false,
+
+                    solution:
+                        "1/n approaches 0, not 1."
+                },
+
+                {
+                    text: "∞",
+
+                    correct: false,
+
+                    solution:
+                        "1/n becomes smaller as n increases."
+                },
+
+                {
+                    text: "Does not exist",
+
+                    correct: false,
+
+                    solution:
+                        "The sequence 1/n converges to 0."
+                }
+
+            ]
+        },
+
+
+        {
+            question:
+                "Which of the following is a Cauchy sequence in R?",
+
+            options: [
+
+                {
+                    text: "a_n = 1/n",
+
+                    correct: true,
+
+                    solution:
+                        "Since 1/n converges to 0 in R, it is a Cauchy sequence."
+                },
+
+                {
+                    text: "a_n = n",
+
+                    correct: false,
+
+                    solution:
+                        "The sequence n is unbounded and is not Cauchy."
+                },
+
+                {
+                    text: "a_n = (-1)^n n",
+
+                    correct: false,
+
+                    solution:
+                        "This sequence is unbounded and therefore cannot be Cauchy."
+                },
+
+                {
+                    text: "a_n = n^2",
+
+                    correct: false,
+
+                    solution:
+                        "The sequence n^2 is unbounded and is not Cauchy."
+                }
+
+            ]
+        }
+
+    ]
+
 };
 
 
