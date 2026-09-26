@@ -265,7 +265,7 @@ const COURSES = {
                 type: "pdf",
                 title: "Lecture 1 PDF",
                 url:
-                    "321581555.PDF"
+                    "7. Strings.pdf"
             },
 
             {
