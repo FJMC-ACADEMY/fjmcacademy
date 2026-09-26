@@ -1,4 +1,4 @@
-/* =========================================================
+8/* =========================================================
    FJMC ACADEMY - STUDENT DASHBOARD
    1 MOBILE + 1 DESKTOP/LAPTOP
    FIXED 3-DAY DEVICE RESERVATION
@@ -44,7 +44,7 @@ const STUDENTS = {
 
     "fogatjagmohan@gmail.com": {
         name: "Neha",
-        courses: ["real-analysis", "calculus"]
+        courses: ["real-analysis", "calculus", "linear-algebra"]
     }
 
 };
