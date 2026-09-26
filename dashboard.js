@@ -244,7 +244,7 @@ const COURSES = {
                 type: "video",
                 title: "Lecture 1",
                 url:
-                    "https://www.youtube.com/embed/dQw4w9WgXcQ"
+                    "https://www.youtube.com/embed/EnLKN-6ocsE?rel=0&modestbranding=1"
             },
 
             {
