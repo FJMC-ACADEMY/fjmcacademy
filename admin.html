@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Panel | FJMC Academy</title>
+
+    <link rel="stylesheet" href="admin.css">
+</head>
+
+<body>
+
+<header class="admin-header">
+    <div class="logo">FJMC Academy</div>
+
+    <div class="header-right">
+        <span id="adminEmail"></span>
+        <button id="logoutBtn">Logout</button>
+    </div>
+</header>
+
+
+<div class="admin-layout">
+
+    <aside class="sidebar">
+
+        <button class="menu-btn active" data-section="dashboardSection">
+            📊 Dashboard
+        </button>
+
+        <button class="menu-btn" data-section="studentsSection">
+            👨‍🎓 Students
+        </button>
+
+        <button class="menu-btn" data-section="coursesSection">
+            📚 Courses
+        </button>
+
+    </aside>
+
+
+    <main class="main-content">
+
+
+        <!-- ================= DASHBOARD ================= -->
+
+        <section id="dashboardSection" class="admin-section active">
+
+            <h1>Admin Dashboard</h1>
+
+            <div class="stats">
+
+                <div class="stat-card">
+                    <div class="stat-title">Students</div>
+                    <div id="totalStudents" class="stat-number">0</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-title">Courses</div>
+                    <div id="totalCourses" class="stat-number">0</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-title">Admin Status</div>
+                    <div class="stat-number small">ACTIVE</div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================= STUDENTS ================= -->
+
+        <section id="studentsSection" class="admin-section">
+
+            <div class="section-heading">
+
+                <div>
+                    <h1>Students</h1>
+                    <p>Manage student courses</p>
+                </div>
+
+                <input
+                    type="text"
+                    id="studentSearch"
+                    placeholder="Search student..."
+                >
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Courses</th>
+                            <th>Action</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="studentsTableBody"></tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================= COURSES ================= -->
+
+        <section id="coursesSection" class="admin-section">
+
+            <h1>Courses</h1>
+
+            <div id="coursesList" class="courses-list"></div>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+
+<!-- ================= COURSE MODAL ================= -->
+
+<div id="courseModal" class="modal">
+
+    <div class="modal-box">
+
+        <div class="modal-header">
+
+            <h2>Manage Courses</h2>
+
+            <button id="closeModal">×</button>
+
+        </div>
+
+
+        <div class="student-info">
+
+            <strong id="modalStudentName"></strong>
+
+            <span id="modalStudentEmail"></span>
+
+        </div>
+
+
+        <div id="courseCheckboxes" class="course-checkboxes"></div>
+
+
+        <button id="saveCoursesBtn" class="save-btn">
+            Save Courses
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<script type="module" src="admin.js"></script>
+
+</body>
+</html>
