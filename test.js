@@ -1,5 +1,6 @@
 /* =========================================================
-   FJMC ACADEMY - LECTURE WISE TEST SYSTEM
+   FJMC ACADEMY
+   LECTURE WISE TEST SYSTEM
    ========================================================= */
 
 import {
@@ -22,9 +23,25 @@ import {
 
 /* =========================================================
    TEST DATA
+   =========================================================
+   
+   IMPORTANT:
+   Course
+      ↓
+   Lecture
+      ↓
+   Test 1 / Test 2 / Test 3 / ...
+      ↓
+   Questions
+
+   Jitne chahe TEST add kar sakte ho.
    ========================================================= */
 
 const TESTS = {
+
+    /* =====================================================
+       REAL ANALYSIS
+       ===================================================== */
 
     "real-analysis": {
 
@@ -32,11 +49,19 @@ const TESTS = {
 
         lectures: {
 
+            /* =================================================
+               LECTURE 1
+               ================================================= */
+
             "1": {
 
                 title: "Lecture 1",
 
                 tests: {
+
+                    /* ==============================
+                       TEST 1
+                       ============================== */
 
                     "1": {
 
@@ -294,9 +319,9 @@ const TESTS = {
                     },
 
 
-                    /* =========================================
-                       LECTURE 1 - TEST 2
-                       ========================================= */
+                    /* ==============================
+                       TEST 2
+                       ============================== */
 
                     "2": {
 
@@ -542,6 +567,69 @@ const TESTS = {
 
                         ]
 
+                    },
+
+
+                    /* ==============================
+                       TEST 3
+                       ============================== */
+
+                    "3": {
+
+                        title:
+                            "Real Analysis - Lecture 1 Test - 3",
+
+                        duration: 30,
+
+                        questions: [
+
+                            {
+                                question:
+                                    "Which of the following is an example of a divergent sequence?",
+
+                                options: [
+
+                                    {
+                                        text: "(-1)^n",
+
+                                        correct: true,
+
+                                        solution:
+                                            "The sequence oscillates between -1 and 1 and therefore does not converge."
+                                    },
+
+                                    {
+                                        text: "1/n",
+
+                                        correct: false,
+
+                                        solution:
+                                            "1/n converges to 0."
+                                    },
+
+                                    {
+                                        text: "1",
+
+                                        correct: false,
+
+                                        solution:
+                                            "The constant sequence 1 converges to 1."
+                                    },
+
+                                    {
+                                        text: "1/(n+1)",
+
+                                        correct: false,
+
+                                        solution:
+                                            "1/(n+1) converges to 0."
+                                    }
+
+                                ]
+                            }
+
+                        ]
+
                     }
 
                 }
@@ -570,7 +658,7 @@ const TESTS = {
 
                             {
                                 question:
-                                    "Sample Lecture 2 Question",
+                                    "A sample Lecture 2 question?",
 
                                 options: [
 
@@ -580,7 +668,7 @@ const TESTS = {
                                         correct: true,
 
                                         solution:
-                                            "Explanation of the correct answer."
+                                            "This is the correct answer."
                                     },
 
                                     {
@@ -589,7 +677,7 @@ const TESTS = {
                                         correct: false,
 
                                         solution:
-                                            "Explanation."
+                                            "This is incorrect."
                                     },
 
                                     {
@@ -598,7 +686,7 @@ const TESTS = {
                                         correct: false,
 
                                         solution:
-                                            "Explanation."
+                                            "This is incorrect."
                                     },
 
                                     {
@@ -607,7 +695,7 @@ const TESTS = {
                                         correct: false,
 
                                         solution:
-                                            "Explanation."
+                                            "This is incorrect."
                                     }
 
                                 ]
@@ -625,54 +713,7 @@ const TESTS = {
 
                         duration: 30,
 
-                        questions: [
-
-                            {
-                                question:
-                                    "Sample Lecture 2 Test 2 Question",
-
-                                options: [
-
-                                    {
-                                        text: "Correct Answer",
-
-                                        correct: true,
-
-                                        solution:
-                                            "Explanation."
-                                    },
-
-                                    {
-                                        text: "Wrong Answer",
-
-                                        correct: false,
-
-                                        solution:
-                                            "Explanation."
-                                    },
-
-                                    {
-                                        text: "Wrong Answer",
-
-                                        correct: false,
-
-                                        solution:
-                                            "Explanation."
-                                    },
-
-                                    {
-                                        text: "Wrong Answer",
-
-                                        correct: false,
-
-                                        solution:
-                                            "Explanation."
-                                    }
-
-                                ]
-                            }
-
-                        ]
+                        questions: []
 
                     }
 
@@ -715,23 +756,96 @@ const TESTS = {
 
                 }
 
-            },
+            }
 
+        }
+
+    },
+
+
+    /* =====================================================
+       CALCULUS
+       ===================================================== */
+
+    "calculus": {
+
+        title: "Calculus",
+
+        lectures: {
 
             /* =================================================
-               LECTURE 4
+               LECTURE 1
                ================================================= */
 
-            "4": {
+            "1": {
 
-                title: "Lecture 4",
+                title: "Calculus - Lecture 1",
 
                 tests: {
 
                     "1": {
 
                         title:
-                            "Real Analysis - Lecture 4 Test - 1",
+                            "Calculus - Lecture 1 Test - 1",
+
+                        duration: 30,
+
+                        questions: [
+
+                            {
+                                question:
+                                    "What is the derivative of x²?",
+
+                                options: [
+
+                                    {
+                                        text: "2x",
+
+                                        correct: true,
+
+                                        solution:
+                                            "Using the power rule, d(x²)/dx = 2x."
+                                    },
+
+                                    {
+                                        text: "x",
+
+                                        correct: false,
+
+                                        solution:
+                                            "The derivative of x² is 2x."
+                                    },
+
+                                    {
+                                        text: "x²",
+
+                                        correct: false,
+
+                                        solution:
+                                            "x² is the original function, not its derivative."
+                                    },
+
+                                    {
+                                        text: "2",
+
+                                        correct: false,
+
+                                        solution:
+                                            "The derivative of x² is 2x."
+                                    }
+
+                                ]
+                            }
+
+                        ]
+
+                    },
+
+
+                    "2": {
+
+                        title:
+                            "Calculus - Lecture 1 Test - 2",
 
                         duration: 30,
 
@@ -739,10 +853,11 @@ const TESTS = {
 
                     },
 
-                    "2": {
+
+                    "3": {
 
                         title:
-                            "Real Analysis - Lecture 4 Test - 2",
+                            "Calculus - Lecture 1 Test - 3",
 
                         duration: 30,
 
@@ -756,19 +871,19 @@ const TESTS = {
 
 
             /* =================================================
-               LECTURE 5
+               LECTURE 2
                ================================================= */
 
-            "5": {
+            "2": {
 
-                title: "Lecture 5",
+                title: "Calculus - Lecture 2",
 
                 tests: {
 
                     "1": {
 
                         title:
-                            "Real Analysis - Lecture 5 Test - 1",
+                            "Calculus - Lecture 2 Test - 1",
 
                         duration: 30,
 
@@ -779,7 +894,44 @@ const TESTS = {
                     "2": {
 
                         title:
-                            "Real Analysis - Lecture 5 Test - 2",
+                            "Calculus - Lecture 2 Test - 2",
+
+                        duration: 30,
+
+                        questions: []
+
+                    }
+
+                }
+
+            },
+
+
+            /* =================================================
+               LECTURE 3
+               ================================================= */
+
+            "3": {
+
+                title: "Calculus - Lecture 3",
+
+                tests: {
+
+                    "1": {
+
+                        title:
+                            "Calculus - Lecture 3 Test - 1",
+
+                        duration: 30,
+
+                        questions: []
+
+                    },
+
+                    "2": {
+
+                        title:
+                            "Calculus - Lecture 3 Test - 2",
 
                         duration: 30,
 
@@ -795,190 +947,8 @@ const TESTS = {
 
     }
 
-},
-/* =====================================================
-   CALCULUS
-   ===================================================== */
+};
 
-"calculus": {
-
-    title: "Calculus",
-
-    lectures: {
-
-        /* ==============================================
-           LECTURE 1
-           ============================================== */
-
-        "1": {
-
-            title: "Calculus - Lecture 1",
-
-            tests: {
-
-                "1": {
-
-                    title:
-                        "Calculus - Lecture 1 Test - 1",
-
-                    duration: 30,
-
-                    questions: [
-
-                        {
-                            question:
-                                "YOUR QUESTION HERE",
-
-                            options: [
-
-                                {
-                                    text:
-                                        "Option A",
-
-                                    correct: true,
-
-                                    solution:
-                                        "Explanation of correct answer."
-                                },
-
-                                {
-                                    text:
-                                        "Option B",
-
-                                    correct: false,
-
-                                    solution:
-                                        "Explanation."
-                                },
-
-                                {
-                                    text:
-                                        "Option C",
-
-                                    correct: false,
-
-                                    solution:
-                                        "Explanation."
-                                },
-
-                                {
-                                    text:
-                                        "Option D",
-
-                                    correct: false,
-
-                                    solution:
-                                        "Explanation."
-                                }
-
-                            ]
-                        }
-
-                    ]
-
-                },
-
-
-                /* LECTURE 1 - TEST 2 */
-
-                "2": {
-
-                    title:
-                        "Calculus - Lecture 1 Test - 2",
-
-                    duration: 30,
-
-                    questions: [
-
-                        /* Test 2 questions here */
-
-                    ]
-
-                }
-
-            }
-
-        },
-
-
-        /* ==============================================
-           LECTURE 2
-           ============================================== */
-
-        "2": {
-
-            title: "Calculus - Lecture 2",
-
-            tests: {
-
-                "1": {
-
-                    title:
-                        "Calculus - Lecture 2 Test - 1",
-
-                    duration: 30,
-
-                    questions: [
-
-                        /* Lecture 2 Test 1 questions */
-
-                    ]
-
-                },
-
-
-                "2": {
-
-                    title:
-                        "Calculus - Lecture 2 Test - 2",
-
-                    duration: 30,
-
-                    questions: [
-
-                        /* Lecture 2 Test 2 questions */
-
-                    ]
-
-                }
-
-            }
-
-        },
-
-
-        /* ==============================================
-           LECTURE 3
-           ============================================== */
-
-        "3": {
-
-            title: "Calculus - Lecture 3",
-
-            tests: {
-
-                "1": {
-
-                    title:
-                        "Calculus - Lecture 3 Test - 1",
-
-                    duration: 30,
-
-                    questions: [
-
-                        /* Lecture 3 Test 1 questions */
-
-                    ]
-
-                }
-
-            }
-
-        }
-
-    }
-
-           };
 
 /* =========================================================
    VARIABLES
@@ -1017,6 +987,20 @@ testNumber =
 
 
 /* =========================================================
+   PAGE SAVE / PRINT PROTECTION
+   ========================================================= */
+
+function protectPage() {
+
+    document.documentElement.setAttribute(
+        "data-test-page",
+        "true"
+    );
+
+}
+
+
+/* =========================================================
    AUTH
    ========================================================= */
 
@@ -1049,10 +1033,6 @@ onAuthStateChanged(
         }
 
 
-        /* ================================================
-           COURSE CHECK
-           ================================================ */
-
         const course =
             TESTS[courseId];
 
@@ -1068,12 +1048,9 @@ onAuthStateChanged(
         }
 
 
-        /*
-         * IMPORTANT
-         *
-         * Agar lecture/test URL mein nahi hai,
-         * to selection page dikhao.
-         */
+        /* ==============================================
+           NO LECTURE / TEST
+           ============================================== */
 
         if (
             !lectureId ||
@@ -1087,10 +1064,14 @@ onAuthStateChanged(
         }
 
 
+        /* ==============================================
+           GET TEST
+           ============================================== */
+
         currentTest =
             course
-                .lectures[lectureId]
-                ?.tests[testNumber];
+                .lectures?.[lectureId]
+                ?.tests?.[testNumber];
 
 
         if (!currentTest) {
@@ -1148,10 +1129,29 @@ function showMessage(message) {
             "loading"
         );
 
+    const area =
+        document.getElementById(
+            "testArea"
+        );
+
+
     if (loading) {
 
         loading.innerHTML = `
             <h3>${message}</h3>
+        `;
+
+        return;
+
+    }
+
+
+    if (area) {
+
+        area.innerHTML = `
+            <div class="test-info">
+                <h3>${message}</h3>
+            </div>
         `;
 
     }
@@ -1211,95 +1211,111 @@ function showTestSelection() {
     `;
 
 
-    Object.keys(course.lectures)
-        .forEach(
-            function(lectureKey) {
+    Object.keys(
+        course.lectures
+    ).forEach(
+        function(lectureKey) {
 
-                const lecture =
-                    course.lectures[
-                        lectureKey
-                    ];
+            const lecture =
+                course.lectures[
+                    lectureKey
+                ];
 
 
-                html += `
+            html += `
+
+                <div class="question">
+
+                    <h2>
+                        📚 ${lecture.title}
+                    </h2>
 
                     <div
-                        class="question"
+                        style="
+                            display:grid;
+                            gap:10px;
+                        "
                     >
 
-                        <h2>
-                            📚 ${lecture.title}
-                        </h2>
+            `;
 
-                        <div
+
+            Object.keys(
+                lecture.tests
+            ).forEach(
+                function(testKey) {
+
+                    const test =
+                        lecture.tests[
+                            testKey
+                        ];
+
+
+                    html += `
+
+                        <button
+                            type="button"
+                            class="submit-btn"
                             style="
-                                display:grid;
-                                gap:10px;
+                                background:#2563eb;
+                                cursor:pointer;
+                            "
+                            onclick="
+                                openTest(
+                                    '${escapeAttribute(lectureKey)}',
+                                    '${escapeAttribute(testKey)}'
+                                )
                             "
                         >
 
-                `;
+                            📝 Test ${testKey}
 
-
-                Object.keys(
-                    lecture.tests
-                ).forEach(
-                    function(testKey) {
-
-                        const test =
-                            lecture.tests[
-                                testKey
-                            ];
-
-
-                        html += `
-
-                            <button
-                                class="submit-btn"
+                            <span
                                 style="
-                                    background:#2563eb;
-                                "
-                                onclick="
-                                    openTest(
-                                        '${lectureKey}',
-                                        '${testKey}'
-                                    )
+                                    font-size:14px;
+                                    opacity:.9;
                                 "
                             >
+                                (${test.duration} min)
+                            </span>
 
-                                📝 Test ${testKey}
+                        </button>
 
-                                <span
-                                    style="
-                                        font-size:14px;
-                                        opacity:.9;
-                                    "
-                                >
-                                    (${test.duration} min)
-                                </span>
+                    `;
 
-                            </button>
-
-                        `;
-
-                    }
-                );
+                }
+            );
 
 
-                html += `
-
-                        </div>
+            html += `
 
                     </div>
 
-                `;
+                </div>
 
-            }
-        );
+            `;
+
+        }
+    );
 
 
     area.innerHTML =
         html;
+
+}
+
+
+/* =========================================================
+   ESCAPE ATTRIBUTE
+   ========================================================= */
+
+function escapeAttribute(value) {
+
+    return String(value)
+        .replace(
+            /'/g,
+            "\\'"
+        );
 
 }
 
@@ -1354,12 +1370,14 @@ function getStudentName() {
                 "loggedInStudent"
             );
 
+
         if (stored) {
 
             const student =
                 JSON.parse(
                     stored
                 );
+
 
             if (
                 student &&
@@ -1408,6 +1426,7 @@ function renderTest() {
         document.getElementById(
             "testArea"
         );
+
 
     if (!area) {
 
@@ -1489,7 +1508,9 @@ function renderTest() {
 
                     html += `
 
-                        <label class="option">
+                        <label
+                            class="option"
+                        >
 
                             <input
                                 type="radio"
@@ -1560,8 +1581,20 @@ function renderTest() {
 
 function startTimer() {
 
+    if (
+        !currentTest ||
+        !currentTest.duration
+    ) {
+
+        return;
+
+    }
+
+
     remainingSeconds =
-        currentTest.duration * 60;
+        Number(
+            currentTest.duration
+        ) * 60;
 
 
     updateTimer();
@@ -1583,6 +1616,7 @@ function startTimer() {
 
 
                 remainingSeconds--;
+
 
                 updateTimer();
 
@@ -1626,6 +1660,7 @@ function updateTimer() {
         document.getElementById(
             "timer"
         );
+
 
     if (!timer) {
 
@@ -1780,7 +1815,7 @@ async function submitTest(event) {
 
 
     /* =====================================================
-       UNIQUE RESULT ID
+       RESULT ID
        ===================================================== */
 
     const safeEmail =
@@ -1820,9 +1855,9 @@ async function submitTest(event) {
             );
 
 
-        /*
-         * FIRST ATTEMPT ONLY
-         */
+        /* ==============================================
+           FIRST ATTEMPT ONLY
+           ============================================== */
 
         if (
             !existingResult.exists()
@@ -1886,7 +1921,6 @@ async function submitTest(event) {
             percentage,
             answers
         );
-
 
     } catch (error) {
 
@@ -2355,7 +2389,7 @@ async function calculateRank() {
 
 
 /* =========================================================
-   BASIC PROTECTION
+   BASIC COPY / CONTEXT PROTECTION
    ========================================================= */
 
 document.addEventListener(
@@ -2407,8 +2441,12 @@ document.addEventListener(
     function(event) {
 
         const key =
-            event.key.toLowerCase();
+            String(
+                event.key
+            ).toLowerCase();
 
+
+        /* Ctrl / CMD */
 
         if (
             (
@@ -2427,14 +2465,62 @@ document.addEventListener(
 
             event.stopPropagation();
 
+            return;
+
         }
 
+
+        /* F12 */
 
         if (
             key === "f12"
         ) {
 
             event.preventDefault();
+
+            event.stopPropagation();
+
+            return;
+
+        }
+
+
+        /* Ctrl + Shift + I */
+
+        if (
+            (
+                event.ctrlKey ||
+                event.metaKey
+            ) &&
+            event.shiftKey &&
+            key === "i"
+        ) {
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+            return;
+
+        }
+
+
+        /* Ctrl + Shift + J */
+
+        if (
+            (
+                event.ctrlKey ||
+                event.metaKey
+            ) &&
+            event.shiftKey &&
+            key === "j"
+        ) {
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+            return;
 
         }
 
@@ -2450,15 +2536,39 @@ window.addEventListener(
     "beforeprint",
     function() {
 
+        document.body.setAttribute(
+            "data-print-blocked",
+            "true"
+        );
+
+
         document.body.innerHTML = `
 
             <div
                 style="
                     width:100%;
                     height:100vh;
-                    background:white;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-family:Arial,sans-serif;
+                    text-align:center;
                 "
-            ></div>
+            >
+
+                <div>
+
+                    <h2>
+                        Printing is disabled.
+                    </h2>
+
+                    <p>
+                        Please use the test page normally.
+                    </p>
+
+                </div>
+
+            </div>
 
         `;
 
@@ -2466,11 +2576,36 @@ window.addEventListener(
 );
 
 
+/* =========================================================
+   AFTER PRINT
+   ========================================================= */
+
 window.addEventListener(
     "afterprint",
     function() {
 
         window.location.reload();
+
+    }
+);
+
+
+/* =========================================================
+   PAGE PROTECTION
+   ========================================================= */
+
+protectPage();
+
+
+/* =========================================================
+   PREVENT DRAGGING
+   ========================================================= */
+
+document.addEventListener(
+    "dragstart",
+    function(event) {
+
+        event.preventDefault();
 
     }
 );
