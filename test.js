@@ -795,8 +795,190 @@ const TESTS = {
 
     }
 
-};
+},
+/* =====================================================
+   CALCULUS
+   ===================================================== */
 
+"calculus": {
+
+    title: "Calculus",
+
+    lectures: {
+
+        /* ==============================================
+           LECTURE 1
+           ============================================== */
+
+        "1": {
+
+            title: "Calculus - Lecture 1",
+
+            tests: {
+
+                "1": {
+
+                    title:
+                        "Calculus - Lecture 1 Test - 1",
+
+                    duration: 30,
+
+                    questions: [
+
+                        {
+                            question:
+                                "YOUR QUESTION HERE",
+
+                            options: [
+
+                                {
+                                    text:
+                                        "Option A",
+
+                                    correct: true,
+
+                                    solution:
+                                        "Explanation of correct answer."
+                                },
+
+                                {
+                                    text:
+                                        "Option B",
+
+                                    correct: false,
+
+                                    solution:
+                                        "Explanation."
+                                },
+
+                                {
+                                    text:
+                                        "Option C",
+
+                                    correct: false,
+
+                                    solution:
+                                        "Explanation."
+                                },
+
+                                {
+                                    text:
+                                        "Option D",
+
+                                    correct: false,
+
+                                    solution:
+                                        "Explanation."
+                                }
+
+                            ]
+                        }
+
+                    ]
+
+                },
+
+
+                /* LECTURE 1 - TEST 2 */
+
+                "2": {
+
+                    title:
+                        "Calculus - Lecture 1 Test - 2",
+
+                    duration: 30,
+
+                    questions: [
+
+                        /* Test 2 questions here */
+
+                    ]
+
+                }
+
+            }
+
+        },
+
+
+        /* ==============================================
+           LECTURE 2
+           ============================================== */
+
+        "2": {
+
+            title: "Calculus - Lecture 2",
+
+            tests: {
+
+                "1": {
+
+                    title:
+                        "Calculus - Lecture 2 Test - 1",
+
+                    duration: 30,
+
+                    questions: [
+
+                        /* Lecture 2 Test 1 questions */
+
+                    ]
+
+                },
+
+
+                "2": {
+
+                    title:
+                        "Calculus - Lecture 2 Test - 2",
+
+                    duration: 30,
+
+                    questions: [
+
+                        /* Lecture 2 Test 2 questions */
+
+                    ]
+
+                }
+
+            }
+
+        },
+
+
+        /* ==============================================
+           LECTURE 3
+           ============================================== */
+
+        "3": {
+
+            title: "Calculus - Lecture 3",
+
+            tests: {
+
+                "1": {
+
+                    title:
+                        "Calculus - Lecture 3 Test - 1",
+
+                    duration: 30,
+
+                    questions: [
+
+                        /* Lecture 3 Test 1 questions */
+
+                    ]
+
+                }
+
+            }
+
+        }
+
+    }
+
+           }
 
 /* =========================================================
    VARIABLES
