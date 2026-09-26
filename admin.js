@@ -1,3 +1,7 @@
+// ============================================================
+// FJMC ACADEMY - ADMIN PANEL
+// ============================================================
+
 import {
     onAuthStateChanged,
     signOut
@@ -6,9 +10,12 @@ import {
 import {
     collection,
     doc,
-    getDocs,
     getDoc,
-    setDoc
+    getDocs,
+    setDoc,
+    updateDoc,
+    deleteDoc,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 import {
@@ -17,104 +24,133 @@ import {
 } from "./firebase.js";
 
 
-/* =========================================================
-   COURSES
-========================================================= */
+// ============================================================
+// ADMIN EMAIL
+// ============================================================
+//
+// YAHAN APNA ADMIN EMAIL DALO
+//
+// Example:
+// const ADMIN_EMAIL = "admin@gmail.com";
+//
+// ============================================================
 
-const COURSES = {
-
-    "real-analysis": {
-        title: "Real Analysis",
-        description: "Complete Real Analysis Course"
-    },
-
-    "linear-algebra": {
-        title: "Linear Algebra",
-        description: "Complete Linear Algebra Course"
-    },
-
-    "calculus": {
-        title: "Calculus",
-        description: "Complete Calculus Course"
-    }
-
-};
+const ADMIN_EMAIL =
+    "YOUR_ADMIN_EMAIL@gmail.com";
 
 
-/* =========================================================
-   ADMIN UID
-=========================================================
+// ============================================================
+// STATE
+// ============================================================
 
-   IMPORTANT:
+let currentUser = null;
 
-   Yahan apne Firebase Authentication
-   wale ADMIN user ka UID paste karna hai.
+let selectedStudentUid = null;
 
-========================================================= */
+let selectedCourseId = null;
 
-const ADMIN_UID = "PASTE_YOUR_ADMIN_UID_HERE";
+let allCourses = [];
 
 
-/* =========================================================
-   HTML
-========================================================= */
+// ============================================================
+// DOM
+// ============================================================
 
-const adminEmail =
-    document.getElementById("adminEmail");
+const studentUid =
+    document.getElementById(
+        "studentUid"
+    );
 
-const totalStudents =
-    document.getElementById("totalStudents");
+const studentName =
+    document.getElementById(
+        "studentName"
+    );
 
-const totalCourses =
-    document.getElementById("totalCourses");
+const studentEmail =
+    document.getElementById(
+        "studentEmail"
+    );
 
-const studentsTableBody =
-    document.getElementById("studentsTableBody");
+const studentCourses =
+    document.getElementById(
+        "studentCourses"
+    );
+
+const studentsList =
+    document.getElementById(
+        "studentsList"
+    );
+
+const courseId =
+    document.getElementById(
+        "courseId"
+    );
+
+const courseTitle =
+    document.getElementById(
+        "courseTitle"
+    );
+
+const courseDescription =
+    document.getElementById(
+        "courseDescription"
+    );
 
 const coursesList =
-    document.getElementById("coursesList");
+    document.getElementById(
+        "coursesList"
+    );
 
-const studentSearch =
-    document.getElementById("studentSearch");
+const contentType =
+    document.getElementById(
+        "contentType"
+    );
 
-const courseModal =
-    document.getElementById("courseModal");
+const contentTitle =
+    document.getElementById(
+        "contentTitle"
+    );
 
-const closeModal =
-    document.getElementById("closeModal");
+const contentUrl =
+    document.getElementById(
+        "contentUrl"
+    );
 
-const modalStudentName =
-    document.getElementById("modalStudentName");
+const contentList =
+    document.getElementById(
+        "contentList"
+    );
 
-const modalStudentEmail =
-    document.getElementById("modalStudentEmail");
-
-const courseCheckboxes =
-    document.getElementById("courseCheckboxes");
-
-const saveCoursesBtn =
-    document.getElementById("saveCoursesBtn");
-
-const logoutBtn =
-    document.getElementById("logoutBtn");
-
-
-/* =========================================================
-   STATE
-========================================================= */
-
-let students = [];
-
-let selectedStudent = null;
+const selectedCourseText =
+    document.getElementById(
+        "selectedCourseText"
+    );
 
 
-/* =========================================================
-   AUTH CHECK
-========================================================= */
+// ============================================================
+// ADMIN CHECK
+// ============================================================
+
+function isAdmin(user) {
+
+    if (!user || !user.email) {
+        return false;
+    }
+
+    return (
+        user.email.toLowerCase() ===
+        ADMIN_EMAIL.toLowerCase()
+    );
+}
+
+
+// ============================================================
+// AUTH
+// ============================================================
 
 onAuthStateChanged(
     auth,
-    async (user) => {
+    async user => {
 
         if (!user) {
 
@@ -125,17 +161,10 @@ onAuthStateChanged(
         }
 
 
-        /*
-           ADMIN UID CHECK
-        */
-
-        if (
-            ADMIN_UID !== "PASTE_YOUR_ADMIN_UID_HERE" &&
-            user.uid !== ADMIN_UID
-        ) {
+        if (!isAdmin(user)) {
 
             alert(
-                "You are not authorized to access Admin Panel."
+                "Access denied. Admin only."
             );
 
             await signOut(auth);
@@ -147,39 +176,885 @@ onAuthStateChanged(
         }
 
 
-        /*
-           TEMPORARY DEVELOPMENT MODE
-
-           Jab tak UID set nahi kiya hai,
-           panel open hoga.
-
-           UID set karne ke baad
-           proper admin protection active ho jayega.
-        */
+        currentUser =
+            user;
 
 
-        if (adminEmail) {
-
-            adminEmail.textContent =
-                user.email || "";
-        }
-
+        await loadCourses();
 
         await loadStudents();
-
-        loadCourses();
-
-        updateDashboard();
 
     }
 );
 
 
-/* =========================================================
-   LOAD STUDENTS
-========================================================= */
+// ============================================================
+// LOAD COURSES
+// ============================================================
+
+async function loadCourses() {
+
+    coursesList.innerHTML =
+        "Loading courses...";
+
+    studentCourses.innerHTML = "";
+
+
+    try {
+
+        const snapshot =
+            await getDocs(
+                collection(
+                    db,
+                    "courses"
+                )
+            );
+
+
+        allCourses = [];
+
+
+        snapshot.forEach(
+            courseDoc => {
+
+                allCourses.push({
+
+                    id:
+                        courseDoc.id,
+
+                    ...courseDoc.data()
+
+                });
+
+            }
+        );
+
+
+        renderCourses();
+
+        renderCourseCheckboxes();
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+
+        coursesList.innerHTML =
+            "Courses load nahi ho paye.";
+    }
+}
+
+
+// ============================================================
+// RENDER COURSE CHECKBOXES
+// ============================================================
+
+function renderCourseCheckboxes(
+    selected = []
+) {
+
+    studentCourses.innerHTML = "";
+
+
+    if (
+        allCourses.length === 0
+    ) {
+
+        studentCourses.innerHTML =
+            "<p>No courses available.</p>";
+
+        return;
+    }
+
+
+    allCourses.forEach(
+        course => {
+
+            const wrapper =
+                document.createElement(
+                    "label"
+                );
+
+            wrapper.className =
+                "checkbox-item";
+
+
+            const checkbox =
+                document.createElement(
+                    "input"
+                );
+
+            checkbox.type =
+                "checkbox";
+
+            checkbox.value =
+                course.id;
+
+            checkbox.checked =
+                selected.includes(
+                    course.id
+                );
+
+
+            const text =
+                document.createTextNode(
+                    " " +
+                    (
+                        course.title ||
+                        course.id
+                    )
+                );
+
+
+            wrapper.appendChild(
+                checkbox
+            );
+
+            wrapper.appendChild(
+                text
+            );
+
+
+            studentCourses.appendChild(
+                wrapper
+            );
+        }
+    );
+}
+
+
+// ============================================================
+// RENDER COURSES
+// ============================================================
+
+function renderCourses() {
+
+    coursesList.innerHTML = "";
+
+
+    if (
+        allCourses.length === 0
+    ) {
+
+        coursesList.innerHTML =
+            "<p>No courses created.</p>";
+
+        return;
+    }
+
+
+    allCourses.forEach(
+        course => {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.className =
+                "data-item";
+
+
+            item.innerHTML = `
+
+                <div class="data-info">
+
+                    <strong>
+                        ${escapeHTML(
+                            course.title ||
+                            course.id
+                        )}
+                    </strong>
+
+                    <small>
+                        ID: ${escapeHTML(
+                            course.id
+                        )}
+                    </small>
+
+                </div>
+
+                <div>
+
+                    <button
+                        class="edit-btn"
+                        data-course-edit="${escapeHTML(course.id)}"
+                    >
+                        Edit
+                    </button>
+
+                    <button
+                        class="danger-btn"
+                        data-course-delete="${escapeHTML(course.id)}"
+                    >
+                        Delete
+                    </button>
+
+                </div>
+
+            `;
+
+
+            coursesList.appendChild(
+                item
+            );
+        }
+    );
+}
+
+
+// ============================================================
+// COURSE LIST EVENTS
+// ============================================================
+
+coursesList.addEventListener(
+    "click",
+    async event => {
+
+        const editId =
+            event.target.dataset.courseEdit;
+
+        const deleteId =
+            event.target.dataset.courseDelete;
+
+
+        if (editId) {
+
+            await editCourse(
+                editId
+            );
+        }
+
+
+        if (deleteId) {
+
+            await deleteCourse(
+                deleteId
+            );
+        }
+
+    }
+);
+
+
+// ============================================================
+// SAVE COURSE
+// ============================================================
+
+document
+    .getElementById("saveCourseBtn")
+    .addEventListener(
+        "click",
+        async () => {
+
+            const id =
+                courseId.value.trim()
+                    .toLowerCase()
+                    .replace(/\s+/g, "-");
+
+            const title =
+                courseTitle.value.trim();
+
+            const description =
+                courseDescription.value.trim();
+
+
+            if (!id || !title) {
+
+                alert(
+                    "Course ID aur Course Title required hai."
+                );
+
+                return;
+            }
+
+
+            try {
+
+                const courseRef =
+                    doc(
+                        db,
+                        "courses",
+                        id
+                    );
+
+
+                const existing =
+                    await getDoc(
+                        courseRef
+                    );
+
+
+                let contents = [];
+
+
+                if (
+                    existing.exists()
+                ) {
+
+                    const data =
+                        existing.data();
+
+                    contents =
+                        Array.isArray(
+                            data.contents
+                        )
+                            ? data.contents
+                            : [];
+                }
+
+
+                await setDoc(
+                    courseRef,
+                    {
+
+                        title,
+
+                        description,
+
+                        contents,
+
+                        updatedAt:
+                            serverTimestamp()
+
+                    },
+                    {
+                        merge: true
+                    }
+                );
+
+
+                alert(
+                    "Course saved successfully."
+                );
+
+
+                clearCourseForm();
+
+                await loadCourses();
+
+            } catch (error) {
+
+                console.error(
+                    error
+                );
+
+                alert(
+                    "Course save nahi hua."
+                );
+            }
+
+        }
+    );
+
+
+// ============================================================
+// EDIT COURSE
+// ============================================================
+
+async function editCourse(id) {
+
+    const course =
+        allCourses.find(
+            c => c.id === id
+        );
+
+
+    if (!course) {
+        return;
+    }
+
+
+    courseId.value =
+        course.id;
+
+    courseTitle.value =
+        course.title || "";
+
+    courseDescription.value =
+        course.description || "";
+
+
+    selectedCourseId =
+        course.id;
+
+
+    selectedCourseText.textContent =
+        "Selected Course: " +
+        (
+            course.title ||
+            course.id
+        );
+
+
+    renderContent(
+        Array.isArray(
+            course.contents
+        )
+            ? course.contents
+            : []
+    );
+}
+
+
+// ============================================================
+// DELETE COURSE
+// ============================================================
+
+async function deleteCourse(id) {
+
+    const course =
+        allCourses.find(
+            c => c.id === id
+        );
+
+
+    const name =
+        course?.title ||
+        id;
+
+
+    const confirmDelete =
+        confirm(
+            `Delete course "${name}"?`
+        );
+
+
+    if (!confirmDelete) {
+        return;
+    }
+
+
+    try {
+
+        await deleteDoc(
+            doc(
+                db,
+                "courses",
+                id
+            )
+        );
+
+
+        // Remove this course from students
+        const usersSnapshot =
+            await getDocs(
+                collection(
+                    db,
+                    "users"
+                )
+            );
+
+
+        for (
+            const userDoc of
+            usersSnapshot.docs
+        ) {
+
+            const data =
+                userDoc.data();
+
+
+            if (
+                Array.isArray(
+                    data.courses
+                ) &&
+                data.courses.includes(id)
+            ) {
+
+                const updatedCourses =
+                    data.courses.filter(
+                        c => c !== id
+                    );
+
+
+                await updateDoc(
+                    userDoc.ref,
+                    {
+                        courses:
+                            updatedCourses,
+
+                        updatedAt:
+                            serverTimestamp()
+                    }
+                );
+            }
+        }
+
+
+        if (
+            selectedCourseId === id
+        ) {
+
+            selectedCourseId =
+                null;
+
+            selectedCourseText.textContent =
+                "Select a course first.";
+
+            contentList.innerHTML =
+                "";
+        }
+
+
+        alert(
+            "Course deleted."
+        );
+
+
+        await loadCourses();
+
+        await loadStudents();
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+
+        alert(
+            "Course delete nahi hua."
+        );
+    }
+}
+
+
+// ============================================================
+// ADD CONTENT
+// ============================================================
+
+document
+    .getElementById("addContentBtn")
+    .addEventListener(
+        "click",
+        async () => {
+
+            if (!selectedCourseId) {
+
+                alert(
+                    "Pehle course select karo."
+                );
+
+                return;
+            }
+
+
+            const type =
+                contentType.value;
+
+            const title =
+                contentTitle.value.trim();
+
+            const url =
+                contentUrl.value.trim();
+
+
+            if (!title || !url) {
+
+                alert(
+                    "Content title aur URL required hai."
+                );
+
+                return;
+            }
+
+
+            try {
+
+                const courseRef =
+                    doc(
+                        db,
+                        "courses",
+                        selectedCourseId
+                    );
+
+
+                const snap =
+                    await getDoc(
+                        courseRef
+                    );
+
+
+                if (!snap.exists()) {
+
+                    alert(
+                        "Course nahi mila."
+                    );
+
+                    return;
+                }
+
+
+                const data =
+                    snap.data();
+
+
+                const contents =
+                    Array.isArray(
+                        data.contents
+                    )
+                        ? [...data.contents]
+                        : [];
+
+
+                contents.push({
+
+                    type,
+
+                    title,
+
+                    url
+
+                });
+
+
+                await updateDoc(
+                    courseRef,
+                    {
+
+                        contents,
+
+                        updatedAt:
+                            serverTimestamp()
+
+                    }
+                );
+
+
+                alert(
+                    "Content added."
+                );
+
+
+                clearContentForm();
+
+                await loadCourses();
+
+
+                const updatedCourse =
+                    allCourses.find(
+                        c =>
+                            c.id ===
+                            selectedCourseId
+                    );
+
+
+                renderContent(
+                    updatedCourse?.contents ||
+                    []
+                );
+
+            } catch (error) {
+
+                console.error(
+                    error
+                );
+
+                alert(
+                    "Content add nahi hua."
+                );
+            }
+
+        }
+    );
+
+
+// ============================================================
+// RENDER CONTENT
+// ============================================================
+
+function renderContent(
+    contents
+) {
+
+    contentList.innerHTML = "";
+
+
+    if (
+        !Array.isArray(contents) ||
+        contents.length === 0
+    ) {
+
+        contentList.innerHTML =
+            "<p>No content added.</p>";
+
+        return;
+    }
+
+
+    contents.forEach(
+        (content, index) => {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.className =
+                "content-item";
+
+
+            item.innerHTML = `
+
+                <div>
+
+                    <strong>
+                        ${escapeHTML(
+                            content.title
+                        )}
+                    </strong>
+
+                    <div class="content-type">
+                        ${escapeHTML(
+                            content.type
+                        )}
+                    </div>
+
+                    <small>
+                        ${escapeHTML(
+                            content.url
+                        )}
+                    </small>
+
+                </div>
+
+
+                <button
+                    class="danger-btn"
+                    data-content-delete="${index}"
+                >
+                    Delete
+                </button>
+
+            `;
+
+
+            contentList.appendChild(
+                item
+            );
+
+        }
+    );
+}
+
+
+// ============================================================
+// DELETE CONTENT
+// ============================================================
+
+contentList.addEventListener(
+    "click",
+    async event => {
+
+        const index =
+            event.target.dataset.contentDelete;
+
+
+        if (
+            index === undefined
+        ) {
+            return;
+        }
+
+
+        if (!selectedCourseId) {
+            return;
+        }
+
+
+        try {
+
+            const courseRef =
+                doc(
+                    db,
+                    "courses",
+                    selectedCourseId
+                );
+
+
+            const snap =
+                await getDoc(
+                    courseRef
+                );
+
+
+            if (!snap.exists()) {
+                return;
+            }
+
+
+            const data =
+                snap.data();
+
+
+            const contents =
+                Array.isArray(
+                    data.contents
+                )
+                    ? [...data.contents]
+                    : [];
+
+
+            contents.splice(
+                Number(index),
+                1
+            );
+
+
+            await updateDoc(
+                courseRef,
+                {
+
+                    contents,
+
+                    updatedAt:
+                        serverTimestamp()
+
+                }
+            );
+
+
+            await loadCourses();
+
+
+            const updatedCourse =
+                allCourses.find(
+                    c =>
+                        c.id ===
+                        selectedCourseId
+                );
+
+
+            renderContent(
+                updatedCourse?.contents ||
+                []
+            );
+
+        } catch (error) {
+
+            console.error(
+                error
+            );
+
+            alert(
+                "Content delete nahi hua."
+            );
+        }
+
+    }
+);
+
+
+// ============================================================
+// LOAD STUDENTS
+// ============================================================
 
 async function loadStudents() {
+
+    studentsList.innerHTML =
+        "Loading students...";
+
 
     try {
 
@@ -192,369 +1067,237 @@ async function loadStudents() {
             );
 
 
-        students = [];
+        studentsList.innerHTML =
+            "";
+
+
+        let found =
+            false;
 
 
         snapshot.forEach(
-            (studentDoc) => {
+            userDoc => {
 
                 const data =
-                    studentDoc.data();
+                    userDoc.data();
 
 
-                students.push({
+                if (
+                    data.role &&
+                    data.role !==
+                    "student"
+                ) {
+                    return;
+                }
 
-                    uid:
-                        studentDoc.id,
 
-                    name:
-                        data.name ||
-                        "Unnamed Student",
+                found = true;
 
-                    email:
-                        data.email ||
-                        "",
 
-                    courses:
-                        Array.isArray(
-                            data.courses
-                        )
-                            ? data.courses
-                            : [],
+                const item =
+                    document.createElement(
+                        "div"
+                    );
 
-                    role:
-                        data.role ||
-                        "student"
+                item.className =
+                    "data-item";
 
-                });
 
+                const courses =
+                    Array.isArray(
+                        data.courses
+                    )
+                        ? data.courses
+                        : [];
+
+
+                item.innerHTML = `
+
+                    <div class="data-info">
+
+                        <strong>
+                            ${escapeHTML(
+                                data.name ||
+                                "Student"
+                            )}
+                        </strong>
+
+                        <small>
+                            ${escapeHTML(
+                                data.email ||
+                                ""
+                            )}
+                        </small>
+
+                        <small>
+                            Courses:
+                            ${
+                                courses.length
+                            }
+                        </small>
+
+                    </div>
+
+
+                    <button
+                        class="edit-btn"
+                        data-student-edit="${escapeHTML(userDoc.id)}"
+                    >
+                        Edit
+                    </button>
+
+                `;
+
+
+                studentsList.appendChild(
+                    item
+                );
             }
         );
 
 
-        renderStudents(
-            students
-        );
+        if (!found) {
 
+            studentsList.innerHTML =
+                "<p>No students found.</p>";
+        }
 
     } catch (error) {
 
         console.error(
-            "Load students:",
             error
         );
 
-        alert(
-            "Students could not be loaded."
-        );
-
+        studentsList.innerHTML =
+            "Students load nahi ho paye.";
     }
-
 }
 
 
-/* =========================================================
-   RENDER STUDENTS
-========================================================= */
-
-function renderStudents(
-    list
-) {
-
-    studentsTableBody.innerHTML =
-        "";
-
-
-    const studentList =
-        list.filter(
-            student =>
-                student.role !==
-                "admin"
-        );
-
-
-    if (
-        studentList.length === 0
-    ) {
-
-        studentsTableBody.innerHTML = `
-
-            <tr>
-
-                <td
-                    colspan="4"
-                    style="text-align:center"
-                >
-                    No students found
-                </td>
-
-            </tr>
-
-        `;
-
-        return;
-    }
-
-
-    studentList.forEach(
-        student => {
-
-            const row =
-                document.createElement(
-                    "tr"
-                );
-
-
-            const courseCount =
-                student.courses.length;
-
-
-            row.innerHTML = `
-
-                <td>
-                    ${escapeHTML(
-                        student.name
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        student.email
-                    )}
-                </td>
-
-                <td>
-                    ${courseCount}
-                </td>
-
-                <td>
-
-                    <button
-                        class="manage-btn"
-                        data-uid="${student.uid}"
-                    >
-                        Manage
-                    </button>
-
-                </td>
-
-            `;
-
-
-            studentsTableBody.appendChild(
-                row
-            );
-
-
-            const manageButton =
-                row.querySelector(
-                    ".manage-btn"
-                );
-
-
-            manageButton.addEventListener(
-                "click",
-                () => {
-
-                    openCourseManager(
-                        student
-                    );
-
-                }
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   SEARCH
-========================================================= */
-
-if (studentSearch) {
-
-    studentSearch.addEventListener(
-        "input",
-        () => {
-
-            const search =
-                studentSearch.value
-                    .trim()
-                    .toLowerCase();
-
-
-            const filtered =
-                students.filter(
-                    student => {
-
-                        return (
-
-                            student.name
-                                .toLowerCase()
-                                .includes(
-                                    search
-                                )
-
-                            ||
-
-                            student.email
-                                .toLowerCase()
-                                .includes(
-                                    search
-                                )
-
-                        );
-
-                    }
-                );
-
-
-            renderStudents(
-                filtered
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   OPEN COURSE MANAGER
-========================================================= */
-
-function openCourseManager(
-    student
-) {
-
-    selectedStudent =
-        student;
-
-
-    modalStudentName.textContent =
-        student.name;
-
-
-    modalStudentEmail.textContent =
-        student.email;
-
-
-    courseCheckboxes.innerHTML =
-        "";
-
-
-    Object.entries(
-        COURSES
-    ).forEach(
-        ([courseId, course]) => {
-
-            const checked =
-                student.courses.includes(
-                    courseId
-                );
-
-
-            const label =
-                document.createElement(
-                    "label"
-                );
-
-
-            label.className =
-                "course-checkbox";
-
-
-            label.innerHTML = `
-
-                <input
-                    type="checkbox"
-                    value="${courseId}"
-                    ${checked ? "checked" : ""}
-                >
-
-                <span>
-                    ${escapeHTML(
-                        course.title
-                    )}
-                </span>
-
-            `;
-
-
-            courseCheckboxes.appendChild(
-                label
-            );
-
-        }
-    );
-
-
-    courseModal.classList.add(
-        "show"
-    );
-
-}
-
-
-/* =========================================================
-   CLOSE MODAL
-========================================================= */
-
-if (closeModal) {
-
-    closeModal.addEventListener(
-        "click",
-        () => {
-
-            courseModal.classList.remove(
-                "show"
-            );
-
-        }
-    );
-
-}
-
-
-courseModal.addEventListener(
+// ============================================================
+// STUDENT LIST EVENTS
+// ============================================================
+
+studentsList.addEventListener(
     "click",
-    event => {
+    async event => {
 
-        if (
-            event.target ===
-            courseModal
-        ) {
+        const uid =
+            event.target.dataset.studentEdit;
 
-            courseModal.classList.remove(
-                "show"
+
+        if (uid) {
+
+            await editStudent(
+                uid
             );
-
         }
 
     }
 );
 
 
-/* =========================================================
-   SAVE COURSES
-========================================================= */
+// ============================================================
+// EDIT STUDENT
+// ============================================================
 
-if (saveCoursesBtn) {
+async function editStudent(uid) {
 
-    saveCoursesBtn.addEventListener(
+    try {
+
+        const userRef =
+            doc(
+                db,
+                "users",
+                uid
+            );
+
+
+        const snap =
+            await getDoc(
+                userRef
+            );
+
+
+        if (!snap.exists()) {
+            return;
+        }
+
+
+        const data =
+            snap.data();
+
+
+        selectedStudentUid =
+            uid;
+
+
+        studentUid.value =
+            uid;
+
+        studentName.value =
+            data.name || "";
+
+        studentEmail.value =
+            data.email || "";
+
+
+        renderCourseCheckboxes(
+            Array.isArray(
+                data.courses
+            )
+                ? data.courses
+                : []
+        );
+
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+    }
+}
+
+
+// ============================================================
+// SAVE STUDENT
+// ============================================================
+
+document
+    .getElementById("saveStudentBtn")
+    .addEventListener(
         "click",
         async () => {
 
-            if (!selectedStudent) {
+            const uid =
+                studentUid.value.trim();
+
+            const name =
+                studentName.value.trim();
+
+            const email =
+                studentEmail.value.trim();
+
+
+            if (!uid || !name) {
+
+                alert(
+                    "Student UID aur Name required hai."
+                );
+
                 return;
             }
 
 
             const selectedCourses =
                 Array.from(
-                    courseCheckboxes.querySelectorAll(
+                    studentCourses.querySelectorAll(
                         "input[type='checkbox']:checked"
                     )
                 ).map(
@@ -563,275 +1306,217 @@ if (saveCoursesBtn) {
                 );
 
 
-            saveCoursesBtn.disabled =
-                true;
-
-
-            saveCoursesBtn.textContent =
-                "Saving...";
-
-
             try {
 
                 await setDoc(
-
                     doc(
                         db,
                         "users",
-                        selectedStudent.uid
+                        uid
                     ),
-
                     {
-                        name:
-                            selectedStudent.name,
 
-                        email:
-                            selectedStudent.email,
+                        name,
+
+                        email,
 
                         role:
-                            selectedStudent.role,
+                            "student",
 
                         courses:
-                            selectedCourses
-                    },
+                            selectedCourses,
 
+                        updatedAt:
+                            serverTimestamp()
+
+                    },
                     {
                         merge: true
                     }
-
-                );
-
-
-                /*
-                   Local state update
-                */
-
-                selectedStudent.courses =
-                    selectedCourses;
-
-
-                const index =
-                    students.findIndex(
-                        student =>
-                            student.uid ===
-                            selectedStudent.uid
-                    );
-
-
-                if (index !== -1) {
-
-                    students[index].courses =
-                        selectedCourses;
-
-                }
-
-
-                renderStudents(
-                    students
-                );
-
-
-                courseModal.classList.remove(
-                    "show"
                 );
 
 
                 alert(
-                    "Courses saved successfully."
+                    "Student saved successfully."
                 );
 
+
+                clearStudentForm();
+
+                await loadStudents();
 
             } catch (error) {
 
                 console.error(
-                    "Save courses:",
                     error
                 );
 
-
                 alert(
-                    "Could not save courses.\n\n" +
-                    error.message
+                    "Student save nahi hua."
                 );
-
             }
 
-
-            saveCoursesBtn.disabled =
-                false;
-
-
-            saveCoursesBtn.textContent =
-                "Save Courses";
-
         }
     );
 
-}
 
-
-/* =========================================================
-   LOAD COURSES
-========================================================= */
-
-function loadCourses() {
-
-    coursesList.innerHTML =
-        "";
-
-
-    Object.entries(
-        COURSES
-    ).forEach(
-        ([id, course]) => {
-
-            const card =
-                document.createElement(
-                    "div"
-                );
-
-
-            card.className =
-                "course-admin-card";
-
-
-            card.innerHTML = `
-
-                <h3>
-                    ${escapeHTML(
-                        course.title
-                    )}
-                </h3>
-
-                <p>
-                    ${escapeHTML(
-                        course.description
-                    )}
-                </p>
-
-                <small>
-                    ID: ${id}
-                </small>
-
-            `;
-
-
-            coursesList.appendChild(
-                card
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   DASHBOARD COUNTS
-========================================================= */
-
-function updateDashboard() {
-
-    const studentCount =
-        students.filter(
-            student =>
-                student.role !==
-                "admin"
-        ).length;
-
-
-    if (totalStudents) {
-
-        totalStudents.textContent =
-            studentCount;
-
-    }
-
-
-    if (totalCourses) {
-
-        totalCourses.textContent =
-            Object.keys(
-                COURSES
-            ).length;
-
-    }
-
-}
-
-
-/* =========================================================
-   MENU
-========================================================= */
+// ============================================================
+// CLEAR STUDENT
+// ============================================================
 
 document
-    .querySelectorAll(
-        ".menu-btn"
-    )
-    .forEach(
-        button => {
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    document
-                        .querySelectorAll(
-                            ".menu-btn"
-                        )
-                        .forEach(
-                            btn =>
-                                btn.classList.remove(
-                                    "active"
-                                )
-                        );
-
-
-                    document
-                        .querySelectorAll(
-                            ".admin-section"
-                        )
-                        .forEach(
-                            section =>
-                                section.classList.remove(
-                                    "active"
-                                )
-                        );
-
-
-                    button.classList.add(
-                        "active"
-                    );
-
-
-                    const section =
-                        document.getElementById(
-                            button.dataset.section
-                        );
-
-
-                    if (section) {
-
-                        section.classList.add(
-                            "active"
-                        );
-
-                    }
-
-                }
-            );
-
-        }
+    .getElementById("clearStudentBtn")
+    .addEventListener(
+        "click",
+        clearStudentForm
     );
 
 
-/* =========================================================
-   LOGOUT
-========================================================= */
+function clearStudentForm() {
 
-if (logoutBtn) {
+    selectedStudentUid =
+        null;
 
-    logoutBtn.addEventListener(
+    studentUid.value =
+        "";
+
+    studentName.value =
+        "";
+
+    studentEmail.value =
+        "";
+
+    renderCourseCheckboxes();
+}
+
+
+// ============================================================
+// CLEAR COURSE
+// ============================================================
+
+document
+    .getElementById("clearCourseBtn")
+    .addEventListener(
+        "click",
+        clearCourseForm
+    );
+
+
+function clearCourseForm() {
+
+    courseId.value =
+        "";
+
+    courseTitle.value =
+        "";
+
+    courseDescription.value =
+        "";
+
+    selectedCourseId =
+        null;
+
+    selectedCourseText.textContent =
+        "Select a course first.";
+
+    contentList.innerHTML =
+        "";
+}
+
+
+// ============================================================
+// CLEAR CONTENT
+// ============================================================
+
+document
+    .getElementById("clearContentBtn")
+    .addEventListener(
+        "click",
+        clearContentForm
+    );
+
+
+function clearContentForm() {
+
+    contentTitle.value =
+        "";
+
+    contentUrl.value =
+        "";
+
+    contentType.value =
+        "youtube";
+}
+
+
+// ============================================================
+// COURSE CLICK = SELECT FOR CONTENT
+// ============================================================
+
+coursesList.addEventListener(
+    "dblclick",
+    async event => {
+
+        const item =
+            event.target.closest(
+                ".data-item"
+            );
+
+
+        if (!item) {
+            return;
+        }
+
+
+        const editButton =
+            item.querySelector(
+                "[data-course-edit]"
+            );
+
+
+        if (!editButton) {
+            return;
+        }
+
+
+        const id =
+            editButton.dataset.courseEdit;
+
+
+        selectedCourseId =
+            id;
+
+
+        const course =
+            allCourses.find(
+                c => c.id === id
+            );
+
+
+        selectedCourseText.textContent =
+            "Selected Course: " +
+            (
+                course?.title ||
+                id
+            );
+
+
+        renderContent(
+            course?.contents ||
+            []
+        );
+
+    }
+);
+
+
+// ============================================================
+// LOGOUT
+// ============================================================
+
+document
+    .getElementById("logoutBtn")
+    .addEventListener(
         "click",
         async () => {
 
@@ -841,41 +1526,42 @@ if (logoutBtn) {
 
             window.location.href =
                 "login.html";
-
         }
     );
 
-}
 
+// ============================================================
+// ESCAPE HTML
+// ============================================================
 
-/* =========================================================
-   HTML SAFETY
-========================================================= */
+function escapeHTML(value) {
 
-function escapeHTML(
-    value
-) {
+    if (
+        value === null ||
+        value === undefined
+    ) {
+        return "";
+    }
 
     return String(value)
-        .replaceAll(
-            "&",
+        .replace(
+            /&/g,
             "&amp;"
         )
-        .replaceAll(
-            "<",
+        .replace(
+            /</g,
             "&lt;"
         )
-        .replaceAll(
-            ">",
+        .replace(
+            />/g,
             "&gt;"
         )
-        .replaceAll(
-            '"',
+        .replace(
+            /"/g,
             "&quot;"
         )
-        .replaceAll(
-            "'",
+        .replace(
+            /'/g,
             "&#039;"
         );
-
-                      }
+                            }
