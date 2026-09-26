@@ -1,27 +1,5 @@
 /* =========================================================
    FJMC ACADEMY - LECTURE WISE TEST SYSTEM
-
-   URL FORMAT:
-
-   test.html?course=real-analysis&lecture=1&test=1
-
-   FEATURES:
-   - Firebase Auth
-   - Firebase Firestore
-   - Course wise
-   - Lecture wise
-   - Multiple tests per lecture
-   - 30 minute timer
-   - First attempt only saved
-   - Retake does NOT change leaderboard
-   - Separate leaderboard for every lecture/test
-   - Solutions & explanations
-   - Basic copy/print/download protection
-   ========================================================= */
-
-
-/* =========================================================
-   FIREBASE IMPORTS
    ========================================================= */
 
 import {
@@ -44,37 +22,9 @@ import {
 
 /* =========================================================
    TEST DATA
-   =========================================================
-
-   STRUCTURE:
-
-   COURSE
-      ↓
-   LECTURE
-      ↓
-   TEST
-      ↓
-   QUESTIONS
-
-   Example:
-
-   real-analysis
-      lecture 1
-         test 1
-         test 2
-
-      lecture 2
-         test 1
-         test 2
-
    ========================================================= */
 
 const TESTS = {
-
-
-    /* =====================================================
-       REAL ANALYSIS
-       ===================================================== */
 
     "real-analysis": {
 
@@ -82,17 +32,11 @@ const TESTS = {
 
         lectures: {
 
-
-            /* =================================================
-               LECTURE 1
-               ================================================= */
-
             "1": {
 
-                title: "Real Analysis - Lecture 1",
+                title: "Lecture 1",
 
                 tests: {
-
 
                     "1": {
 
@@ -116,7 +60,7 @@ const TESTS = {
                                         correct: true,
 
                                         solution:
-                                            "Every convergent sequence is bounded. If a sequence converges to a finite limit, its terms cannot become arbitrarily large."
+                                            "Every convergent sequence is bounded."
                                     },
 
                                     {
@@ -126,7 +70,7 @@ const TESTS = {
                                         correct: false,
 
                                         solution:
-                                            "A bounded sequence need not converge. For example, (-1)^n is bounded but does not converge."
+                                            "A bounded sequence need not converge. For example, (-1)^n is bounded but divergent."
                                     },
 
                                     {
@@ -136,7 +80,7 @@ const TESTS = {
                                         correct: false,
 
                                         solution:
-                                            "This is false. Many sequences do not have a finite limit."
+                                            "Not every sequence converges."
                                     },
 
                                     {
@@ -165,7 +109,7 @@ const TESTS = {
                                         correct: true,
 
                                         solution:
-                                            "By definition, if a sequence converges, its limit is the value L to which the sequence approaches."
+                                            "By definition, the limit of the sequence is L."
                                     },
 
                                     {
@@ -174,7 +118,7 @@ const TESTS = {
                                         correct: false,
 
                                         solution:
-                                            "A convergent sequence does not necessarily converge to zero."
+                                            "A convergent sequence need not converge to zero."
                                     },
 
                                     {
@@ -183,7 +127,7 @@ const TESTS = {
                                         correct: false,
 
                                         solution:
-                                            "Convergence generally means approaching a finite real number."
+                                            "A convergent sequence has a finite real limit."
                                     },
 
                                     {
@@ -222,7 +166,7 @@ const TESTS = {
                                         correct: false,
 
                                         solution:
-                                            "Positivity alone does not imply the Cauchy property."
+                                            "Positive terms alone do not imply the Cauchy property."
                                     },
 
                                     {
@@ -232,7 +176,7 @@ const TESTS = {
                                         correct: false,
 
                                         solution:
-                                            "Being increasing alone does not guarantee that a sequence is Cauchy."
+                                            "An increasing sequence need not be Cauchy."
                                     },
 
                                     {
@@ -242,7 +186,7 @@ const TESTS = {
                                         correct: false,
 
                                         solution:
-                                            "Having infinitely many terms says nothing about whether a sequence is Cauchy."
+                                            "Having infinitely many terms does not imply that a sequence is Cauchy."
                                     }
 
                                 ]
@@ -261,7 +205,7 @@ const TESTS = {
                                         correct: true,
 
                                         solution:
-                                            "1 is an upper bound of (0,1), and every number smaller than 1 fails to be an upper bound. Hence sup(0,1)=1."
+                                            "The supremum of (0,1) is 1."
                                     },
 
                                     {
@@ -270,7 +214,7 @@ const TESTS = {
                                         correct: false,
 
                                         solution:
-                                            "0 is a lower bound, not the supremum."
+                                            "0 is the infimum, not the supremum."
                                     },
 
                                     {
@@ -279,7 +223,7 @@ const TESTS = {
                                         correct: false,
 
                                         solution:
-                                            "1/2 is an element of the set but is not an upper bound."
+                                            "1/2 is not an upper bound of (0,1)."
                                     },
 
                                     {
@@ -289,7 +233,7 @@ const TESTS = {
                                         correct: false,
 
                                         solution:
-                                            "The real numbers are complete, and the set (0,1) has supremum 1."
+                                            "The set (0,1) has supremum 1."
                                     }
 
                                 ]
@@ -309,7 +253,7 @@ const TESTS = {
                                         correct: true,
 
                                         solution:
-                                            "The Monotone Convergence Theorem states that every monotone bounded sequence of real numbers converges."
+                                            "Every bounded monotone sequence of real numbers converges."
                                     },
 
                                     {
@@ -319,7 +263,7 @@ const TESTS = {
                                         correct: false,
 
                                         solution:
-                                            "The Intermediate Value Theorem concerns continuous functions and values between function values."
+                                            "This theorem concerns continuous functions."
                                     },
 
                                     {
@@ -329,7 +273,7 @@ const TESTS = {
                                         correct: false,
 
                                         solution:
-                                            "Bolzano-Weierstrass states that every bounded sequence in R has a convergent subsequence."
+                                            "It states that every bounded sequence has a convergent subsequence."
                                     },
 
                                     {
@@ -339,7 +283,7 @@ const TESTS = {
                                         correct: false,
 
                                         solution:
-                                            "The Mean Value Theorem concerns derivatives of continuous/differentiable functions."
+                                            "It concerns derivatives of functions."
                                     }
 
                                 ]
@@ -350,9 +294,9 @@ const TESTS = {
                     },
 
 
-                    /* =================================================
+                    /* =========================================
                        LECTURE 1 - TEST 2
-                       ================================================= */
+                       ========================================= */
 
                     "2": {
 
@@ -363,7 +307,238 @@ const TESTS = {
 
                         questions: [
 
-                            /* YAHAN TEST 2 KE QUESTIONS PASTE KARO */
+                            {
+                                question:
+                                    "Which of the following sequences converges to 0?",
+
+                                options: [
+
+                                    {
+                                        text: "1/n",
+
+                                        correct: true,
+
+                                        solution:
+                                            "As n tends to infinity, 1/n tends to 0."
+                                    },
+
+                                    {
+                                        text: "n",
+
+                                        correct: false,
+
+                                        solution:
+                                            "n tends to infinity."
+                                    },
+
+                                    {
+                                        text: "(-1)^n",
+
+                                        correct: false,
+
+                                        solution:
+                                            "(-1)^n oscillates between -1 and 1."
+                                    },
+
+                                    {
+                                        text: "n^2",
+
+                                        correct: false,
+
+                                        solution:
+                                            "n^2 tends to infinity."
+                                    }
+
+                                ]
+                            },
+
+
+                            {
+                                question:
+                                    "Which of the following sequences is bounded?",
+
+                                options: [
+
+                                    {
+                                        text: "(-1)^n",
+
+                                        correct: true,
+
+                                        solution:
+                                            "The sequence only takes the values -1 and 1."
+                                    },
+
+                                    {
+                                        text: "n",
+
+                                        correct: false,
+
+                                        solution:
+                                            "n is unbounded."
+                                    },
+
+                                    {
+                                        text: "n^2",
+
+                                        correct: false,
+
+                                        solution:
+                                            "n^2 is unbounded."
+                                    },
+
+                                    {
+                                        text: "2^n",
+
+                                        correct: false,
+
+                                        solution:
+                                            "2^n is unbounded."
+                                    }
+
+                                ]
+                            },
+
+
+                            {
+                                question:
+                                    "What is the infimum of the set (0,1)?",
+
+                                options: [
+
+                                    {
+                                        text: "0",
+
+                                        correct: true,
+
+                                        solution:
+                                            "The infimum of (0,1) is 0."
+                                    },
+
+                                    {
+                                        text: "1",
+
+                                        correct: false,
+
+                                        solution:
+                                            "1 is the supremum."
+                                    },
+
+                                    {
+                                        text: "1/2",
+
+                                        correct: false,
+
+                                        solution:
+                                            "1/2 is not a lower bound."
+                                    },
+
+                                    {
+                                        text:
+                                            "There is no infimum",
+
+                                        correct: false,
+
+                                        solution:
+                                            "The set (0,1) has infimum 0."
+                                    }
+
+                                ]
+                            },
+
+
+                            {
+                                question:
+                                    "Which of the following is true for every convergent sequence of real numbers?",
+
+                                options: [
+
+                                    {
+                                        text: "It is bounded",
+
+                                        correct: true,
+
+                                        solution:
+                                            "Every convergent sequence of real numbers is bounded."
+                                    },
+
+                                    {
+                                        text:
+                                            "It is strictly increasing",
+
+                                        correct: false,
+
+                                        solution:
+                                            "Convergence does not imply increasing behaviour."
+                                    },
+
+                                    {
+                                        text:
+                                            "It is strictly decreasing",
+
+                                        correct: false,
+
+                                        solution:
+                                            "Convergence does not imply decreasing behaviour."
+                                    },
+
+                                    {
+                                        text:
+                                            "It contains only positive terms",
+
+                                        correct: false,
+
+                                        solution:
+                                            "A convergent sequence may contain negative terms."
+                                    }
+
+                                ]
+                            },
+
+
+                            {
+                                question:
+                                    "Which sequence is monotone increasing?",
+
+                                options: [
+
+                                    {
+                                        text: "a_n = n",
+
+                                        correct: true,
+
+                                        solution:
+                                            "a_(n+1) = n+1 > n = a_n."
+                                    },
+
+                                    {
+                                        text: "a_n = (-1)^n",
+
+                                        correct: false,
+
+                                        solution:
+                                            "The sequence alternates between -1 and 1."
+                                    },
+
+                                    {
+                                        text: "a_n = 1/n",
+
+                                        correct: false,
+
+                                        solution:
+                                            "1/n is decreasing."
+                                    },
+
+                                    {
+                                        text: "a_n = (-1)^n/n",
+
+                                        correct: false,
+
+                                        solution:
+                                            "The signs alternate."
+                                    }
+
+                                ]
+                            }
 
                         ]
 
@@ -380,7 +555,7 @@ const TESTS = {
 
             "2": {
 
-                title: "Real Analysis - Lecture 2",
+                title: "Lecture 2",
 
                 tests: {
 
@@ -393,7 +568,50 @@ const TESTS = {
 
                         questions: [
 
-                            /* LECTURE 2 KE QUESTIONS */
+                            {
+                                question:
+                                    "Sample Lecture 2 Question",
+
+                                options: [
+
+                                    {
+                                        text: "Correct Answer",
+
+                                        correct: true,
+
+                                        solution:
+                                            "Explanation of the correct answer."
+                                    },
+
+                                    {
+                                        text: "Wrong Answer",
+
+                                        correct: false,
+
+                                        solution:
+                                            "Explanation."
+                                    },
+
+                                    {
+                                        text: "Wrong Answer",
+
+                                        correct: false,
+
+                                        solution:
+                                            "Explanation."
+                                    },
+
+                                    {
+                                        text: "Wrong Answer",
+
+                                        correct: false,
+
+                                        solution:
+                                            "Explanation."
+                                    }
+
+                                ]
+                            }
 
                         ]
 
@@ -409,7 +627,50 @@ const TESTS = {
 
                         questions: [
 
-                            /* LECTURE 2 TEST 2 KE QUESTIONS */
+                            {
+                                question:
+                                    "Sample Lecture 2 Test 2 Question",
+
+                                options: [
+
+                                    {
+                                        text: "Correct Answer",
+
+                                        correct: true,
+
+                                        solution:
+                                            "Explanation."
+                                    },
+
+                                    {
+                                        text: "Wrong Answer",
+
+                                        correct: false,
+
+                                        solution:
+                                            "Explanation."
+                                    },
+
+                                    {
+                                        text: "Wrong Answer",
+
+                                        correct: false,
+
+                                        solution:
+                                            "Explanation."
+                                    },
+
+                                    {
+                                        text: "Wrong Answer",
+
+                                        correct: false,
+
+                                        solution:
+                                            "Explanation."
+                                    }
+
+                                ]
+                            }
 
                         ]
 
@@ -426,7 +687,7 @@ const TESTS = {
 
             "3": {
 
-                title: "Real Analysis - Lecture 3",
+                title: "Lecture 3",
 
                 tests: {
 
@@ -437,11 +698,18 @@ const TESTS = {
 
                         duration: 30,
 
-                        questions: [
+                        questions: []
 
-                            /* LECTURE 3 KE QUESTIONS */
+                    },
 
-                        ]
+                    "2": {
+
+                        title:
+                            "Real Analysis - Lecture 3 Test - 2",
+
+                        duration: 30,
+
+                        questions: []
 
                     }
 
@@ -456,7 +724,7 @@ const TESTS = {
 
             "4": {
 
-                title: "Real Analysis - Lecture 4",
+                title: "Lecture 4",
 
                 tests: {
 
@@ -467,11 +735,18 @@ const TESTS = {
 
                         duration: 30,
 
-                        questions: [
+                        questions: []
 
-                            /* LECTURE 4 KE QUESTIONS */
+                    },
 
-                        ]
+                    "2": {
+
+                        title:
+                            "Real Analysis - Lecture 4 Test - 2",
+
+                        duration: 30,
+
+                        questions: []
 
                     }
 
@@ -486,7 +761,7 @@ const TESTS = {
 
             "5": {
 
-                title: "Real Analysis - Lecture 5",
+                title: "Lecture 5",
 
                 tests: {
 
@@ -497,11 +772,18 @@ const TESTS = {
 
                         duration: 30,
 
-                        questions: [
+                        questions: []
 
-                            /* LECTURE 5 KE QUESTIONS */
+                    },
 
-                        ]
+                    "2": {
+
+                        title:
+                            "Real Analysis - Lecture 5 Test - 2",
+
+                        duration: 30,
+
+                        questions: []
 
                     }
 
@@ -511,47 +793,7 @@ const TESTS = {
 
         }
 
-    },
-
-
-    /* =====================================================
-       FUTURE COURSE EXAMPLE
-       =====================================================
-
-       Jab Linear Algebra banana ho:
-
-       "linear-algebra": {
-
-           title: "Linear Algebra",
-
-           lectures: {
-
-               "1": {
-
-                   title: "Linear Algebra - Lecture 1",
-
-                   tests: {
-
-                       "1": {
-
-                           title:
-                               "Linear Algebra - Lecture 1 Test - 1",
-
-                           duration: 30,
-
-                           questions: []
-
-                       }
-
-                   }
-
-               }
-
-           }
-
-       }
-
-       ===================================================== */
+    }
 
 };
 
@@ -561,24 +803,20 @@ const TESTS = {
    ========================================================= */
 
 let currentUser = null;
-
 let currentTest = null;
 
 let courseId = null;
-
 let lectureId = null;
-
 let testNumber = null;
 
 let timerInterval = null;
-
 let remainingSeconds = 0;
 
 let testSubmitted = false;
 
 
 /* =========================================================
-   GET URL PARAMETERS
+   URL PARAMETERS
    ========================================================= */
 
 const params =
@@ -586,17 +824,14 @@ const params =
         window.location.search
     );
 
-
 courseId =
     params.get("course");
 
-
 lectureId =
-    params.get("lecture") || "1";
-
+    params.get("lecture");
 
 testNumber =
-    params.get("test") || "1";
+    params.get("test");
 
 
 /* =========================================================
@@ -605,7 +840,6 @@ testNumber =
 
 onAuthStateChanged(
     auth,
-
     async function(user) {
 
         if (!user) {
@@ -617,7 +851,6 @@ onAuthStateChanged(
 
         }
 
-
         currentUser = user;
 
 
@@ -625,7 +858,6 @@ onAuthStateChanged(
             document.getElementById(
                 "studentEmail"
             );
-
 
         if (emailElement) {
 
@@ -635,75 +867,65 @@ onAuthStateChanged(
         }
 
 
-        /* =================================================
-           GET CURRENT TEST
-           ================================================= */
+        /* ================================================
+           COURSE CHECK
+           ================================================ */
 
-        currentTest =
-            TESTS[
-                courseId
-            ]
-            ?.lectures[
-                lectureId
-            ]
-            ?.tests[
-                testNumber
-            ];
+        const course =
+            TESTS[courseId];
 
 
-        /* =================================================
-           TEST NOT FOUND
-           ================================================= */
+        if (!course) {
 
-        if (!currentTest) {
-
-            const loading =
-                document.getElementById(
-                    "loading"
-                );
-
-
-            if (loading) {
-
-                loading.innerHTML = `
-
-                    <h3>
-                        Test not available.
-                    </h3>
-
-                    <p>
-                        Course:
-                        ${courseId || "Unknown"}
-                    </p>
-
-                    <p>
-                        Lecture:
-                        ${lectureId}
-                    </p>
-
-                    <p>
-                        Test:
-                        ${testNumber}
-                    </p>
-
-                `;
-
-            }
+            showMessage(
+                "Course not available."
+            );
 
             return;
 
         }
 
 
-        /* =================================================
-           TEST TITLE
-           ================================================= */
+        /*
+         * IMPORTANT
+         *
+         * Agar lecture/test URL mein nahi hai,
+         * to selection page dikhao.
+         */
+
+        if (
+            !lectureId ||
+            !testNumber
+        ) {
+
+            showTestSelection();
+
+            return;
+
+        }
+
+
+        currentTest =
+            course
+                .lectures[lectureId]
+                ?.tests[testNumber];
+
+
+        if (!currentTest) {
+
+            showMessage(
+                "Test not available."
+            );
+
+            return;
+
+        }
+
 
         const titleElement =
             document.getElementById(
                 "testTitle"
             );
-
 
         if (titleElement) {
 
@@ -718,7 +940,6 @@ onAuthStateChanged(
                 "loading"
             );
 
-
         if (loading) {
 
             loading.remove();
@@ -731,8 +952,201 @@ onAuthStateChanged(
         startTimer();
 
     }
-
 );
+
+
+/* =========================================================
+   MESSAGE
+   ========================================================= */
+
+function showMessage(message) {
+
+    const loading =
+        document.getElementById(
+            "loading"
+        );
+
+    if (loading) {
+
+        loading.innerHTML = `
+            <h3>${message}</h3>
+        `;
+
+    }
+
+}
+
+
+/* =========================================================
+   TEST SELECTION
+   ========================================================= */
+
+function showTestSelection() {
+
+    const loading =
+        document.getElementById(
+            "loading"
+        );
+
+    if (loading) {
+
+        loading.remove();
+
+    }
+
+
+    const area =
+        document.getElementById(
+            "testArea"
+        );
+
+
+    if (!area) {
+
+        return;
+
+    }
+
+
+    const course =
+        TESTS[courseId];
+
+
+    let html = `
+
+        <div class="test-info">
+
+            <h1>
+                ${course.title}
+            </h1>
+
+            <p>
+                Select Lecture and Test
+            </p>
+
+        </div>
+
+    `;
+
+
+    Object.keys(course.lectures)
+        .forEach(
+            function(lectureKey) {
+
+                const lecture =
+                    course.lectures[
+                        lectureKey
+                    ];
+
+
+                html += `
+
+                    <div
+                        class="question"
+                    >
+
+                        <h2>
+                            📚 ${lecture.title}
+                        </h2>
+
+                        <div
+                            style="
+                                display:grid;
+                                gap:10px;
+                            "
+                        >
+
+                `;
+
+
+                Object.keys(
+                    lecture.tests
+                ).forEach(
+                    function(testKey) {
+
+                        const test =
+                            lecture.tests[
+                                testKey
+                            ];
+
+
+                        html += `
+
+                            <button
+                                class="submit-btn"
+                                style="
+                                    background:#2563eb;
+                                "
+                                onclick="
+                                    openTest(
+                                        '${lectureKey}',
+                                        '${testKey}'
+                                    )
+                                "
+                            >
+
+                                📝 Test ${testKey}
+
+                                <span
+                                    style="
+                                        font-size:14px;
+                                        opacity:.9;
+                                    "
+                                >
+                                    (${test.duration} min)
+                                </span>
+
+                            </button>
+
+                        `;
+
+                    }
+                );
+
+
+                html += `
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+        );
+
+
+    area.innerHTML =
+        html;
+
+}
+
+
+/* =========================================================
+   OPEN TEST
+   ========================================================= */
+
+window.openTest =
+    function(
+        lecture,
+        test
+    ) {
+
+        window.location.href =
+            "test.html?course=" +
+            encodeURIComponent(
+                courseId
+            ) +
+            "&lecture=" +
+            encodeURIComponent(
+                lecture
+            ) +
+            "&test=" +
+            encodeURIComponent(
+                test
+            );
+
+    };
 
 
 /* =========================================================
@@ -758,12 +1172,12 @@ function getStudentName() {
                 "loggedInStudent"
             );
 
-
         if (stored) {
 
             const student =
-                JSON.parse(stored);
-
+                JSON.parse(
+                    stored
+                );
 
             if (
                 student &&
@@ -813,7 +1227,6 @@ function renderTest() {
             "testArea"
         );
 
-
     if (!area) {
 
         return;
@@ -856,13 +1269,12 @@ function renderTest() {
                 Time Left:
 
                 <strong id="timer">
-                    ${currentTest.duration}:00
+                    00:00
                 </strong>
 
             </div>
 
         </div>
-
 
         <form id="testForm">
 
@@ -870,7 +1282,10 @@ function renderTest() {
 
 
     currentTest.questions.forEach(
-        function(question, index) {
+        function(
+            question,
+            index
+        ) {
 
             html += `
 
@@ -885,7 +1300,10 @@ function renderTest() {
 
 
             question.options.forEach(
-                function(option, optionIndex) {
+                function(
+                    option,
+                    optionIndex
+                ) {
 
                     html += `
 
@@ -984,7 +1402,6 @@ function startTimer() {
 
                 remainingSeconds--;
 
-
                 updateTimer();
 
 
@@ -1003,7 +1420,9 @@ function startTimer() {
 
 
                     submitTest(
-                        new Event("submit")
+                        new Event(
+                            "submit"
+                        )
                     );
 
                 }
@@ -1025,7 +1444,6 @@ function updateTimer() {
         document.getElementById(
             "timer"
         );
-
 
     if (!timer) {
 
@@ -1050,16 +1468,6 @@ function updateTimer() {
         ":" +
         String(seconds)
             .padStart(2, "0");
-
-
-    if (
-        remainingSeconds <= 60
-    ) {
-
-        timer.style.fontWeight =
-            "900";
-
-    }
 
 }
 
@@ -1116,7 +1524,10 @@ async function submitTest(event) {
 
 
     currentTest.questions.forEach(
-        function(question, index) {
+        function(
+            question,
+            index
+        ) {
 
             const selected =
                 document.querySelector(
@@ -1179,7 +1590,8 @@ async function submitTest(event) {
     const percentage =
         total > 0
             ? (
-                (score / total) *
+                score /
+                total *
                 100
             ).toFixed(2)
             : "0.00";
@@ -1187,19 +1599,7 @@ async function submitTest(event) {
 
     /* =====================================================
        UNIQUE RESULT ID
-
-       COURSE + LECTURE + TEST + EMAIL
-
-       Example:
-
-       real-analysis_lecture-1_test-1_email
-
-       real-analysis_lecture-2_test-1_email
-
-       Therefore every test gets separate
-       first-attempt result.
        ===================================================== */
-
 
     const safeEmail =
         (
@@ -1238,16 +1638,9 @@ async function submitTest(event) {
             );
 
 
-        /* =================================================
-           FIRST ATTEMPT ONLY
-
-           Document does not exist:
-           SAVE.
-
-           Document exists:
-           DO NOT UPDATE.
-           ================================================= */
-
+        /*
+         * FIRST ATTEMPT ONLY
+         */
 
         if (
             !existingResult.exists()
@@ -1305,14 +1698,6 @@ async function submitTest(event) {
         }
 
 
-        /* =================================================
-           SHOW CURRENT ATTEMPT RESULT
-
-           Rank will use FIRST ATTEMPT
-           stored in Firestore.
-           ================================================= */
-
-
         showResult(
             score,
             total,
@@ -1346,9 +1731,6 @@ async function submitTest(event) {
         testSubmitted =
             false;
 
-
-        return;
-
     }
 
 }
@@ -1369,13 +1751,6 @@ async function showResult(
         document.getElementById(
             "testArea"
         );
-
-
-    if (!area) {
-
-        return;
-
-    }
 
 
     let html = `
@@ -1399,9 +1774,7 @@ async function showResult(
                 class="rank-box"
                 id="rankBox"
             >
-
-                Calculating First Attempt Rank...
-
+                Calculating Rank...
             </div>
 
         </div>
@@ -1409,7 +1782,6 @@ async function showResult(
 
         <div
             class="leaderboard"
-            id="leaderboard"
         >
 
             <h2>
@@ -1419,13 +1791,10 @@ async function showResult(
             <div
                 id="leaderboardList"
             >
-
-                Loading leaderboard...
-
+                Loading...
             </div>
 
         </div>
-
 
         <h2>
             Solutions & Explanations
@@ -1435,7 +1804,10 @@ async function showResult(
 
 
     currentTest.questions.forEach(
-        function(question, qIndex) {
+        function(
+            question,
+            qIndex
+        ) {
 
             const answer =
                 answers[qIndex];
@@ -1454,7 +1826,10 @@ async function showResult(
 
 
             question.options.forEach(
-                function(option, optionIndex) {
+                function(
+                    option,
+                    optionIndex
+                ) {
 
                     const isCorrect =
                         option.correct === true;
@@ -1570,9 +1945,6 @@ async function calculateRank() {
             );
 
 
-        const results = [];
-
-
         const currentTestId =
             courseId +
             "-lecture-" +
@@ -1581,16 +1953,15 @@ async function calculateRank() {
             testNumber;
 
 
+        const results = [];
+
+
         snapshot.forEach(
             function(resultDoc) {
 
                 const data =
                     resultDoc.data();
 
-
-                /* =========================================
-                   ONLY CURRENT COURSE + LECTURE + TEST
-                   ========================================= */
 
                 if (
                     data.testId ===
@@ -1607,28 +1978,19 @@ async function calculateRank() {
         );
 
 
-        /* =================================================
-           SORT
-
-           1. Highest score first
-           2. Same score:
-              Earlier first attempt first
-           ================================================= */
-
-
         results.sort(
             function(a, b) {
 
-                const scoreDifference =
+                const difference =
                     Number(b.score) -
                     Number(a.score);
 
 
                 if (
-                    scoreDifference !== 0
+                    difference !== 0
                 ) {
 
-                    return scoreDifference;
+                    return difference;
 
                 }
 
@@ -1645,10 +2007,6 @@ async function calculateRank() {
             }
         );
 
-
-        /* =================================================
-           CURRENT STUDENT RANK
-           ================================================= */
 
         const myIndex =
             results.findIndex(
@@ -1684,133 +2042,104 @@ async function calculateRank() {
         }
 
 
-        /* =================================================
-           LEADERBOARD
-           ================================================= */
-
-        let leaderboardHTML = "";
+        let html = "";
 
 
-        if (
-            results.length === 0
-        ) {
+        results.forEach(
+            function(
+                result,
+                index
+            ) {
 
-            leaderboardHTML = `
-
-                <p>
-                    No results yet.
-                </p>
-
-            `;
-
-        } else {
-
-            results.forEach(
-                function(result, index) {
-
-                    const studentName =
-                        result.name ||
-                        (
-                            result.email
-                                ? result.email
-                                    .split("@")[0]
-                                : "Student"
-                        );
+                const name =
+                    result.name ||
+                    (
+                        result.email
+                            ? result.email
+                                .split("@")[0]
+                            : "Student"
+                    );
 
 
-                    let rankText =
-                        "#" +
-                        (
-                            index + 1
-                        );
+                let rankText =
+                    "#" +
+                    (
+                        index + 1
+                    );
 
 
-                    if (
-                        index === 0
-                    ) {
+                if (index === 0) {
 
-                        rankText =
-                            "🥇 #1";
+                    rankText =
+                        "🥇 #1";
 
-                    } else if (
-                        index === 1
-                    ) {
+                } else if (index === 1) {
 
-                        rankText =
-                            "🥈 #2";
+                    rankText =
+                        "🥈 #2";
 
-                    } else if (
-                        index === 2
-                    ) {
+                } else if (index === 2) {
 
-                        rankText =
-                            "🥉 #3";
-
-                    }
-
-
-                    const isMe =
-                        result.uid ===
-                        currentUser.uid;
-
-
-                    leaderboardHTML += `
-
-                        <div
-                            class="
-                                leaderboard-row
-                                ${
-                                    isMe
-                                        ? "my-rank"
-                                        : ""
-                                }
-                            "
-                        >
-
-                            <span
-                                class="lb-rank"
-                            >
-                                ${rankText}
-                            </span>
-
-
-                            <span
-                                class="lb-name"
-                            >
-
-                                ${studentName}
-
-                                ${
-                                    isMe
-                                        ? " 👈"
-                                        : ""
-                                }
-
-                            </span>
-
-
-                            <span
-                                class="lb-score"
-                            >
-
-                                ${result.score}/${result.total}
-
-                            </span>
-
-                        </div>
-
-                    `;
+                    rankText =
+                        "🥉 #3";
 
                 }
-            );
 
-        }
+
+                const isMe =
+                    result.uid ===
+                    currentUser.uid;
+
+
+                html += `
+
+                    <div
+                        class="
+                            leaderboard-row
+                            ${
+                                isMe
+                                    ? "my-rank"
+                                    : ""
+                            }
+                        "
+                    >
+
+                        <span
+                            class="lb-rank"
+                        >
+                            ${rankText}
+                        </span>
+
+                        <span
+                            class="lb-name"
+                        >
+                            ${name}
+                            ${
+                                isMe
+                                    ? " 👈"
+                                    : ""
+                            }
+                        </span>
+
+                        <span
+                            class="lb-score"
+                        >
+                            ${result.score}/${result.total}
+                        </span>
+
+                    </div>
+
+                `;
+
+            }
+        );
 
 
         if (leaderboardList) {
 
             leaderboardList.innerHTML =
-                leaderboardHTML;
+                html ||
+                "<p>No results yet.</p>";
 
         }
 
@@ -1833,7 +2162,7 @@ async function calculateRank() {
 
         if (leaderboardList) {
 
-            leaderboardList.innerHTML =
+            leaderboardList.textContent =
                 "Leaderboard unavailable.";
 
         }
@@ -1938,11 +2267,6 @@ document.addEventListener(
 window.addEventListener(
     "beforeprint",
     function() {
-
-        document.body.dataset
-            .originalHTML =
-            document.body.innerHTML;
-
 
         document.body.innerHTML = `
 
