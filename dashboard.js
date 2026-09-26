@@ -1,7 +1,4 @@
-// ============================================================
-// FJMC ACADEMY - STUDENT DASHBOARD
-// Courses / student details are controlled from ADMIN PANEL
-// ============================================================
+import { auth, db } from "./firebase.js";
 
 import {
     onAuthStateChanged,
@@ -18,194 +15,213 @@ import {
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-import {
-    auth,
-    db
-} from "./firebase.js";
 
-
-// ============================================================
-// SETTINGS
-// ============================================================
+/* =========================================================
+   SETTINGS
+========================================================= */
 
 const MAX_DEVICES = 2;
+
 const RESERVATION_DAYS = 3;
-const HEARTBEAT_INTERVAL = 2 * 60 * 1000;
 
-const DEVICE_STORAGE_KEY = "fjmcDeviceId";
-
-
-// ============================================================
-// DOM
-// ============================================================
-
-const studentNameEl =
-    document.getElementById("studentName");
-
-const coursesContainer =
-    document.getElementById("coursesContainer");
-
-const logoutBtn =
-    document.getElementById("logoutBtn");
+const HEARTBEAT_INTERVAL =
+    2 * 60 * 1000;
 
 
-// ============================================================
-// GLOBAL STATE
-// ============================================================
+/* =========================================================
+   VARIABLES
+========================================================= */
 
 let currentUser = null;
+
 let currentStudent = null;
+
+let currentDeviceId = null;
+
+let currentDeviceType = null;
+
 let heartbeatTimer = null;
 
 
-// ============================================================
-// DEVICE ID
-// ============================================================
+/* =========================================================
+   DEVICE ID
+========================================================= */
 
 function getDeviceId() {
 
     let deviceId =
-        localStorage.getItem(DEVICE_STORAGE_KEY);
+        localStorage.getItem(
+            "fjmcDeviceId"
+        );
+
 
     if (!deviceId) {
 
-        if (
-            typeof crypto !== "undefined" &&
-            crypto.randomUUID
-        ) {
-            deviceId = crypto.randomUUID();
-        } else {
+        deviceId =
+            "device_" +
+            crypto.randomUUID();
 
-            deviceId =
-                "device-" +
-                Date.now() +
-                "-" +
-                Math.random()
-                    .toString(36)
-                    .substring(2, 12);
-        }
 
         localStorage.setItem(
-            DEVICE_STORAGE_KEY,
+            "fjmcDeviceId",
             deviceId
         );
+
     }
+
 
     return deviceId;
 }
 
 
-// ============================================================
-// DEVICE TYPE
-// ============================================================
+/* =========================================================
+   DEVICE TYPE
+========================================================= */
 
 function getDeviceType() {
 
     const ua =
         navigator.userAgent.toLowerCase();
 
-    const isMobile =
-        /android|iphone|ipad|ipod|mobile|tablet/.test(ua);
 
-    return isMobile
+    const mobile =
+        /android|iphone|ipad|ipod|mobile/i
+            .test(ua);
+
+
+    return mobile
         ? "mobile"
         : "desktop";
 }
 
 
-// ============================================================
-// ESCAPE HTML
-// ============================================================
+/* =========================================================
+   AUTH
+========================================================= */
 
-function escapeHTML(value) {
+onAuthStateChanged(
+    auth,
+    async (user) => {
 
-    if (value === undefined || value === null) {
-        return "";
+        if (!user) {
+
+            window.location.href =
+                "index.html";
+
+            return;
+        }
+
+
+        currentUser = user;
+
+
+        currentDeviceId =
+            getDeviceId();
+
+
+        currentDeviceType =
+            getDeviceType();
+
+
+        try {
+
+            currentStudent =
+                await loadStudentProfile(
+                    user
+                );
+
+
+            if (!currentStudent) {
+
+                alert(
+                    "Student profile not found."
+                );
+
+                await signOut(auth);
+
+                return;
+            }
+
+
+            sessionStorage.setItem(
+                "studentEmail",
+                currentStudent.email
+            );
+
+
+            sessionStorage.setItem(
+                "studentUid",
+                currentStudent.uid
+            );
+
+
+            document.getElementById(
+                "studentName"
+            ).textContent =
+                `Welcome, ${currentStudent.name || "Student"}`;
+
+
+            const allowed =
+                await registerDevice();
+
+
+            if (!allowed) {
+
+                return;
+            }
+
+
+            await showStudentCourses();
+
+
+            startHeartbeat();
+
+
+        } catch (error) {
+
+            console.error(
+                "Dashboard error:",
+                error
+            );
+
+
+            alert(
+                "Dashboard load nahi ho raha."
+            );
+
+        }
+
     }
-
-    return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
+);
 
 
-// ============================================================
-// DATE HELPERS
-// ============================================================
-
-function getExpiryDate() {
-
-    const date = new Date();
-
-    date.setDate(
-        date.getDate() + RESERVATION_DAYS
-    );
-
-    return date;
-}
-
-
-function timestampToDate(timestamp) {
-
-    if (!timestamp) {
-        return null;
-    }
-
-    if (
-        typeof timestamp.toDate === "function"
-    ) {
-        return timestamp.toDate();
-    }
-
-    if (timestamp instanceof Date) {
-        return timestamp;
-    }
-
-    return null;
-}
-
-
-// ============================================================
-// LOAD STUDENT PROFILE FROM FIRESTORE
-// ============================================================
-//
-// Admin Panel should create/update:
-//
-// users/{uid}
-//
-// Example:
-//
-// {
-//    name: "Rahul",
-//    email: "rahul@gmail.com",
-//    role: "student",
-//    courses: ["real-analysis", "calculus"]
-// }
-//
-// ============================================================
+/* =========================================================
+   LOAD STUDENT
+========================================================= */
 
 async function loadStudentProfile(user) {
 
     const userRef =
-        doc(db, "users", user.uid);
-
-    const snap =
-        await getDoc(userRef);
-
-    if (!snap.exists()) {
-
-        console.error(
-            "Student profile not found:",
+        doc(
+            db,
+            "users",
             user.uid
         );
+
+
+    const userSnap =
+        await getDoc(userRef);
+
+
+    if (!userSnap.exists()) {
 
         return null;
     }
 
-    const data = snap.data();
+
+    const data =
+        userSnap.data();
+
 
     return {
 
@@ -218,7 +234,6 @@ async function loadStudentProfile(user) {
 
         name:
             data.name ||
-            user.displayName ||
             "Student",
 
         role:
@@ -229,337 +244,274 @@ async function loadStudentProfile(user) {
             Array.isArray(data.courses)
                 ? data.courses
                 : []
+
     };
+
 }
 
 
-// ============================================================
-// LOAD COURSE FROM FIRESTORE
-// ============================================================
-//
-// Admin Panel should create:
-//
-// courses/{courseId}
-//
-// Example:
-//
-// {
-//    title: "Real Analysis",
-//    description: "Real Analysis Course",
-//    contents: [
-//       {
-//          type: "youtube",
-//          title: "Lecture 1",
-//          url: "..."
-//       }
-//    ]
-// }
-//
-// ============================================================
+/* =========================================================
+   DEVICE REGISTRATION
+========================================================= */
 
-async function loadCourse(courseId) {
+async function registerDevice() {
 
-    try {
+    const uid =
+        currentUser.uid;
 
-        const courseRef =
-            doc(db, "courses", courseId);
-
-        const snap =
-            await getDoc(courseRef);
-
-        if (!snap.exists()) {
-
-            console.warn(
-                "Course not found:",
-                courseId
-            );
-
-            return null;
-        }
-
-        return {
-
-            id: courseId,
-
-            ...snap.data()
-        };
-
-    } catch (error) {
-
-        console.error(
-            "Course loading error:",
-            courseId,
-            error
-        );
-
-        return null;
-    }
-}
-
-
-// ============================================================
-// LOAD ALL ASSIGNED COURSES
-// ============================================================
-
-async function loadStudentCourses(courseIds) {
-
-    if (!Array.isArray(courseIds)) {
-        return [];
-    }
-
-    const validIds =
-        courseIds.filter(
-            id =>
-                typeof id === "string" &&
-                id.trim() !== ""
-        );
-
-    const courses =
-        await Promise.all(
-            validIds.map(
-                courseId =>
-                    loadCourse(courseId)
-            )
-        );
-
-    return courses.filter(Boolean);
-}
-
-
-// ============================================================
-// DEVICE COLLECTION
-// ============================================================
-
-function getDevicesCollection(user) {
-
-    return collection(
-        db,
-        "users",
-        user.uid,
-        "devices"
-    );
-}
-
-
-// ============================================================
-// GET ACTIVE DEVICES
-// ============================================================
-
-async function getActiveDevices(user) {
 
     const devicesRef =
-        getDevicesCollection(user);
+        collection(
+            db,
+            "users",
+            uid,
+            "devices"
+        );
 
-    const snapshot =
-        await getDocs(devicesRef);
+
+    const currentDeviceRef =
+        doc(
+            devicesRef,
+            currentDeviceId
+        );
+
+
+    const currentSnap =
+        await getDoc(
+            currentDeviceRef
+        );
+
 
     const now =
-        new Date();
+        Date.now();
 
-    const activeDevices = [];
 
-    snapshot.forEach(deviceDoc => {
+    /* -----------------------------------------
+       CURRENT DEVICE ALREADY REGISTERED
+    ----------------------------------------- */
 
-        const data =
-            deviceDoc.data();
+    if (currentSnap.exists()) {
+
+        const currentData =
+            currentSnap.data();
+
 
         const expiresAt =
-            timestampToDate(
-                data.expiresAt
+            getMillis(
+                currentData.expiresAt
             );
 
+
         if (
-            data.active === true &&
             expiresAt &&
             expiresAt > now
         ) {
 
-            activeDevices.push({
-
-                id: deviceDoc.id,
-
-                ...data,
-
-                expiresDate: expiresAt
-            });
-        }
-    });
-
-    return activeDevices;
-}
-
-
-// ============================================================
-// REGISTER DEVICE
-// ============================================================
-
-async function registerDevice(user) {
-
-    const deviceId =
-        getDeviceId();
-
-    const deviceType =
-        getDeviceType();
-
-    const deviceRef =
-        doc(
-            db,
-            "users",
-            user.uid,
-            "devices",
-            deviceId
-        );
-
-    const deviceSnap =
-        await getDoc(deviceRef);
-
-
-    // --------------------------------------------------------
-    // CURRENT DEVICE ALREADY EXISTS
-    // --------------------------------------------------------
-
-    if (deviceSnap.exists()) {
-
-        const data =
-            deviceSnap.data();
-
-        const expiresAt =
-            timestampToDate(
-                data.expiresAt
-            );
-
-        // Current reservation still valid
-        if (
-            data.active === true &&
-            expiresAt &&
-            expiresAt > new Date()
-        ) {
-
             await updateDoc(
-                deviceRef,
+                currentDeviceRef,
                 {
                     lastSeen:
                         serverTimestamp()
                 }
             );
 
+
             return true;
         }
+
+
+        /* Expired current device */
+
+        await updateDoc(
+            currentDeviceRef,
+            {
+
+                active: false,
+
+                lastSeen:
+                    serverTimestamp()
+
+            }
+        );
+
     }
 
 
-    // --------------------------------------------------------
-    // CHECK OTHER DEVICES
-    // --------------------------------------------------------
+    /* -----------------------------------------
+       LOAD ALL DEVICES
+    ----------------------------------------- */
 
-    const activeDevices =
-        await getActiveDevices(user);
-
-
-    const otherDevices =
-        activeDevices.filter(
-            device =>
-                device.id !== deviceId
+    const snapshot =
+        await getDocs(
+            devicesRef
         );
 
 
-    // --------------------------------------------------------
-    // SAME DEVICE TYPE CHECK
-    // --------------------------------------------------------
+    const activeDevices = [];
 
-    const sameTypeDevice =
-        otherDevices.find(
+
+    snapshot.forEach(
+        (deviceDoc) => {
+
+            const data =
+                deviceDoc.data();
+
+
+            const expiresAt =
+                getMillis(
+                    data.expiresAt
+                );
+
+
+            if (
+                data.active === true &&
+                expiresAt &&
+                expiresAt > now
+            ) {
+
+                activeDevices.push({
+
+                    id:
+                        deviceDoc.id,
+
+                    ...data
+
+                });
+
+            }
+
+        }
+    );
+
+
+    /* -----------------------------------------
+       CHECK SAME DEVICE TYPE
+    ----------------------------------------- */
+
+    const sameType =
+        activeDevices.some(
             device =>
-                device.deviceType === deviceType
+                device.deviceType ===
+                currentDeviceType
         );
 
 
-    if (sameTypeDevice) {
+    if (sameType) {
 
         alert(
-            "You already have an active " +
-            deviceType +
-            " device.\n\n" +
-            "Maximum allowed:\n" +
-            "1 Mobile + 1 Desktop/Laptop."
+            currentDeviceType === "mobile"
+
+                ? "Ek mobile device already active hai."
+
+                : "Ek desktop/laptop device already active hai."
         );
 
         return false;
     }
 
 
-    // --------------------------------------------------------
-    // MAXIMUM TWO DEVICES
-    // --------------------------------------------------------
+    /* -----------------------------------------
+       MAX TWO DEVICES
+    ----------------------------------------- */
 
-    if (otherDevices.length >= MAX_DEVICES) {
+    if (
+        activeDevices.length >=
+        MAX_DEVICES
+    ) {
 
         alert(
-            "Maximum 2 devices are already active.\n\n" +
-            "Allowed:\n" +
-            "1 Mobile + 1 Desktop/Laptop."
+            "Maximum 2 devices already active hain."
         );
 
         return false;
     }
 
 
-    // --------------------------------------------------------
-    // CREATE / RENEW DEVICE
-    // --------------------------------------------------------
+    /* -----------------------------------------
+       CREATE NEW RESERVATION
+    ----------------------------------------- */
+
+    const expiresAt =
+        new Date(
+            now +
+            RESERVATION_DAYS *
+            24 *
+            60 *
+            60 *
+            1000
+        );
+
 
     await setDoc(
-        deviceRef,
+
+        currentDeviceRef,
+
         {
 
             deviceType:
+                currentDeviceType,
 
-                deviceSnap.exists()
-                    ? (
-                        deviceSnap.data().deviceType ||
-                        deviceType
-                    )
-                    : deviceType,
-
-            active: true,
+            active:
+                true,
 
             createdAt:
-                deviceSnap.exists()
-                    ? (
-                        deviceSnap.data().createdAt ||
-                        serverTimestamp()
-                    )
-                    : serverTimestamp(),
+                serverTimestamp(),
 
             lastSeen:
                 serverTimestamp(),
 
             expiresAt:
-                getExpiryDate()
+                expiresAt
+
         },
+
         {
             merge: true
         }
+
     );
+
 
     return true;
 }
 
 
-// ============================================================
-// HEARTBEAT
-// ============================================================
+/* =========================================================
+   HEARTBEAT
+========================================================= */
+
+function startHeartbeat() {
+
+    if (heartbeatTimer) {
+
+        clearInterval(
+            heartbeatTimer
+        );
+
+    }
+
+
+    heartbeatTimer =
+        setInterval(
+            heartbeat,
+            HEARTBEAT_INTERVAL
+        );
+
+}
+
 
 async function heartbeat() {
 
-    if (!currentUser) {
+    if (
+        !currentUser ||
+        !currentDeviceId
+    ) {
+
         return;
     }
 
-    try {
 
-        const deviceId =
-            getDeviceId();
+    try {
 
         const deviceRef =
             doc(
@@ -567,36 +519,46 @@ async function heartbeat() {
                 "users",
                 currentUser.uid,
                 "devices",
-                deviceId
+                currentDeviceId
             );
 
+
         const snap =
-            await getDoc(deviceRef);
+            await getDoc(
+                deviceRef
+            );
+
 
         if (!snap.exists()) {
 
             await forceLogout();
+
             return;
         }
+
 
         const data =
             snap.data();
 
+
         const expiresAt =
-            timestampToDate(
+            getMillis(
                 data.expiresAt
             );
 
 
-        // Reservation expired
         if (
             !expiresAt ||
-            expiresAt <= new Date()
+            expiresAt <= Date.now()
         ) {
 
-            alert(
-                "Your device reservation has expired. Please login again."
+            await updateDoc(
+                deviceRef,
+                {
+                    active: false
+                }
             );
+
 
             await forceLogout();
 
@@ -605,12 +567,16 @@ async function heartbeat() {
 
 
         await updateDoc(
+
             deviceRef,
+
             {
                 lastSeen:
                     serverTimestamp()
             }
+
         );
+
 
     } catch (error) {
 
@@ -618,31 +584,17 @@ async function heartbeat() {
             "Heartbeat error:",
             error
         );
+
     }
+
 }
 
 
-// ============================================================
-// START HEARTBEAT
-// ============================================================
+/* =========================================================
+   FORCE LOGOUT
+========================================================= */
 
-function startHeartbeat() {
-
-    stopHeartbeat();
-
-    heartbeatTimer =
-        setInterval(
-            heartbeat,
-            HEARTBEAT_INTERVAL
-        );
-}
-
-
-// ============================================================
-// STOP HEARTBEAT
-// ============================================================
-
-function stopHeartbeat() {
+async function forceLogout() {
 
     if (heartbeatTimer) {
 
@@ -650,96 +602,241 @@ function stopHeartbeat() {
             heartbeatTimer
         );
 
-        heartbeatTimer = null;
     }
-}
 
 
-// ============================================================
-// FORCE LOGOUT
-// ============================================================
-
-async function forceLogout() {
-
-    stopHeartbeat();
-
-    sessionStorage.removeItem(
-        "fjmcStudentEmail"
+    alert(
+        "Your device reservation has expired."
     );
 
-    sessionStorage.removeItem(
-        "fjmcStudentUid"
-    );
 
-    try {
+    await signOut(auth);
 
-        await signOut(auth);
-
-    } catch (error) {
-
-        console.error(
-            "Logout error:",
-            error
-        );
-    }
 
     window.location.href =
-        "login.html";
+        "index.html";
 }
 
 
-// ============================================================
-// COURSE CARD
-// ============================================================
+/* =========================================================
+   LOAD COURSES
+========================================================= */
 
-function createCourseCard(course) {
+async function showStudentCourses() {
+
+    const container =
+        document.getElementById(
+            "coursesContainer"
+        );
+
+
+    container.innerHTML = "";
+
+
+    const courseIds =
+        currentStudent.courses || [];
+
+
+    if (
+        courseIds.length === 0
+    ) {
+
+        container.innerHTML = `
+
+            <div class="no-courses">
+
+                <h3>
+                    No courses assigned
+                </h3>
+
+                <p>
+                    Please contact the academy.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    for (
+        const courseId
+        of courseIds
+    ) {
+
+        try {
+
+            const course =
+                await loadCourse(
+                    courseId
+                );
+
+
+            if (!course) {
+
+                continue;
+            }
+
+
+            const card =
+                createCourseCard(
+                    course
+                );
+
+
+            container.appendChild(
+                card
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Course error:",
+                courseId,
+                error
+            );
+
+        }
+
+    }
+
+
+    if (
+        container.children.length === 0
+    ) {
+
+        container.innerHTML = `
+
+            <div class="no-courses">
+
+                <h3>
+                    No courses available
+                </h3>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* =========================================================
+   LOAD COURSE
+========================================================= */
+
+async function loadCourse(
+    courseId
+) {
+
+    const courseRef =
+        doc(
+            db,
+            "courses",
+            courseId
+        );
+
+
+    const courseSnap =
+        await getDoc(
+            courseRef
+        );
+
+
+    if (!courseSnap.exists()) {
+
+        return null;
+    }
+
+
+    return {
+
+        id:
+            courseSnap.id,
+
+        ...courseSnap.data()
+
+    };
+
+}
+
+
+/* =========================================================
+   CREATE COURSE CARD
+========================================================= */
+
+function createCourseCard(
+    course
+) {
 
     const card =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     card.className =
         "course-card";
 
 
     const title =
-        escapeHTML(
-            course.title ||
-            course.name ||
-            course.id
-        );
+        course.title ||
+        course.id;
 
 
     const description =
-        escapeHTML(
-            course.description ||
-            ""
-        );
+        course.description ||
+        "";
 
 
     card.innerHTML = `
 
-        <div class="course-card-content">
+        <div class="course-card-header">
 
             <h3>
-                ${title}
+                ${escapeHTML(title)}
             </h3>
 
             ${
                 description
-                    ? `<p>${description}</p>`
+                    ? `
+                    <p>
+                        ${escapeHTML(
+                            description
+                        )}
+                    </p>
+                    `
                     : ""
             }
 
-            <div class="course-buttons">
-            </div>
+        </div>
+
+
+        <div class="course-content">
 
         </div>
+
+
+        <div class="course-actions">
+
+        </div>
+
     `;
 
 
-    const buttonsContainer =
+    const contentContainer =
         card.querySelector(
-            ".course-buttons"
+            ".course-content"
+        );
+
+
+    const actionsContainer =
+        card.querySelector(
+            ".course-actions"
         );
 
 
@@ -749,216 +846,91 @@ function createCourseCard(course) {
             : [];
 
 
-    // --------------------------------------------------------
-    // CONTENT BUTTONS
-    // --------------------------------------------------------
-
     contents.forEach(
-        (content, index) => {
+        (content) => {
 
-            if (!content) {
-                return;
-            }
-
-            const type =
-                String(
-                    content.type || ""
-                ).toLowerCase();
-
-            const contentTitle =
-                content.title ||
-                `Lecture ${index + 1}`;
-
-
-            // ------------------------------------------------
-            // YOUTUBE
-            // ------------------------------------------------
-
-            if (
-                type === "youtube" ||
-                type === "video"
-            ) {
-
-                const btn =
-                    document.createElement(
-                        "button"
-                    );
-
-                btn.className =
-                    "course-btn";
-
-                btn.textContent =
-                    contentTitle;
-
-                btn.addEventListener(
-                    "click",
-                    () => {
-
-                        openYouTubeModal(
-                            content.url,
-                            contentTitle
-                        );
-                    }
+            const item =
+                createContentItem(
+                    content
                 );
 
-                buttonsContainer.appendChild(
-                    btn
-                );
 
-                return;
-            }
+            if (item) {
 
+                contentContainer
+                    .appendChild(item);
 
-            // ------------------------------------------------
-            // LOCAL VIDEO
-            // ------------------------------------------------
-
-            if (
-                type === "local-video" ||
-                type === "mp4" ||
-                type === "local"
-            ) {
-
-                const btn =
-                    document.createElement(
-                        "button"
-                    );
-
-                btn.className =
-                    "course-btn";
-
-                btn.textContent =
-                    contentTitle;
-
-                btn.addEventListener(
-                    "click",
-                    () => {
-
-                        openVideoModal(
-                            content.url,
-                            contentTitle
-                        );
-                    }
-                );
-
-                buttonsContainer.appendChild(
-                    btn
-                );
-
-                return;
-            }
-
-
-            // ------------------------------------------------
-            // PDF
-            // ------------------------------------------------
-
-            if (type === "pdf") {
-
-                const btn =
-                    document.createElement(
-                        "button"
-                    );
-
-                btn.className =
-                    "course-btn";
-
-                btn.textContent =
-                    contentTitle;
-
-                btn.addEventListener(
-                    "click",
-                    () => {
-
-                        openPDFModal(
-                            content.url,
-                            contentTitle
-                        );
-                    }
-                );
-
-                buttonsContainer.appendChild(
-                    btn
-                );
-
-                return;
-            }
-
-
-            // ------------------------------------------------
-            // LIVE CLASS
-            // ------------------------------------------------
-
-            if (
-                type === "live" ||
-                type === "live-class"
-            ) {
-
-                const btn =
-                    document.createElement(
-                        "button"
-                    );
-
-                btn.className =
-                    "course-btn";
-
-                btn.textContent =
-                    contentTitle;
-
-                btn.addEventListener(
-                    "click",
-                    () => {
-
-                        if (
-                            content.url
-                        ) {
-
-                            window.open(
-                                content.url,
-                                "_blank",
-                                "noopener,noreferrer"
-                            );
-                        }
-                    }
-                );
-
-                buttonsContainer.appendChild(
-                    btn
-                );
-
-                return;
             }
 
         }
     );
 
 
-    // --------------------------------------------------------
-    // TEST BUTTON
-    // --------------------------------------------------------
+    /* -----------------------------------------
+       TAKE TEST
+    ----------------------------------------- */
 
-    const testBtn =
+    const testButton =
         document.createElement(
             "button"
         );
 
-    testBtn.className =
-        "course-btn test-btn";
 
-    testBtn.textContent =
+    testButton.textContent =
         "Take Test";
 
-    testBtn.addEventListener(
+
+    testButton.className =
+        "course-button test-button";
+
+
+    testButton.addEventListener(
         "click",
         () => {
 
             window.location.href =
-                `test.html?course=${encodeURIComponent(course.id)}`;
+                `test.html?test=${encodeURIComponent(course.id)}`;
+
         }
     );
 
-    buttonsContainer.appendChild(
-        testBtn
+
+    actionsContainer.appendChild(
+        testButton
+    );
+
+
+    /* -----------------------------------------
+       LEADERBOARD
+    ----------------------------------------- */
+
+    const leaderboardButton =
+        document.createElement(
+            "button"
+        );
+
+
+    leaderboardButton.textContent =
+        "Leaderboard";
+
+
+    leaderboardButton.className =
+        "course-button leaderboard-button";
+
+
+    leaderboardButton.addEventListener(
+        "click",
+        () => {
+
+            window.location.href =
+                `leaderboard.html?test=${encodeURIComponent(course.id)}`;
+
+        }
+    );
+
+
+    actionsContainer.appendChild(
+        leaderboardButton
     );
 
 
@@ -966,268 +938,232 @@ function createCourseCard(course) {
 }
 
 
-// ============================================================
-// SHOW STUDENT COURSES
-// ============================================================
+/* =========================================================
+   CONTENT ITEM
+========================================================= */
 
-async function showStudentCourses(student) {
-
-    coursesContainer.innerHTML = "";
-
-    const courseIds =
-        Array.isArray(student.courses)
-            ? student.courses
-            : [];
-
-
-    if (courseIds.length === 0) {
-
-        coursesContainer.innerHTML = `
-
-            <div class="no-courses">
-
-                <h3>
-                    No courses assigned
-                </h3>
-
-                <p>
-                    Your courses will appear here
-                    after they are assigned by the admin.
-                </p>
-
-            </div>
-
-        `;
-
-        return;
-    }
-
-
-    const courses =
-        await loadStudentCourses(
-            courseIds
-        );
-
-
-    if (courses.length === 0) {
-
-        coursesContainer.innerHTML = `
-
-            <div class="no-courses">
-
-                <h3>
-                    No courses available
-                </h3>
-
-                <p>
-                    Please contact the academy administrator.
-                </p>
-
-            </div>
-
-        `;
-
-        return;
-    }
-
-
-    courses.forEach(
-        course => {
-
-            const card =
-                createCourseCard(course);
-
-            coursesContainer.appendChild(
-                card
-            );
-        }
-    );
-}
-
-
-// ============================================================
-// MODAL
-// ============================================================
-
-function createModal() {
-
-    let modal =
-        document.getElementById(
-            "fjmcContentModal"
-        );
-
-    if (modal) {
-        return modal;
-    }
-
-
-    modal =
-        document.createElement(
-            "div"
-        );
-
-    modal.id =
-        "fjmcContentModal";
-
-    modal.innerHTML = `
-
-        <div class="fjmc-modal-overlay">
-
-            <div class="fjmc-modal">
-
-                <button
-                    class="fjmc-modal-close"
-                    type="button"
-                >
-                    ×
-                </button>
-
-                <h2
-                    class="fjmc-modal-title"
-                ></h2>
-
-                <div
-                    class="fjmc-modal-body"
-                ></div>
-
-            </div>
-
-        </div>
-
-    `;
-
-
-    document.body.appendChild(
-        modal
-    );
-
-
-    const closeBtn =
-        modal.querySelector(
-            ".fjmc-modal-close"
-        );
-
-
-    const overlay =
-        modal.querySelector(
-            ".fjmc-modal-overlay"
-        );
-
-
-    closeBtn.addEventListener(
-        "click",
-        closeModal
-    );
-
-
-    overlay.addEventListener(
-        "click",
-        event => {
-
-            if (
-                event.target === overlay
-            ) {
-
-                closeModal();
-            }
-        }
-    );
-
-
-    return modal;
-}
-
-
-// ============================================================
-// OPEN MODAL
-// ============================================================
-
-function openModal(
-    title,
+function createContentItem(
     content
 ) {
 
-    const modal =
-        createModal();
+    if (!content) {
 
-
-    modal.querySelector(
-        ".fjmc-modal-title"
-    ).textContent =
-        title || "";
-
-
-    const body =
-        modal.querySelector(
-            ".fjmc-modal-body"
-        );
-
-
-    body.innerHTML = "";
-
-    body.appendChild(
-        content
-    );
-
-
-    modal.style.display =
-        "block";
-
-
-    document.body.style.overflow =
-        "hidden";
-}
-
-
-// ============================================================
-// CLOSE MODAL
-// ============================================================
-
-function closeModal() {
-
-    const modal =
-        document.getElementById(
-            "fjmcContentModal"
-        );
-
-    if (!modal) {
-        return;
+        return null;
     }
 
 
-    const body =
-        modal.querySelector(
-            ".fjmc-modal-body"
-        );
+    const type =
+        String(
+            content.type || ""
+        ).toLowerCase();
 
 
-    body.innerHTML = "";
+    const title =
+        content.title ||
+        "Content";
 
-    modal.style.display =
-        "none";
 
-
-    document.body.style.overflow =
+    const url =
+        content.url ||
         "";
-}
 
 
-// ============================================================
-// YOUTUBE MODAL
-// ============================================================
+    /* -----------------------------------------
+       YOUTUBE
+    ----------------------------------------- */
 
-function openYouTubeModal(
-    url,
-    title
-) {
+    if (
+        type === "youtube"
+    ) {
 
-    if (!url) {
-        return;
+        const button =
+            document.createElement(
+                "button"
+            );
+
+
+        button.className =
+            "course-button";
+
+
+        button.textContent =
+            title;
+
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                const youtubeId =
+                    getYouTubeId(
+                        url
+                    );
+
+
+                if (!youtubeId) {
+
+                    alert(
+                        "Invalid YouTube URL."
+                    );
+
+                    return;
+                }
+
+
+                openVideoModal(
+                    title,
+                    `https://www.youtube.com/embed/${youtubeId}`
+                );
+
+            }
+        );
+
+
+        return button;
     }
 
 
-    let videoId = "";
+    /* -----------------------------------------
+       LOCAL VIDEO
+    ----------------------------------------- */
 
+    if (
+        type === "local-video" ||
+        type === "video" ||
+        type === "mp4" ||
+        type === "local"
+    ) {
+
+        const button =
+            document.createElement(
+                "button"
+            );
+
+
+        button.className =
+            "course-button";
+
+
+        button.textContent =
+            title;
+
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                openLocalVideoModal(
+                    title,
+                    url
+                );
+
+            }
+        );
+
+
+        return button;
+    }
+
+
+    /* -----------------------------------------
+       PDF
+    ----------------------------------------- */
+
+    if (
+        type === "pdf"
+    ) {
+
+        const button =
+            document.createElement(
+                "button"
+            );
+
+
+        button.className =
+            "course-button";
+
+
+        button.textContent =
+            title;
+
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                openPdfModal(
+                    title,
+                    url
+                );
+
+            }
+        );
+
+
+        return button;
+    }
+
+
+    /* -----------------------------------------
+       LIVE
+    ----------------------------------------- */
+
+    if (
+        type === "live"
+    ) {
+
+        const button =
+            document.createElement(
+                "button"
+            );
+
+
+        button.className =
+            "course-button live-button";
+
+
+        button.textContent =
+            title;
+
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                if (!url) {
+
+                    alert(
+                        "Live class link not available."
+                    );
+
+                    return;
+                }
+
+
+                window.open(
+                    url,
+                    "_blank"
+                );
+
+            }
+        );
+
+
+        return button;
+    }
+
+
+    return null;
+}
+
+
+/* =========================================================
+   YOUTUBE ID
+========================================================= */
+
+function getYouTubeId(
+    url
+) {
 
     try {
 
@@ -1241,171 +1177,247 @@ function openYouTubeModal(
             )
         ) {
 
-            videoId =
-                parsed.pathname.substring(1);
+            return parsed.pathname
+                .replace("/", "")
+                .split("?")[0];
 
-        } else {
-
-            videoId =
-                parsed.searchParams.get(
-                    "v"
-                ) || "";
         }
+
+
+        if (
+            parsed.hostname.includes(
+                "youtube.com"
+            )
+        ) {
+
+            return parsed.searchParams
+                .get("v");
+
+        }
+
+
+        return null;
 
     } catch {
 
-        videoId =
-            url;
+        return null;
+
     }
 
-
-    if (!videoId) {
-
-        alert(
-            "Invalid YouTube URL."
-        );
-
-        return;
-    }
-
-
-    const iframe =
-        document.createElement(
-            "iframe"
-        );
-
-
-    iframe.src =
-        `https://www.youtube.com/embed/${encodeURIComponent(videoId)}`;
-
-    iframe.width =
-        "100%";
-
-    iframe.height =
-        "500";
-
-    iframe.frameBorder =
-        "0";
-
-    iframe.allow =
-        "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-
-    iframe.allowFullscreen =
-        true;
-
-
-    openModal(
-        title,
-        iframe
-    );
 }
 
 
-// ============================================================
-// LOCAL VIDEO MODAL
-// ============================================================
+/* =========================================================
+   VIDEO MODAL
+========================================================= */
 
 function openVideoModal(
-    url,
-    title
+    title,
+    videoUrl
 ) {
 
-    if (!url) {
-        return;
-    }
+    const modal =
+        createModal();
 
 
-    const video =
-        document.createElement(
-            "video"
-        );
+    modal.innerHTML = `
+
+        <div class="modal-box">
+
+            <div class="modal-header">
+
+                <h3>
+                    ${escapeHTML(title)}
+                </h3>
+
+                <button class="close-modal">
+                    ×
+                </button>
+
+            </div>
 
 
-    video.src =
-        url;
+            <div class="video-wrapper">
 
-    video.controls =
-        true;
+                <iframe
+                    src="${escapeAttribute(videoUrl)}"
+                    allowfullscreen
+                    allow="
+                        autoplay;
+                        encrypted-media;
+                        picture-in-picture
+                    "
+                ></iframe>
 
-    video.autoplay =
-        true;
+            </div>
 
-    video.controlsList =
-        "nodownload";
+        </div>
 
-    video.disablePictureInPicture =
-        true;
-
-    video.style.width =
-        "100%";
-
-    video.style.maxHeight =
-        "75vh";
+    `;
 
 
-    openModal(
-        title,
-        video
+    document.body.appendChild(
+        modal
     );
+
+
+    modal
+        .querySelector(
+            ".close-modal"
+        )
+        .onclick = () => {
+
+            modal.remove();
+
+        };
+
 }
 
 
-// ============================================================
-// PDF MODAL
-// ============================================================
+/* =========================================================
+   LOCAL VIDEO MODAL
+========================================================= */
 
-async function openPDFModal(
-    url,
-    title
+function openLocalVideoModal(
+    title,
+    url
 ) {
 
-    if (!url) {
-        return;
-    }
+    const modal =
+        createModal();
 
 
-    const container =
-        document.createElement(
-            "div"
-        );
+    modal.innerHTML = `
 
-    container.style.width =
-        "100%";
+        <div class="modal-box">
 
-    container.style.maxHeight =
-        "75vh";
+            <div class="modal-header">
 
-    container.style.overflow =
-        "auto";
+                <h3>
+                    ${escapeHTML(title)}
+                </h3>
+
+                <button class="close-modal">
+                    ×
+                </button>
+
+            </div>
 
 
-    openModal(
-        title,
-        container
+            <video
+                class="local-video"
+                controls
+                controlsList="nodownload"
+                autoplay
+            >
+
+                <source
+                    src="${escapeAttribute(url)}"
+                    type="video/mp4"
+                >
+
+                Your browser does not support video.
+
+            </video>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        modal
     );
+
+
+    modal
+        .querySelector(
+            ".close-modal"
+        )
+        .onclick = () => {
+
+            modal.remove();
+
+        };
+
+}
+
+
+/* =========================================================
+   PDF MODAL
+========================================================= */
+
+async function openPdfModal(
+    title,
+    url
+) {
+
+    const modal =
+        createModal();
+
+
+    modal.innerHTML = `
+
+        <div class="modal-box pdf-modal-box">
+
+            <div class="modal-header">
+
+                <h3>
+                    ${escapeHTML(title)}
+                </h3>
+
+                <button class="close-modal">
+                    ×
+                </button>
+
+            </div>
+
+
+            <div
+                id="pdfContainer"
+                class="pdf-container"
+            >
+
+                Loading PDF...
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        modal
+    );
+
+
+    modal
+        .querySelector(
+            ".close-modal"
+        )
+        .onclick = () => {
+
+            modal.remove();
+
+        };
 
 
     try {
 
-        if (
-            typeof pdfjsLib ===
-            "undefined"
-        ) {
-
-            throw new Error(
-                "PDF.js not loaded."
-            );
-        }
-
-
-        pdfjsLib.GlobalWorkerOptions.workerSrc =
-            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-
-
         const pdf =
-            await pdfjsLib.getDocument(
-                url
-            ).promise;
+            await window.pdfjsLib
+                .getDocument(url)
+                .promise;
+
+
+        const container =
+            modal.querySelector(
+                "#pdfContainer"
+            );
+
+
+        container.innerHTML = "";
 
 
         for (
@@ -1422,7 +1434,7 @@ async function openPDFModal(
 
             const viewport =
                 page.getViewport({
-                    scale: 1.5
+                    scale: 1.3
                 });
 
 
@@ -1432,30 +1444,16 @@ async function openPDFModal(
                 );
 
 
-            const context =
-                canvas.getContext(
-                    "2d"
-                );
-
-
             canvas.width =
                 viewport.width;
+
 
             canvas.height =
                 viewport.height;
 
 
-            canvas.style.display =
-                "block";
-
-            canvas.style.width =
-                "100%";
-
-            canvas.style.height =
-                "auto";
-
-            canvas.style.marginBottom =
-                "15px";
+            canvas.className =
+                "pdf-page";
 
 
             container.appendChild(
@@ -1463,42 +1461,22 @@ async function openPDFModal(
             );
 
 
+            const context =
+                canvas.getContext(
+                    "2d"
+                );
+
+
             await page.render({
+
                 canvasContext:
                     context,
 
                 viewport:
                     viewport
+
             }).promise;
 
-
-            // Watermark
-            const watermark =
-                document.createElement(
-                    "div"
-                );
-
-            watermark.textContent =
-                "FJMC ACADEMY";
-
-            watermark.style.position =
-                "absolute";
-
-            watermark.style.opacity =
-                "0.18";
-
-            watermark.style.pointerEvents =
-                "none";
-
-            watermark.style.fontSize =
-                "28px";
-
-            watermark.style.fontWeight =
-                "bold";
-
-
-            // Keep watermark simple
-            // without affecting PDF rendering.
         }
 
     } catch (error) {
@@ -1509,247 +1487,248 @@ async function openPDFModal(
         );
 
 
-        container.innerHTML = `
+        modal.querySelector(
+            "#pdfContainer"
+        ).innerHTML = `
 
-            <p style="padding:20px;text-align:center;">
-                PDF could not be loaded.
+            <p>
+                PDF load nahi ho paya.
             </p>
 
         `;
+
     }
+
 }
 
 
-// ============================================================
-// LOGOUT BUTTON
-// ============================================================
+/* =========================================================
+   CREATE MODAL
+========================================================= */
 
-if (logoutBtn) {
+function createModal() {
 
-    logoutBtn.addEventListener(
+    const modal =
+        document.createElement(
+            "div"
+        );
+
+
+    modal.className =
+        "fjmc-modal";
+
+
+    modal.addEventListener(
         "click",
-        async () => {
+        (event) => {
 
-            await forceLogout();
+            if (
+                event.target === modal
+            ) {
+
+                modal.remove();
+
+            }
 
         }
     );
+
+
+    return modal;
 }
 
 
-// ============================================================
-// AUTH STATE
-// ============================================================
+/* =========================================================
+   LOGOUT
+========================================================= */
 
-onAuthStateChanged(
-    auth,
-    async user => {
+document
+    .getElementById(
+        "logoutBtn"
+    )
+    ?.addEventListener(
+        "click",
+        async () => {
 
-        if (!user) {
+            try {
 
-            window.location.href =
-                "login.html";
+                if (heartbeatTimer) {
 
-            return;
+                    clearInterval(
+                        heartbeatTimer
+                    );
+
+                }
+
+
+                /*
+                 * IMPORTANT:
+                 * Logout device slot free nahi karta.
+                 */
+
+                await signOut(auth);
+
+
+                window.location.href =
+                    "index.html";
+
+
+            } catch (error) {
+
+                console.error(
+                    error
+                );
+
+            }
+
         }
+    );
 
 
-        currentUser =
-            user;
+/* =========================================================
+   DATE / FIRESTORE TIMESTAMP
+========================================================= */
+
+function getMillis(value) {
+
+    if (!value) {
+
+        return 0;
+    }
 
 
-        try {
+    if (
+        typeof value.toMillis ===
+        "function"
+    ) {
 
-            // ------------------------------------------------
-            // LOAD STUDENT PROFILE
-            // ------------------------------------------------
-
-            const student =
-                await loadStudentProfile(
-                    user
-                );
-
-
-            if (!student) {
-
-                alert(
-                    "Student profile not found. Please contact the admin."
-                );
-
-                await forceLogout();
-
-                return;
-            }
-
-
-            currentStudent =
-                student;
-
-
-            // ------------------------------------------------
-            // SAVE SESSION INFO
-            // ------------------------------------------------
-
-            sessionStorage.setItem(
-                "fjmcStudentEmail",
-                student.email
-            );
-
-            sessionStorage.setItem(
-                "fjmcStudentUid",
-                user.uid
-            );
-
-
-            // ------------------------------------------------
-            // WELCOME
-            // ------------------------------------------------
-
-            if (studentNameEl) {
-
-                studentNameEl.textContent =
-                    `Welcome, ${student.name}`;
-            }
-
-
-            // ------------------------------------------------
-            // DEVICE CHECK
-            // ------------------------------------------------
-
-            const allowed =
-                await registerDevice(
-                    user
-                );
-
-
-            if (!allowed) {
-
-                await forceLogout();
-
-                return;
-            }
-
-
-            // ------------------------------------------------
-            // LOAD COURSES
-            // ------------------------------------------------
-
-            await showStudentCourses(
-                student
-            );
-
-
-            // ------------------------------------------------
-            // HEARTBEAT
-            // ------------------------------------------------
-
-            startHeartbeat();
-
-
-        } catch (error) {
-
-            console.error(
-                "Dashboard error:",
-                error
-            );
-
-
-            alert(
-                "Dashboard load nahi ho saka. Please try again."
-            );
-
-            await forceLogout();
-        }
+        return value.toMillis();
 
     }
-);
 
 
-// ============================================================
-// BASIC CONTENT PROTECTION
-// ============================================================
+    if (
+        value instanceof Date
+    ) {
+
+        return value.getTime();
+
+    }
+
+
+    if (
+        typeof value === "number"
+    ) {
+
+        return value;
+
+    }
+
+
+    return 0;
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHTML(
+    value
+) {
+
+    return String(value)
+
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
+}
+
+
+function escapeAttribute(
+    value
+) {
+
+    return escapeHTML(value);
+
+}
+
+
+/* =========================================================
+   BASIC PROTECTION
+========================================================= */
 
 document.addEventListener(
     "contextmenu",
-    event => {
+    (event) => {
 
         event.preventDefault();
-    }
-);
 
-
-document.addEventListener(
-    "copy",
-    event => {
-
-        event.preventDefault();
-    }
-);
-
-
-document.addEventListener(
-    "cut",
-    event => {
-
-        event.preventDefault();
     }
 );
 
 
 document.addEventListener(
     "selectstart",
-    event => {
+    (event) => {
 
-        // Don't block selection inside inputs
-        // if any are added later.
+        event.preventDefault();
 
-        const tag =
-            event.target.tagName;
+    }
+);
 
-        if (
-            tag !== "INPUT" &&
-            tag !== "TEXTAREA"
-        ) {
 
-            event.preventDefault();
-        }
+document.addEventListener(
+    "copy",
+    (event) => {
+
+        event.preventDefault();
+
     }
 );
 
 
 document.addEventListener(
     "keydown",
-    event => {
-
-        const key =
-            event.key.toLowerCase();
-
+    (event) => {
 
         if (
             (event.ctrlKey ||
-                event.metaKey) &&
-            (
-                key === "s" ||
-                key === "p" ||
-                key === "u"
+             event.metaKey) &&
+            [
+                "s",
+                "p",
+                "u"
+            ].includes(
+                event.key.toLowerCase()
             )
         ) {
 
             event.preventDefault();
+
         }
 
-    }
-);
-
-
-// ============================================================
-// CLEANUP
-// ============================================================
-
-window.addEventListener(
-    "beforeunload",
-    () => {
-
-        stopHeartbeat();
     }
 );
