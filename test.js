@@ -1,17 +1,21 @@
 /* =========================================================
-   FJMC ACADEMY - TEST SYSTEM
-   SAME FIREBASE AUTHENTICATION
+   FJMC ACADEMY - LECTURE WISE TEST SYSTEM
+
+   URL FORMAT:
+
+   test.html?course=real-analysis&lecture=1&test=1
 
    FEATURES:
    - Firebase Auth
    - Firebase Firestore
+   - Course wise
+   - Lecture wise
+   - Multiple tests per lecture
    - 30 minute timer
-   - First attempt only saved in leaderboard
+   - First attempt only saved
    - Retake does NOT change leaderboard
-   - Rank based only on first attempt
-   - New students can change existing ranks
+   - Separate leaderboard for every lecture/test
    - Solutions & explanations
-   - Leaderboard
    - Basic copy/print/download protection
    ========================================================= */
 
@@ -24,7 +28,6 @@ import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
-
 import {
     collection,
     doc,
@@ -33,745 +36,524 @@ import {
     setDoc
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-
 import {
     auth,
     db
 } from "./firebase.js";
 
 
-
 /* =========================================================
    TEST DATA
+   =========================================================
+
+   STRUCTURE:
+
+   COURSE
+      ↓
+   LECTURE
+      ↓
+   TEST
+      ↓
+   QUESTIONS
+
+   Example:
+
+   real-analysis
+      lecture 1
+         test 1
+         test 2
+
+      lecture 2
+         test 1
+         test 2
+
    ========================================================= */
 
 const TESTS = {
 
+
+    /* =====================================================
+       REAL ANALYSIS
+       ===================================================== */
+
     "real-analysis": {
 
-        title: "Real Analysis Test - 1",
+        title: "Real Analysis",
 
-        duration: 30,
+        lectures: {
 
-        questions: [
 
-            {
-                question:
-                    "Which of the following statements is true about every convergent sequence?",
+            /* =================================================
+               LECTURE 1
+               ================================================= */
 
-                options: [
+            "1": {
 
-                    {
-                        text:
-                            "Every convergent sequence is bounded",
+                title: "Real Analysis - Lecture 1",
 
-                        correct: true,
+                tests: {
 
-                        solution:
-                            "Every convergent sequence is bounded. If a sequence converges to a finite limit, its terms cannot become arbitrarily large."
+
+                    "1": {
+
+                        title:
+                            "Real Analysis - Lecture 1 Test - 1",
+
+                        duration: 30,
+
+                        questions: [
+
+                            {
+                                question:
+                                    "Which of the following statements is true about every convergent sequence?",
+
+                                options: [
+
+                                    {
+                                        text:
+                                            "Every convergent sequence is bounded",
+
+                                        correct: true,
+
+                                        solution:
+                                            "Every convergent sequence is bounded. If a sequence converges to a finite limit, its terms cannot become arbitrarily large."
+                                    },
+
+                                    {
+                                        text:
+                                            "Every bounded sequence is convergent",
+
+                                        correct: false,
+
+                                        solution:
+                                            "A bounded sequence need not converge. For example, (-1)^n is bounded but does not converge."
+                                    },
+
+                                    {
+                                        text:
+                                            "Every sequence is convergent",
+
+                                        correct: false,
+
+                                        solution:
+                                            "This is false. Many sequences do not have a finite limit."
+                                    },
+
+                                    {
+                                        text:
+                                            "Every divergent sequence is bounded",
+
+                                        correct: false,
+
+                                        solution:
+                                            "A divergent sequence can be bounded or unbounded."
+                                    }
+
+                                ]
+                            },
+
+
+                            {
+                                question:
+                                    "If a sequence converges to L, what is its limit?",
+
+                                options: [
+
+                                    {
+                                        text: "L",
+
+                                        correct: true,
+
+                                        solution:
+                                            "By definition, if a sequence converges, its limit is the value L to which the sequence approaches."
+                                    },
+
+                                    {
+                                        text: "0 always",
+
+                                        correct: false,
+
+                                        solution:
+                                            "A convergent sequence does not necessarily converge to zero."
+                                    },
+
+                                    {
+                                        text: "Infinity always",
+
+                                        correct: false,
+
+                                        solution:
+                                            "Convergence generally means approaching a finite real number."
+                                    },
+
+                                    {
+                                        text: "It has no limit",
+
+                                        correct: false,
+
+                                        solution:
+                                            "A convergent sequence necessarily has a limit."
+                                    }
+
+                                ]
+                            },
+
+
+                            {
+                                question:
+                                    "Which condition is sufficient for a sequence to be Cauchy in R?",
+
+                                options: [
+
+                                    {
+                                        text:
+                                            "The sequence is convergent",
+
+                                        correct: true,
+
+                                        solution:
+                                            "Every convergent sequence in R is Cauchy."
+                                    },
+
+                                    {
+                                        text:
+                                            "The sequence contains only positive terms",
+
+                                        correct: false,
+
+                                        solution:
+                                            "Positivity alone does not imply the Cauchy property."
+                                    },
+
+                                    {
+                                        text:
+                                            "The sequence is always increasing",
+
+                                        correct: false,
+
+                                        solution:
+                                            "Being increasing alone does not guarantee that a sequence is Cauchy."
+                                    },
+
+                                    {
+                                        text:
+                                            "The sequence has infinitely many terms",
+
+                                        correct: false,
+
+                                        solution:
+                                            "Having infinitely many terms says nothing about whether a sequence is Cauchy."
+                                    }
+
+                                ]
+                            },
+
+
+                            {
+                                question:
+                                    "What is the supremum of the set (0,1)?",
+
+                                options: [
+
+                                    {
+                                        text: "1",
+
+                                        correct: true,
+
+                                        solution:
+                                            "1 is an upper bound of (0,1), and every number smaller than 1 fails to be an upper bound. Hence sup(0,1)=1."
+                                    },
+
+                                    {
+                                        text: "0",
+
+                                        correct: false,
+
+                                        solution:
+                                            "0 is a lower bound, not the supremum."
+                                    },
+
+                                    {
+                                        text: "1/2",
+
+                                        correct: false,
+
+                                        solution:
+                                            "1/2 is an element of the set but is not an upper bound."
+                                    },
+
+                                    {
+                                        text:
+                                            "There is no supremum",
+
+                                        correct: false,
+
+                                        solution:
+                                            "The real numbers are complete, and the set (0,1) has supremum 1."
+                                    }
+
+                                ]
+                            },
+
+
+                            {
+                                question:
+                                    "Which theorem states that every bounded monotone sequence converges?",
+
+                                options: [
+
+                                    {
+                                        text:
+                                            "Monotone Convergence Theorem",
+
+                                        correct: true,
+
+                                        solution:
+                                            "The Monotone Convergence Theorem states that every monotone bounded sequence of real numbers converges."
+                                    },
+
+                                    {
+                                        text:
+                                            "Intermediate Value Theorem",
+
+                                        correct: false,
+
+                                        solution:
+                                            "The Intermediate Value Theorem concerns continuous functions and values between function values."
+                                    },
+
+                                    {
+                                        text:
+                                            "Bolzano-Weierstrass Theorem",
+
+                                        correct: false,
+
+                                        solution:
+                                            "Bolzano-Weierstrass states that every bounded sequence in R has a convergent subsequence."
+                                    },
+
+                                    {
+                                        text:
+                                            "Mean Value Theorem",
+
+                                        correct: false,
+
+                                        solution:
+                                            "The Mean Value Theorem concerns derivatives of continuous/differentiable functions."
+                                    }
+
+                                ]
+                            }
+
+                        ]
+
                     },
 
-                    {
-                        text:
-                            "Every bounded sequence is convergent",
 
-                        correct: false,
+                    /* =================================================
+                       LECTURE 1 - TEST 2
+                       ================================================= */
 
-                        solution:
-                            "A bounded sequence need not converge. For example, (-1)^n is bounded but does not converge."
-                    },
+                    "2": {
 
-                    {
-                        text:
-                            "Every sequence is convergent",
+                        title:
+                            "Real Analysis - Lecture 1 Test - 2",
 
-                        correct: false,
+                        duration: 30,
 
-                        solution:
-                            "This is false. Many sequences do not have a finite limit."
-                    },
+                        questions: [
 
-                    {
-                        text:
-                            "Every divergent sequence is bounded",
+                            /* YAHAN TEST 2 KE QUESTIONS PASTE KARO */
 
-                        correct: false,
+                        ]
 
-                        solution:
-                            "A divergent sequence can be bounded or unbounded."
                     }
 
-                ]
+                }
+
             },
 
 
-            {
-                question:
-                    "If a sequence converges to L, what is its limit?",
+            /* =================================================
+               LECTURE 2
+               ================================================= */
 
-                options: [
+            "2": {
 
-                    {
-                        text: "L",
+                title: "Real Analysis - Lecture 2",
 
-                        correct: true,
+                tests: {
 
-                        solution:
-                            "By definition, if a sequence converges, its limit is the value L to which the sequence approaches."
+                    "1": {
+
+                        title:
+                            "Real Analysis - Lecture 2 Test - 1",
+
+                        duration: 30,
+
+                        questions: [
+
+                            /* LECTURE 2 KE QUESTIONS */
+
+                        ]
+
                     },
 
-                    {
-                        text: "0 always",
 
-                        correct: false,
+                    "2": {
 
-                        solution:
-                            "A convergent sequence does not necessarily converge to zero."
-                    },
+                        title:
+                            "Real Analysis - Lecture 2 Test - 2",
 
-                    {
-                        text: "Infinity always",
+                        duration: 30,
 
-                        correct: false,
+                        questions: [
 
-                        solution:
-                            "Convergence generally means approaching a finite real number."
-                    },
+                            /* LECTURE 2 TEST 2 KE QUESTIONS */
 
-                    {
-                        text: "It has no limit",
+                        ]
 
-                        correct: false,
-
-                        solution:
-                            "A convergent sequence necessarily has a limit."
                     }
 
-                ]
+                }
+
             },
 
 
-            {
-                question:
-                    "Which condition is sufficient for a sequence to be Cauchy in R?",
+            /* =================================================
+               LECTURE 3
+               ================================================= */
 
-                options: [
+            "3": {
 
-                    {
-                        text:
-                            "The sequence is convergent",
+                title: "Real Analysis - Lecture 3",
 
-                        correct: true,
+                tests: {
 
-                        solution:
-                            "Every convergent sequence in R is Cauchy."
-                    },
+                    "1": {
 
-                    {
-                        text:
-                            "The sequence contains only positive terms",
+                        title:
+                            "Real Analysis - Lecture 3 Test - 1",
 
-                        correct: false,
+                        duration: 30,
 
-                        solution:
-                            "Positivity alone does not imply the Cauchy property."
-                    },
+                        questions: [
 
-                    {
-                        text:
-                            "The sequence is always increasing",
+                            /* LECTURE 3 KE QUESTIONS */
 
-                        correct: false,
+                        ]
 
-                        solution:
-                            "Being increasing alone does not guarantee that a sequence is Cauchy."
-                    },
-
-                    {
-                        text:
-                            "The sequence has infinitely many terms",
-
-                        correct: false,
-
-                        solution:
-                            "Having infinitely many terms says nothing about whether a sequence is Cauchy."
                     }
 
-                ]
+                }
+
             },
 
 
-            {
-                question:
-                    "What is the supremum of the set (0,1)?",
+            /* =================================================
+               LECTURE 4
+               ================================================= */
 
-                options: [
+            "4": {
 
-                    {
-                        text: "1",
+                title: "Real Analysis - Lecture 4",
 
-                        correct: true,
+                tests: {
 
-                        solution:
-                            "1 is an upper bound of (0,1), and every number smaller than 1 fails to be an upper bound. Hence sup(0,1)=1."
-                    },
+                    "1": {
 
-                    {
-                        text: "0",
+                        title:
+                            "Real Analysis - Lecture 4 Test - 1",
 
-                        correct: false,
+                        duration: 30,
 
-                        solution:
-                            "0 is a lower bound, not the supremum."
-                    },
+                        questions: [
 
-                    {
-                        text: "1/2",
+                            /* LECTURE 4 KE QUESTIONS */
 
-                        correct: false,
+                        ]
 
-                        solution:
-                            "1/2 is an element of the set but is not an upper bound."
-                    },
-
-                    {
-                        text: "There is no supremum",
-
-                        correct: false,
-
-                        solution:
-                            "The real numbers are complete, and the set (0,1) has supremum 1."
                     }
 
-                ]
+                }
+
             },
 
 
-            {
-                question:
-                    "Which theorem states that every bounded monotone sequence converges?",
+            /* =================================================
+               LECTURE 5
+               ================================================= */
 
-                options: [
+            "5": {
 
-                    {
-                        text:
-                            "Monotone Convergence Theorem",
+                title: "Real Analysis - Lecture 5",
 
-                        correct: true,
+                tests: {
 
-                        solution:
-                            "The Monotone Convergence Theorem states that every monotone bounded sequence of real numbers converges."
-                    },
+                    "1": {
 
-                    {
-                        text:
-                            "Intermediate Value Theorem",
+                        title:
+                            "Real Analysis - Lecture 5 Test - 1",
 
-                        correct: false,
+                        duration: 30,
 
-                        solution:
-                            "The Intermediate Value Theorem concerns continuous functions and values between function values."
-                    },
+                        questions: [
 
-                    {
-                        text:
-                            "Bolzano-Weierstrass Theorem",
+                            /* LECTURE 5 KE QUESTIONS */
 
-                        correct: false,
+                        ]
 
-                        solution:
-                            "Bolzano-Weierstrass states that every bounded sequence in R has a convergent subsequence."
-                    },
-
-                    {
-                        text:
-                            "Mean Value Theorem",
-
-                        correct: false,
-
-                        solution:
-                            "The Mean Value Theorem concerns derivatives of continuous/differentiable functions."
                     }
 
-                ]
+                }
+
             }
 
-        ]
-
-    }
-
-},
-   "real-analysis-test-2": {
-
-    title: "Real Analysis Test - 2",
-
-    duration: 30,
-
-    questions: [
-
-        {
-            question:
-                "Which of the following sequences converges to 0?",
-
-            options: [
-
-                {
-                    text: "1/n",
-
-                    correct: true,
-
-                    solution:
-                        "The sequence 1/n approaches 0 as n tends to infinity. Therefore, it converges to 0."
-                },
-
-                {
-                    text: "n",
-
-                    correct: false,
-
-                    solution:
-                        "The sequence n increases without bound, so it does not converge to a finite real number."
-                },
-
-                {
-                    text: "(-1)^n",
-
-                    correct: false,
-
-                    solution:
-                        "The sequence (-1)^n oscillates between -1 and 1 and therefore does not converge."
-                },
-
-                {
-                    text: "n^2",
-
-                    correct: false,
-
-                    solution:
-                        "The sequence n^2 tends to infinity and does not converge to a finite real number."
-                }
-
-            ]
-        },
-
-
-        {
-            question:
-                "Which of the following sequences is bounded?",
-
-            options: [
-
-                {
-                    text: "(-1)^n",
-
-                    correct: true,
-
-                    solution:
-                        "The sequence (-1)^n takes only the values -1 and 1, so it is bounded."
-                },
-
-                {
-                    text: "n",
-
-                    correct: false,
-
-                    solution:
-                        "The sequence n is unbounded because its terms increase without limit."
-                },
-
-                {
-                    text: "n^2",
-
-                    correct: false,
-
-                    solution:
-                        "The sequence n^2 is unbounded."
-                },
-
-                {
-                    text: "2^n",
-
-                    correct: false,
-
-                    solution:
-                        "The sequence 2^n grows without bound and is therefore unbounded."
-                }
-
-            ]
-        },
-
-
-        {
-            question:
-                "What is the infimum of the set (0,1)?",
-
-            options: [
-
-                {
-                    text: "0",
-
-                    correct: true,
-
-                    solution:
-                        "0 is a lower bound of (0,1), and no number greater than 0 is a lower bound. Hence inf(0,1)=0."
-                },
-
-                {
-                    text: "1",
-
-                    correct: false,
-
-                    solution:
-                        "1 is the supremum of (0,1), not the infimum."
-                },
-
-                {
-                    text: "1/2",
-
-                    correct: false,
-
-                    solution:
-                        "1/2 is not a lower bound of (0,1)."
-                },
-
-                {
-                    text: "There is no infimum",
-
-                    correct: false,
-
-                    solution:
-                        "The set (0,1) has infimum 0."
-                }
-
-            ]
-        },
-
-
-        {
-            question:
-                "Which of the following is true for every convergent sequence of real numbers?",
-
-            options: [
-
-                {
-                    text: "It is bounded",
-
-                    correct: true,
-
-                    solution:
-                        "Every convergent sequence of real numbers is bounded."
-                },
-
-                {
-                    text: "It is strictly increasing",
-
-                    correct: false,
-
-                    solution:
-                        "A convergent sequence need not be increasing."
-                },
-
-                {
-                    text: "It is strictly decreasing",
-
-                    correct: false,
-
-                    solution:
-                        "A convergent sequence need not be decreasing."
-                },
-
-                {
-                    text: "It contains only positive terms",
-
-                    correct: false,
-
-                    solution:
-                        "A convergent sequence can contain negative terms."
-                }
-
-            ]
-        },
-
-
-        {
-            question:
-                "Which sequence is monotone increasing?",
-
-            options: [
-
-                {
-                    text: "a_n = n",
-
-                    correct: true,
-
-                    solution:
-                        "Since a_(n+1) = n+1 > n = a_n, the sequence is increasing."
-                },
-
-                {
-                    text: "a_n = (-1)^n",
-
-                    correct: false,
-
-                    solution:
-                        "The sequence alternates between -1 and 1, so it is not monotone."
-                },
-
-                {
-                    text: "a_n = 1/n",
-
-                    correct: false,
-
-                    solution:
-                        "The sequence 1/n is decreasing."
-                },
-
-                {
-                    text: "a_n = (-1)^n/n",
-
-                    correct: false,
-
-                    solution:
-                        "The signs alternate, so the sequence is not monotone."
-                }
-
-            ]
-        },
-
-
-        {
-            question:
-                "If a sequence is convergent, then it is necessarily:",
-
-            options: [
-
-                {
-                    text: "Cauchy",
-
-                    correct: true,
-
-                    solution:
-                        "Every convergent sequence in R is a Cauchy sequence."
-                },
-
-                {
-                    text: "Unbounded",
-
-                    correct: false,
-
-                    solution:
-                        "Every convergent sequence is bounded."
-                },
-
-                {
-                    text: "Divergent",
-
-                    correct: false,
-
-                    solution:
-                        "A convergent sequence cannot be divergent."
-                },
-
-                {
-                    text: "Strictly increasing",
-
-                    correct: false,
-
-                    solution:
-                        "Convergence does not imply monotonicity."
-                }
-
-            ]
-        },
-
-
-        {
-            question:
-                "What is the supremum of the set {1, 2, 3, 4}?",
-
-            options: [
-
-                {
-                    text: "4",
-
-                    correct: true,
-
-                    solution:
-                        "The largest element of the set is 4, so its supremum is 4."
-                },
-
-                {
-                    text: "1",
-
-                    correct: false,
-
-                    solution:
-                        "1 is the minimum element, not the supremum."
-                },
-
-                {
-                    text: "3",
-
-                    correct: false,
-
-                    solution:
-                        "3 is not an upper bound because 4 belongs to the set."
-                },
-
-                {
-                    text: "5",
-
-                    correct: false,
-
-                    solution:
-                        "5 is an upper bound, but it is not the least upper bound."
-                }
-
-            ]
-        },
-
-
-        {
-            question:
-                "Which theorem states that every bounded sequence in R has a convergent subsequence?",
-
-            options: [
-
-                {
-                    text: "Bolzano-Weierstrass Theorem",
-
-                    correct: true,
-
-                    solution:
-                        "The Bolzano-Weierstrass Theorem states that every bounded sequence in R has a convergent subsequence."
-                },
-
-                {
-                    text: "Mean Value Theorem",
-
-                    correct: false,
-
-                    solution:
-                        "The Mean Value Theorem concerns derivatives of functions."
-                },
-
-                {
-                    text: "Intermediate Value Theorem",
-
-                    correct: false,
-
-                    solution:
-                        "The Intermediate Value Theorem concerns continuous functions."
-                },
-
-                {
-                    text: "Monotone Convergence Theorem",
-
-                    correct: false,
-
-                    solution:
-                        "The Monotone Convergence Theorem concerns bounded monotone sequences."
-                }
-
-            ]
-        },
-
-
-        {
-            question:
-                "If a_n = 1/n, then lim(n→∞) a_n is:",
-
-            options: [
-
-                {
-                    text: "0",
-
-                    correct: true,
-
-                    solution:
-                        "As n becomes arbitrarily large, 1/n approaches 0."
-                },
-
-                {
-                    text: "1",
-
-                    correct: false,
-
-                    solution:
-                        "1/n approaches 0, not 1."
-                },
-
-                {
-                    text: "∞",
-
-                    correct: false,
-
-                    solution:
-                        "1/n becomes smaller as n increases."
-                },
-
-                {
-                    text: "Does not exist",
-
-                    correct: false,
-
-                    solution:
-                        "The sequence 1/n converges to 0."
-                }
-
-            ]
-        },
-
-
-        {
-            question:
-                "Which of the following is a Cauchy sequence in R?",
-
-            options: [
-
-                {
-                    text: "a_n = 1/n",
-
-                    correct: true,
-
-                    solution:
-                        "Since 1/n converges to 0 in R, it is a Cauchy sequence."
-                },
-
-                {
-                    text: "a_n = n",
-
-                    correct: false,
-
-                    solution:
-                        "The sequence n is unbounded and is not Cauchy."
-                },
-
-                {
-                    text: "a_n = (-1)^n n",
-
-                    correct: false,
-
-                    solution:
-                        "This sequence is unbounded and therefore cannot be Cauchy."
-                },
-
-                {
-                    text: "a_n = n^2",
-
-                    correct: false,
-
-                    solution:
-                        "The sequence n^2 is unbounded and is not Cauchy."
-                }
-
-            ]
         }
 
-    ]
+    },
+
+
+    /* =====================================================
+       FUTURE COURSE EXAMPLE
+       =====================================================
+
+       Jab Linear Algebra banana ho:
+
+       "linear-algebra": {
+
+           title: "Linear Algebra",
+
+           lectures: {
+
+               "1": {
+
+                   title: "Linear Algebra - Lecture 1",
+
+                   tests: {
+
+                       "1": {
+
+                           title:
+                               "Linear Algebra - Lecture 1 Test - 1",
+
+                           duration: 30,
+
+                           questions: []
+
+                       }
+
+                   }
+
+               }
+
+           }
+
+       }
+
+       ===================================================== */
 
 };
-
 
 
 /* =========================================================
@@ -784,6 +566,10 @@ let currentTest = null;
 
 let courseId = null;
 
+let lectureId = null;
+
+let testNumber = null;
+
 let timerInterval = null;
 
 let remainingSeconds = 0;
@@ -791,9 +577,8 @@ let remainingSeconds = 0;
 let testSubmitted = false;
 
 
-
 /* =========================================================
-   GET COURSE
+   GET URL PARAMETERS
    ========================================================= */
 
 const params =
@@ -805,6 +590,13 @@ const params =
 courseId =
     params.get("course");
 
+
+lectureId =
+    params.get("lecture") || "1";
+
+
+testNumber =
+    params.get("test") || "1";
 
 
 /* =========================================================
@@ -822,6 +614,7 @@ onAuthStateChanged(
                 "login.html";
 
             return;
+
         }
 
 
@@ -842,9 +635,25 @@ onAuthStateChanged(
         }
 
 
-        currentTest =
-            TESTS[courseId];
+        /* =================================================
+           GET CURRENT TEST
+           ================================================= */
 
+        currentTest =
+            TESTS[
+                courseId
+            ]
+            ?.lectures[
+                lectureId
+            ]
+            ?.tests[
+                testNumber
+            ];
+
+
+        /* =================================================
+           TEST NOT FOUND
+           ================================================= */
 
         if (!currentTest) {
 
@@ -856,14 +665,39 @@ onAuthStateChanged(
 
             if (loading) {
 
-                loading.innerHTML =
-                    "<h3>Test not available.</h3>";
+                loading.innerHTML = `
+
+                    <h3>
+                        Test not available.
+                    </h3>
+
+                    <p>
+                        Course:
+                        ${courseId || "Unknown"}
+                    </p>
+
+                    <p>
+                        Lecture:
+                        ${lectureId}
+                    </p>
+
+                    <p>
+                        Test:
+                        ${testNumber}
+                    </p>
+
+                `;
 
             }
 
             return;
+
         }
 
+
+        /* =================================================
+           TEST TITLE
+           ================================================= */
 
         const titleElement =
             document.getElementById(
@@ -897,8 +731,8 @@ onAuthStateChanged(
         startTimer();
 
     }
-);
 
+);
 
 
 /* =========================================================
@@ -968,7 +802,6 @@ function getStudentName() {
 }
 
 
-
 /* =========================================================
    RENDER TEST
    ========================================================= */
@@ -997,6 +830,16 @@ function renderTest() {
             </h2>
 
             <p>
+                Lecture:
+                ${lectureId}
+            </p>
+
+            <p>
+                Test:
+                ${testNumber}
+            </p>
+
+            <p>
                 Total Questions:
                 ${currentTest.questions.length}
             </p>
@@ -1009,10 +852,13 @@ function renderTest() {
                 id="timerBox"
                 class="timer-box"
             >
+
                 Time Left:
+
                 <strong id="timer">
                     ${currentTest.duration}:00
                 </strong>
+
             </div>
 
         </div>
@@ -1108,7 +954,6 @@ function renderTest() {
 }
 
 
-
 /* =========================================================
    TIMER
    ========================================================= */
@@ -1170,7 +1015,6 @@ function startTimer() {
 }
 
 
-
 /* =========================================================
    UPDATE TIMER
    ========================================================= */
@@ -1218,7 +1062,6 @@ function updateTimer() {
     }
 
 }
-
 
 
 /* =========================================================
@@ -1342,20 +1185,19 @@ async function submitTest(event) {
             : "0.00";
 
 
-
     /* =====================================================
-       FIRST ATTEMPT ONLY
+       UNIQUE RESULT ID
 
-       IMPORTANT:
-       Same student + same course =
-       ONE FIRESTORE DOCUMENT.
+       COURSE + LECTURE + TEST + EMAIL
 
-       If document already exists:
-       DO NOT UPDATE IT.
+       Example:
 
-       Therefore:
-       FIRST ATTEMPT SCORE STAYS FOREVER
-       IN LEADERBOARD.
+       real-analysis_lecture-1_test-1_email
+
+       real-analysis_lecture-2_test-1_email
+
+       Therefore every test gets separate
+       first-attempt result.
        ===================================================== */
 
 
@@ -1372,6 +1214,10 @@ async function submitTest(event) {
 
     const resultId =
         courseId +
+        "_lecture-" +
+        lectureId +
+        "_test-" +
+        testNumber +
         "_" +
         safeEmail;
 
@@ -1392,12 +1238,16 @@ async function submitTest(event) {
             );
 
 
-        /*
-         * FIRST ATTEMPT
-         *
-         * Document does NOT exist.
-         * Save result.
-         */
+        /* =================================================
+           FIRST ATTEMPT ONLY
+
+           Document does not exist:
+           SAVE.
+
+           Document exists:
+           DO NOT UPDATE.
+           ================================================= */
+
 
         if (
             !existingResult.exists()
@@ -1419,9 +1269,18 @@ async function submitTest(event) {
                     course:
                         courseId,
 
+                    lecture:
+                        lectureId,
+
+                    testNumber:
+                        testNumber,
+
                     testId:
                         courseId +
-                        "-test-1",
+                        "-lecture-" +
+                        lectureId +
+                        "-test-" +
+                        testNumber,
 
                     score:
                         score,
@@ -1446,14 +1305,20 @@ async function submitTest(event) {
         }
 
 
-        /*
-         * SECOND / THIRD / FUTURE ATTEMPT
-         *
-         * Do NOTHING.
-         *
-         * Existing first-attempt result
-         * remains unchanged.
-         */
+        /* =================================================
+           SHOW CURRENT ATTEMPT RESULT
+
+           Rank will use FIRST ATTEMPT
+           stored in Firestore.
+           ================================================= */
+
+
+        showResult(
+            score,
+            total,
+            percentage,
+            answers
+        );
 
 
     } catch (error) {
@@ -1486,28 +1351,7 @@ async function submitTest(event) {
 
     }
 
-
-    /*
-     * IMPORTANT:
-     *
-     * Student ko current attempt ka
-     * score dikhega.
-     *
-     * Lekin calculateRank()
-     * Firestore se FIRST ATTEMPT
-     * wala saved score use karega.
-     */
-
-
-    showResult(
-        score,
-        total,
-        percentage,
-        answers
-    );
-
 }
-
 
 
 /* =========================================================
@@ -1555,7 +1399,9 @@ async function showResult(
                 class="rank-box"
                 id="rankBox"
             >
+
                 Calculating First Attempt Rank...
+
             </div>
 
         </div>
@@ -1573,7 +1419,9 @@ async function showResult(
             <div
                 id="leaderboardList"
             >
+
                 Loading leaderboard...
+
             </div>
 
         </div>
@@ -1688,18 +1536,9 @@ async function showResult(
         html;
 
 
-    /*
-     * Rank is calculated from Firestore.
-     *
-     * Therefore it uses the student's
-     * FIRST ATTEMPT score, not the
-     * current retake score.
-     */
-
     await calculateRank();
 
 }
-
 
 
 /* =========================================================
@@ -1734,6 +1573,14 @@ async function calculateRank() {
         const results = [];
 
 
+        const currentTestId =
+            courseId +
+            "-lecture-" +
+            lectureId +
+            "-test-" +
+            testNumber;
+
+
         snapshot.forEach(
             function(resultDoc) {
 
@@ -1741,14 +1588,13 @@ async function calculateRank() {
                     resultDoc.data();
 
 
-                /*
-                 * Only current test.
-                 */
+                /* =========================================
+                   ONLY CURRENT COURSE + LECTURE + TEST
+                   ========================================= */
 
                 if (
                     data.testId ===
-                    courseId +
-                    "-test-1"
+                    currentTestId
                 ) {
 
                     results.push(
@@ -1761,10 +1607,14 @@ async function calculateRank() {
         );
 
 
-        /*
-         * HIGHEST FIRST-ATTEMPT SCORE
-         * COMES FIRST.
-         */
+        /* =================================================
+           SORT
+
+           1. Highest score first
+           2. Same score:
+              Earlier first attempt first
+           ================================================= */
+
 
         results.sort(
             function(a, b) {
@@ -1783,12 +1633,6 @@ async function calculateRank() {
                 }
 
 
-                /*
-                 * Same marks:
-                 * Earlier first attempt
-                 * gets higher rank.
-                 */
-
                 return (
                     Number(
                         a.submittedAt || 0
@@ -1802,10 +1646,9 @@ async function calculateRank() {
         );
 
 
-        /*
-         * CURRENT STUDENT'S
-         * FIRST ATTEMPT RANK
-         */
+        /* =================================================
+           CURRENT STUDENT RANK
+           ================================================= */
 
         const myIndex =
             results.findIndex(
@@ -1831,6 +1674,7 @@ async function calculateRank() {
             rankBox.innerHTML = `
 
                 🏆 Your First Attempt Rank:
+
                 <strong>
                     #${rank}
                 </strong>
@@ -1838,7 +1682,6 @@ async function calculateRank() {
             `;
 
         }
-
 
 
         /* =================================================
@@ -2000,7 +1843,6 @@ async function calculateRank() {
 }
 
 
-
 /* =========================================================
    BASIC PROTECTION
    ========================================================= */
@@ -2045,7 +1887,6 @@ document.addEventListener(
 );
 
 
-
 /* =========================================================
    KEYBOARD PROTECTION
    ========================================================= */
@@ -2057,14 +1898,6 @@ document.addEventListener(
         const key =
             event.key.toLowerCase();
 
-
-        /*
-         * Ctrl / Cmd:
-         * P = Print
-         * S = Save
-         * C = Copy
-         * U = View Source
-         */
 
         if (
             (
@@ -2086,10 +1919,6 @@ document.addEventListener(
         }
 
 
-        /*
-         * F12
-         */
-
         if (
             key === "f12"
         ) {
@@ -2102,17 +1931,8 @@ document.addEventListener(
 );
 
 
-
 /* =========================================================
    PRINT PROTECTION
-   =========================================================
-
-   Normal browser print attempt will show
-   a blank white page.
-
-   NOTE:
-   Browser-level protection cannot guarantee
-   against screenshots or developer tools.
    ========================================================= */
 
 window.addEventListener(
