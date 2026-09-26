@@ -94,6 +94,12 @@ const COURSES = {
             },
 
             {
+                type: "pdf",
+                title: "Lecture 3 PDF",
+                url: "321581555.PDF"
+            },
+
+            {
                 type: "live",
                 title: "Live Class",
                 url: "#"
