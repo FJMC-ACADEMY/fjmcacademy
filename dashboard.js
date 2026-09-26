@@ -1,4 +1,4 @@
-8/* =========================================================
+/* =========================================================
    FJMC ACADEMY - STUDENT DASHBOARD
    1 MOBILE + 1 DESKTOP/LAPTOP
    FIXED 3-DAY DEVICE RESERVATION
@@ -28,23 +28,94 @@ import {
 
 /* =========================================================
    STUDENT DATA
+
+   FORMAT:
+
+   email: {
+       name: "Student Name",
+
+       exam: "Exam Name",
+       batch: "Batch 1",
+       year: "2026",
+
+       courses: [
+           "course-id"
+       ]
+   }
+
+   IMPORTANT:
+   Different batch/year can have completely
+   different courses and materials.
 ========================================================= */
 
 const STUDENTS = {
 
+    /* =====================================================
+       TEST STUDENT 1
+       CSIR NET - Batch 1 - 2026
+    ===================================================== */
+
     "fjmcacademy1008@gmail.com": {
+
         name: "Rahul",
-        courses: ["real-analysis"]
+
+        exam: "CSIR NET",
+
+        batch: "Batch 1",
+
+        year: "2026",
+
+        courses: [
+            "csir-net-2026-batch1-linear-algebra",
+            "csir-net-2026-batch1-real-analysis"
+        ]
+
     },
+
+
+    /* =====================================================
+       TEST STUDENT 2
+       CSIR NET - Batch 2 - 2026
+    ===================================================== */
 
     "amit@gmail.com": {
+
         name: "Amit",
-        courses: ["linear-algebra", "calculus"]
+
+        exam: "CSIR NET",
+
+        batch: "Batch 2",
+
+        year: "2026",
+
+        courses: [
+            "csir-net-2026-batch2-linear-algebra",
+            "csir-net-2026-batch2-calculus"
+        ]
+
     },
 
+
+    /* =====================================================
+       TEST STUDENT 3
+       IIT JAM - Batch 1 - 2026
+    ===================================================== */
+
     "fogatjagmohan@gmail.com": {
+
         name: "Neha",
-        courses: ["real-analysis", "calculus", "linear-algebra"]
+
+        exam: "IIT JAM",
+
+        batch: "Batch 1",
+
+        year: "2026",
+
+        courses: [
+            "iit-jam-2026-batch1-linear-algebra",
+            "iit-jam-2026-batch1-calculus"
+        ]
+
     }
 
 };
@@ -52,80 +123,84 @@ const STUDENTS = {
 
 /* =========================================================
    COURSE DATA
+
+   IMPORTANT:
+
+   Course ID contains:
+
+   EXAM + YEAR + BATCH + SUBJECT
+
+   Therefore:
+
+   CSIR Batch 1 Linear Algebra
+   and
+   CSIR Batch 2 Linear Algebra
+
+   are completely separate courses.
+
+   Their videos/PDF/live links can be different.
 ========================================================= */
 
 const COURSES = {
 
-    "real-analysis": {
 
-        title: "Real Analysis",
-        description: "Complete Real Analysis Course",
+    /* =====================================================
+       CSIR NET
+       2026
+       BATCH 1
+       LINEAR ALGEBRA
+    ===================================================== */
+
+    "csir-net-2026-batch1-linear-algebra": {
+
+        exam: "CSIR NET",
+
+        batch: "Batch 1",
+
+        year: "2026",
+
+        subject: "Linear Algebra",
+
+        title: "Linear Algebra",
+
+        description:
+            "CSIR NET 2026 - Batch 1 - Complete Linear Algebra Course",
+
+        /*
+           Existing Test 1 system can still use
+           the old test ID.
+        */
+
+        testId: "linear-algebra",
 
         contents: [
 
             {
                 type: "video",
                 title: "Lecture 1",
-                url: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+                url:
+                    "https://www.youtube.com/embed/dQw4w9WgXcQ"
             },
 
             {
                 type: "video",
                 title: "Lecture 2",
-                url: "https://www.youtube.com/embed/dQw4w9WgXcQ"
-            },
-
-            {
-                type: "local-video",
-                title: "Lecture 3",
-                url: "real-analysis-lecture-3.mp4"
-            },
-
-            {
-                type: "pdf",
-                title: "Lecture 1 PDF",
-                url: "321581555.PDF"
-            },
-
-            {
-                type: "pdf",
-                title: "Lecture 2 PDF",
-                url: "ch03.pdf"
-            },
-
-            {
-                type: "pdf",
-                title: "Lecture 3 PDF",
-                url: "3.pdf"
-            },
-
-            {
-                type: "live",
-                title: "Live Class",
-                url: "#"
-            }
-
-        ]
-    },
-
-
-    "linear-algebra": {
-
-        title: "Linear Algebra",
-        description: "Complete Linear Algebra Course",
-
-        contents: [
-
-            {
-                type: "video",
-                title: "Lecture 1",
-                url: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+                url:
+                    "https://www.youtube.com/embed/dQw4w9WgXcQ"
             },
 
             {
                 type: "pdf",
                 title: "Linear Algebra Notes",
-                url: "pdf/linear-algebra-notes.pdf"
+                url:
+                    "pdf/linear-algebra-notes.pdf"
+            },
+
+            {
+                type: "pdf",
+                title: "Lecture 2 PDF",
+                url:
+                    "ch03.pdf"
             },
 
             {
@@ -135,32 +210,76 @@ const COURSES = {
             }
 
         ]
+
     },
 
 
-    "calculus": {
+    /* =====================================================
+       CSIR NET
+       2026
+       BATCH 1
+       REAL ANALYSIS
+    ===================================================== */
 
-        title: "Calculus",
-        description: "Complete Calculus Course",
+    "csir-net-2026-batch1-real-analysis": {
+
+        exam: "CSIR NET",
+
+        batch: "Batch 1",
+
+        year: "2026",
+
+        subject: "Real Analysis",
+
+        title: "Real Analysis",
+
+        description:
+            "CSIR NET 2026 - Batch 1 - Complete Real Analysis Course",
+
+        testId: "real-analysis",
 
         contents: [
 
             {
                 type: "video",
                 title: "Lecture 1",
-                url: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+                url:
+                    "https://www.youtube.com/embed/dQw4w9WgXcQ"
+            },
+
+            {
+                type: "video",
+                title: "Lecture 2",
+                url:
+                    "https://www.youtube.com/embed/dQw4w9WgXcQ"
             },
 
             {
                 type: "local-video",
-                title: "Lecture 2",
-                url: "./videos/calculus-lecture-2.mp4"
+                title: "Lecture 3",
+                url:
+                    "real-analysis-lecture-3.mp4"
             },
 
             {
                 type: "pdf",
-                title: "Chapter 3 PDF",
-                url: "ch03.pdf"
+                title: "Lecture 1 PDF",
+                url:
+                    "321581555.PDF"
+            },
+
+            {
+                type: "pdf",
+                title: "Lecture 2 PDF",
+                url:
+                    "ch03.pdf"
+            },
+
+            {
+                type: "pdf",
+                title: "Lecture 3 PDF",
+                url:
+                    "3.pdf"
             },
 
             {
@@ -170,6 +289,244 @@ const COURSES = {
             }
 
         ]
+
+    },
+
+
+    /* =====================================================
+       CSIR NET
+       2026
+       BATCH 2
+       LINEAR ALGEBRA
+
+       SAME SUBJECT
+       BUT DIFFERENT BATCH
+
+       Therefore material can be completely different.
+    ===================================================== */
+
+    "csir-net-2026-batch2-linear-algebra": {
+
+        exam: "CSIR NET",
+
+        batch: "Batch 2",
+
+        year: "2026",
+
+        subject: "Linear Algebra",
+
+        title: "Linear Algebra",
+
+        description:
+            "CSIR NET 2026 - Batch 2 - Complete Linear Algebra Course",
+
+        testId: "linear-algebra",
+
+        contents: [
+
+            {
+                type: "video",
+                title: "Batch 2 - Lecture 1",
+                url:
+                    "https://www.youtube.com/embed/dQw4w9WgXcQ"
+            },
+
+            {
+                type: "video",
+                title: "Batch 2 - Lecture 2",
+                url:
+                    "https://www.youtube.com/embed/dQw4w9WgXcQ"
+            },
+
+            {
+                type: "pdf",
+                title: "Batch 2 Linear Algebra Notes",
+                url:
+                    "pdf/linear-algebra-notes.pdf"
+            },
+
+            {
+                type: "pdf",
+                title: "Batch 2 Lecture Notes",
+                url:
+                    "ch03.pdf"
+            },
+
+            {
+                type: "live",
+                title: "Batch 2 Live Class",
+                url: "#"
+            }
+
+        ]
+
+    },
+
+
+    /* =====================================================
+       CSIR NET
+       2026
+       BATCH 2
+       CALCULUS
+    ===================================================== */
+
+    "csir-net-2026-batch2-calculus": {
+
+        exam: "CSIR NET",
+
+        batch: "Batch 2",
+
+        year: "2026",
+
+        subject: "Calculus",
+
+        title: "Calculus",
+
+        description:
+            "CSIR NET 2026 - Batch 2 - Complete Calculus Course",
+
+        testId: "calculus",
+
+        contents: [
+
+            {
+                type: "video",
+                title: "Batch 2 - Lecture 1",
+                url:
+                    "https://www.youtube.com/embed/dQw4w9WgXcQ"
+            },
+
+            {
+                type: "local-video",
+                title: "Batch 2 - Lecture 2",
+                url:
+                    "./videos/calculus-lecture-2.mp4"
+            },
+
+            {
+                type: "pdf",
+                title: "Batch 2 Chapter 3 PDF",
+                url:
+                    "ch03.pdf"
+            },
+
+            {
+                type: "live",
+                title: "Batch 2 Live Class",
+                url: "#"
+            }
+
+        ]
+
+    },
+
+
+    /* =====================================================
+       IIT JAM
+       2026
+       BATCH 1
+       LINEAR ALGEBRA
+    ===================================================== */
+
+    "iit-jam-2026-batch1-linear-algebra": {
+
+        exam: "IIT JAM",
+
+        batch: "Batch 1",
+
+        year: "2026",
+
+        subject: "Linear Algebra",
+
+        title: "Linear Algebra",
+
+        description:
+            "IIT JAM 2026 - Batch 1 - Complete Linear Algebra Course",
+
+        testId: "linear-algebra",
+
+        contents: [
+
+            {
+                type: "video",
+                title: "IIT JAM Lecture 1",
+                url:
+                    "https://www.youtube.com/embed/dQw4w9WgXcQ"
+            },
+
+            {
+                type: "pdf",
+                title: "IIT JAM Linear Algebra Notes",
+                url:
+                    "pdf/linear-algebra-notes.pdf"
+            },
+
+            {
+                type: "live",
+                title: "IIT JAM Live Class",
+                url: "#"
+            }
+
+        ]
+
+    },
+
+
+    /* =====================================================
+       IIT JAM
+       2026
+       BATCH 1
+       CALCULUS
+    ===================================================== */
+
+    "iit-jam-2026-batch1-calculus": {
+
+        exam: "IIT JAM",
+
+        batch: "Batch 1",
+
+        year: "2026",
+
+        subject: "Calculus",
+
+        title: "Calculus",
+
+        description:
+            "IIT JAM 2026 - Batch 1 - Complete Calculus Course",
+
+        testId: "calculus",
+
+        contents: [
+
+            {
+                type: "video",
+                title: "IIT JAM Calculus Lecture 1",
+                url:
+                    "https://www.youtube.com/embed/dQw4w9WgXcQ"
+            },
+
+            {
+                type: "local-video",
+                title: "IIT JAM Calculus Lecture 2",
+                url:
+                    "./videos/calculus-lecture-2.mp4"
+            },
+
+            {
+                type: "pdf",
+                title: "IIT JAM Calculus Notes",
+                url:
+                    "ch03.pdf"
+            },
+
+            {
+                type: "live",
+                title: "IIT JAM Live Class",
+                url: "#"
+            }
+
+        ]
+
     }
 
 };
@@ -177,13 +534,10 @@ const COURSES = {
 
 /* =========================================================
    DEVICE SETTINGS
+   EVERYTHING BELOW THIS POINT IS YOUR EXISTING SYSTEM
 ========================================================= */
 
 const MAX_DEVICES = 2;
-
-/*
-   Fixed 3 days
-*/
 
 const DEVICE_TIMEOUT =
     3 * 24 * 60 * 60 * 1000;
@@ -240,7 +594,7 @@ const deviceId =
 
 
 /* =========================================================
-   DEVICE TYPE DETECTION
+   DEVICE TYPE
 ========================================================= */
 
 function getDeviceType() {
@@ -339,12 +693,6 @@ function hidePageLoading() {
         }
     );
 
-
-    /*
-       Also remove common loading text
-       only when it is inside a dedicated
-       loading element.
-    */
 
     const possibleLoaders =
         document.querySelectorAll(
@@ -450,10 +798,6 @@ onAuthStateChanged(
                 STUDENTS[email];
 
 
-            /* =============================================
-               STUDENT CHECK
-            ============================================= */
-
             if (!student) {
 
                 console.error(
@@ -495,7 +839,7 @@ onAuthStateChanged(
 
 
             /* =============================================
-               WELCOME
+               STUDENT NAME
             ============================================= */
 
             if (studentName) {
@@ -544,16 +888,8 @@ onAuthStateChanged(
             );
 
 
-            /* =============================================
-               HIDE LOADING
-            ============================================= */
-
             hidePageLoading();
 
-
-            /* =============================================
-               HEARTBEAT
-            ============================================= */
 
             startDeviceHeartbeat();
 
@@ -744,14 +1080,6 @@ async function countAllActiveDevices(
 
 /* =========================================================
    REGISTER / CHECK DEVICE
-
-   RULE:
-
-   1 Mobile + 1 Desktop/Laptop
-
-   Fixed 3-day reservation.
-
-   Logout does NOT free slot.
 ========================================================= */
 
 async function registerDevice(user) {
@@ -772,19 +1100,11 @@ async function registerDevice(user) {
             Date.now();
 
 
-        /* =============================================
-           CURRENT DEVICE DOCUMENT
-        ============================================= */
-
         const currentDevice =
             await getDoc(
                 deviceRef
             );
 
-
-        /* =============================================
-           CURRENT DEVICE EXISTS
-        ============================================= */
 
         if (
             currentDevice.exists()
@@ -804,10 +1124,6 @@ async function registerDevice(user) {
                 data.deviceType ||
                 currentDeviceType;
 
-
-            /* =========================================
-               CURRENT DEVICE STILL ACTIVE
-            ========================================= */
 
             if (
                 expiresAt > now
@@ -831,10 +1147,6 @@ async function registerDevice(user) {
                 return true;
             }
 
-
-            /* =========================================
-               CURRENT DEVICE EXPIRED
-            ========================================= */
 
             const sameTypeDevices =
                 await countActiveDeviceType(
@@ -874,10 +1186,6 @@ async function registerDevice(user) {
             }
 
 
-            /* =========================================
-               NEW 3-DAY RESERVATION
-            ========================================= */
-
             await setDoc(
                 deviceRef,
                 {
@@ -906,10 +1214,6 @@ async function registerDevice(user) {
             return true;
         }
 
-
-        /* =============================================
-           COMPLETELY NEW DEVICE
-        ============================================= */
 
         const sameTypeDevices =
             await countActiveDeviceType(
@@ -946,10 +1250,6 @@ async function registerDevice(user) {
             return false;
         }
 
-
-        /* =============================================
-           CREATE NEW DEVICE
-        ============================================= */
 
         await setDoc(
             deviceRef,
@@ -1122,10 +1422,6 @@ async function updateDeviceHeartbeat() {
             );
 
 
-        /* =============================================
-           DEVICE EXPIRED
-        ============================================= */
-
         if (
             expiresAt > 0 &&
             expiresAt <= now
@@ -1171,11 +1467,6 @@ async function updateDeviceHeartbeat() {
         }
 
 
-        /* =============================================
-           UPDATE ONLY LAST SEEN
-           DO NOT CHANGE expiresAt
-        ============================================= */
-
         await updateDoc(
             deviceRef,
             {
@@ -1199,6 +1490,15 @@ async function updateDeviceHeartbeat() {
 
 /* =========================================================
    SHOW STUDENT COURSES
+
+   NOW SHOWS:
+
+   Exam
+   Batch
+   Year
+   Subject
+   Description
+   Course Material
 ========================================================= */
 
 function showStudentCourses(
@@ -1240,6 +1540,64 @@ function showStudentCourses(
     }
 
 
+    /* =====================================================
+       STUDENT BATCH / EXAM INFORMATION
+    ===================================================== */
+
+    const studentInfo =
+        document.createElement(
+            "div"
+        );
+
+
+    studentInfo.className =
+        "student-course-info";
+
+
+    studentInfo.innerHTML = `
+
+        <div style="
+            margin-bottom:20px;
+            padding:18px;
+            border-radius:12px;
+            background:rgba(255,255,255,.06);
+            border:1px solid rgba(255,255,255,.12);
+        ">
+
+            <h3 style="
+                margin:0 0 12px 0;
+            ">
+                ${student.exam}
+            </h3>
+
+            <p style="
+                margin:5px 0;
+            ">
+                <strong>Batch:</strong>
+                ${student.batch}
+            </p>
+
+            <p style="
+                margin:5px 0;
+            ">
+                <strong>Year:</strong>
+                ${student.year}
+            </p>
+
+        </div>
+
+    `;
+
+
+    coursesContainer.appendChild(
+        studentInfo
+    );
+
+
+    /* =====================================================
+       COURSES
+    ===================================================== */
+
     student.courses.forEach(
         function (courseId) {
 
@@ -1248,6 +1606,12 @@ function showStudentCourses(
 
 
             if (!course) {
+
+                console.warn(
+                    "Course not found:",
+                    courseId
+                );
+
                 return;
             }
 
@@ -1343,9 +1707,25 @@ function showStudentCourses(
 
                 <div class="course-title">
 
+                    <div style="
+                        margin-bottom:10px;
+                        font-size:13px;
+                        opacity:.85;
+                    ">
+
+                        ${course.exam}
+                        &nbsp;•&nbsp;
+                        ${course.batch}
+                        &nbsp;•&nbsp;
+                        ${course.year}
+
+                    </div>
+
+
                     <h3>
                         ${course.title}
                     </h3>
+
 
                     <p>
                         ${course.description}
@@ -1369,9 +1749,13 @@ function showStudentCourses(
 
                     <button
                         class="fjmc-test-button"
-                        data-test-course="${courseId}"
+                        data-test-course="${
+                            course.testId || courseId
+                        }"
                     >
+
                         📝 ${course.title} Test
+
                     </button>
 
                 </div>
@@ -1508,10 +1892,6 @@ function showStudentCourses(
         }
     );
 
-
-    /* =====================================================
-       LOADING SCREEN OFF
-    ===================================================== */
 
     hidePageLoading();
 
@@ -1953,10 +2333,6 @@ async function openPDFViewer(
         }
 
 
-        /* =================================================
-           SCREEN WATERMARK
-        ================================================= */
-
         const oldWatermark =
             document.getElementById(
                 "fjmcScreenWatermark"
@@ -2044,10 +2420,6 @@ async function openPDFViewer(
             watermark
         );
 
-
-        /* =================================================
-           RENDER PDF PAGES
-        ================================================= */
 
         for (
             let pageNumber = 1;
@@ -2223,7 +2595,6 @@ async function openPDFViewer(
 /* =========================================================
    LOGOUT
 
-   IMPORTANT:
    LOGOUT DOES NOT FREE DEVICE SLOT
 ========================================================= */
 
@@ -2358,30 +2729,12 @@ document.addEventListener(
    INITIAL LOADING SAFETY
 ========================================================= */
 
-/*
-   If Firebase takes time to respond,
-   keep loading screen visible.
-
-   Once dashboard is ready,
-   hidePageLoading() is called automatically.
-*/
-
 window.addEventListener(
     "load",
     function () {
 
-        /*
-           Small delay allows Firebase
-           and dashboard DOM to finish.
-        */
-
         setTimeout(
             function () {
-
-                /*
-                   Only hide if dashboard
-                   content is already available.
-                */
 
                 if (
                     currentUser &&
