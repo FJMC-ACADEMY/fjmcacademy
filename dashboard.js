@@ -1,33 +1,22 @@
-/* =========================================================
-   FJMC ACADEMY - STUDENT DASHBOARD
-   FIREBASE STUDENT DATA VERSION
-
-   - Student data comes from:
-       users/{Firebase UID}
-
-   - Courses assigned from Admin Panel
-   - 1 Mobile + 1 Desktop/Laptop
-   - Device reservation = 3 days
-   - Logout does NOT free device slot
-========================================================= */
-
+// ============================================================
+// FJMC ACADEMY - STUDENT DASHBOARD
+// Courses / student details are controlled from ADMIN PANEL
+// ============================================================
 
 import {
     onAuthStateChanged,
     signOut
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
-
 import {
     collection,
     doc,
-    getDocs,
     getDoc,
+    getDocs,
     setDoc,
     updateDoc,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-
 
 import {
     auth,
@@ -35,771 +24,313 @@ import {
 } from "./firebase.js";
 
 
-
-/* =========================================================
-   COURSE DATA
-========================================================= */
-
-const COURSES = {
-
-    "real-analysis": {
-
-        title: "Real Analysis",
-
-        description:
-            "Complete Real Analysis Course",
-
-        contents: [
-
-            {
-                type: "video",
-
-                title: "Lecture 1",
-
-                url:
-                    "https://www.youtube.com/embed/dQw4w9WgXcQ"
-            },
-
-
-            {
-                type: "video",
-
-                title: "Lecture 2",
-
-                url:
-                    "https://www.youtube.com/embed/dQw4w9WgXcQ"
-            },
-
-
-            {
-                type: "local-video",
-
-                title: "Lecture 3",
-
-                url:
-                    "real-analysis-lecture-3.mp4"
-            },
-
-
-            {
-                type: "pdf",
-
-                title: "Lecture 1 PDF",
-
-                url:
-                    "321581555.PDF"
-            },
-
-
-            {
-                type: "pdf",
-
-                title: "Lecture 2 PDF",
-
-                url:
-                    "ch03.pdf"
-            },
-
-
-            {
-                type: "live",
-
-                title: "Live Class",
-
-                url:
-                    "#"
-            }
-
-        ]
-
-    },
-
-
-
-    "linear-algebra": {
-
-        title:
-            "Linear Algebra",
-
-        description:
-            "Complete Linear Algebra Course",
-
-        contents: [
-
-            {
-                type: "video",
-
-                title:
-                    "Lecture 1",
-
-                url:
-                    "https://www.youtube.com/embed/dQw4w9WgXcQ"
-            },
-
-
-            {
-                type: "pdf",
-
-                title:
-                    "Linear Algebra Notes",
-
-                url:
-                    "pdf/linear-algebra-notes.pdf"
-            },
-
-
-            {
-                type: "live",
-
-                title:
-                    "Live Class",
-
-                url:
-                    "#"
-            }
-
-        ]
-
-    },
-
-
-
-    "calculus": {
-
-        title:
-            "Calculus",
-
-        description:
-            "Complete Calculus Course",
-
-        contents: [
-
-            {
-                type: "video",
-
-                title:
-                    "Lecture 1",
-
-                url:
-                    "https://www.youtube.com/embed/dQw4w9WgXcQ"
-            },
-
-
-            {
-                type: "local-video",
-
-                title:
-                    "Lecture 2",
-
-                url:
-                    "./videos/calculus-lecture-2.mp4"
-            },
-
-
-            {
-                type: "pdf",
-
-                title:
-                    "Chapter 3 PDF",
-
-                url:
-                    "ch03.pdf"
-            },
-
-
-            {
-                type: "live",
-
-                title:
-                    "Live Class",
-
-                url:
-                    "#"
-            }
-
-        ]
-
-    }
-
-};
-
-
-
-/* =========================================================
-   DEVICE SETTINGS
-========================================================= */
+// ============================================================
+// SETTINGS
+// ============================================================
 
 const MAX_DEVICES = 2;
+const RESERVATION_DAYS = 3;
+const HEARTBEAT_INTERVAL = 2 * 60 * 1000;
+
+const DEVICE_STORAGE_KEY = "fjmcDeviceId";
 
 
-/*
-   Device reservation:
-   3 days
-*/
+// ============================================================
+// DOM
+// ============================================================
 
-const DEVICE_TIMEOUT =
-    3 * 24 * 60 * 60 * 1000;
+const studentNameEl =
+    document.getElementById("studentName");
+
+const coursesContainer =
+    document.getElementById("coursesContainer");
+
+const logoutBtn =
+    document.getElementById("logoutBtn");
 
 
+// ============================================================
+// GLOBAL STATE
+// ============================================================
 
-/* =========================================================
-   DEVICE ID
-========================================================= */
+let currentUser = null;
+let currentStudent = null;
+let heartbeatTimer = null;
+
+
+// ============================================================
+// DEVICE ID
+// ============================================================
 
 function getDeviceId() {
 
-    let id =
-        localStorage.getItem(
-            "fjmcDeviceId"
-        );
+    let deviceId =
+        localStorage.getItem(DEVICE_STORAGE_KEY);
 
-
-    if (!id) {
+    if (!deviceId) {
 
         if (
             typeof crypto !== "undefined" &&
-            typeof crypto.randomUUID === "function"
+            crypto.randomUUID
         ) {
-
-            id =
-                "device-" +
-                crypto.randomUUID();
-
+            deviceId = crypto.randomUUID();
         } else {
 
-            id =
+            deviceId =
                 "device-" +
                 Date.now() +
                 "-" +
                 Math.random()
                     .toString(36)
-                    .substring(2);
-
+                    .substring(2, 12);
         }
 
-
         localStorage.setItem(
-            "fjmcDeviceId",
-            id
+            DEVICE_STORAGE_KEY,
+            deviceId
         );
-
     }
 
-
-    return id;
-
+    return deviceId;
 }
 
 
-const deviceId =
-    getDeviceId();
-
-
-
-/* =========================================================
-   DEVICE TYPE
-========================================================= */
+// ============================================================
+// DEVICE TYPE
+// ============================================================
 
 function getDeviceType() {
 
-    const userAgent =
-        navigator.userAgent ||
-        navigator.vendor ||
-        window.opera ||
-        "";
+    const ua =
+        navigator.userAgent.toLowerCase();
+
+    const isMobile =
+        /android|iphone|ipad|ipod|mobile|tablet/.test(ua);
+
+    return isMobile
+        ? "mobile"
+        : "desktop";
+}
 
 
-    const mobilePattern =
-        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i;
+// ============================================================
+// ESCAPE HTML
+// ============================================================
 
+function escapeHTML(value) {
 
-    if (
-        mobilePattern.test(
-            userAgent
-        )
-    ) {
-
-        return "mobile";
-
+    if (value === undefined || value === null) {
+        return "";
     }
 
-
-    return "desktop";
-
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 
-const currentDeviceType =
-    getDeviceType();
+// ============================================================
+// DATE HELPERS
+// ============================================================
 
+function getExpiryDate() {
 
-console.log(
-    "Current device:",
-    currentDeviceType
-);
+    const date = new Date();
 
-
-
-/* =========================================================
-   GLOBAL STATE
-========================================================= */
-
-let currentUser = null;
-
-let deviceHeartbeat = null;
-
-
-
-/* =========================================================
-   PAGE LOADING
-========================================================= */
-
-function hidePageLoading() {
-
-    const selectors = [
-
-        "#pageLoading",
-        "#loadingScreen",
-        "#pageLoader",
-        "#loadingOverlay",
-        "#loader",
-
-        ".page-loading",
-        ".loading-screen",
-        ".loading-overlay",
-        ".page-loader",
-        ".loader-overlay"
-
-    ];
-
-
-    selectors.forEach(
-        function (selector) {
-
-            const elements =
-                document.querySelectorAll(
-                    selector
-                );
-
-
-            elements.forEach(
-                function (element) {
-
-                    element.style.display =
-                        "none";
-
-                    element.style.visibility =
-                        "hidden";
-
-                    element.style.opacity =
-                        "0";
-
-                    element.style.pointerEvents =
-                        "none";
-
-                }
-            );
-
-        }
+    date.setDate(
+        date.getDate() + RESERVATION_DAYS
     );
 
+    return date;
+}
 
-    const possibleLoaders =
-        document.querySelectorAll(
-            "[id*='loading'], [id*='Loading'], [class*='loading'], [class*='Loading']"
+
+function timestampToDate(timestamp) {
+
+    if (!timestamp) {
+        return null;
+    }
+
+    if (
+        typeof timestamp.toDate === "function"
+    ) {
+        return timestamp.toDate();
+    }
+
+    if (timestamp instanceof Date) {
+        return timestamp;
+    }
+
+    return null;
+}
+
+
+// ============================================================
+// LOAD STUDENT PROFILE FROM FIRESTORE
+// ============================================================
+//
+// Admin Panel should create/update:
+//
+// users/{uid}
+//
+// Example:
+//
+// {
+//    name: "Rahul",
+//    email: "rahul@gmail.com",
+//    role: "student",
+//    courses: ["real-analysis", "calculus"]
+// }
+//
+// ============================================================
+
+async function loadStudentProfile(user) {
+
+    const userRef =
+        doc(db, "users", user.uid);
+
+    const snap =
+        await getDoc(userRef);
+
+    if (!snap.exists()) {
+
+        console.error(
+            "Student profile not found:",
+            user.uid
         );
 
+        return null;
+    }
 
-    possibleLoaders.forEach(
-        function (element) {
+    const data = snap.data();
 
-            const text =
-                (
-                    element.textContent ||
-                    ""
-                )
-                    .trim()
-                    .toLowerCase();
+    return {
 
+        uid: user.uid,
 
-            if (
-                text.includes(
-                    "page loading"
-                ) ||
-                text ===
-                    "loading..." ||
-                text ===
-                    "loading"
-            ) {
+        email:
+            data.email ||
+            user.email ||
+            "",
 
-                element.style.display =
-                    "none";
+        name:
+            data.name ||
+            user.displayName ||
+            "Student",
 
-                element.style.visibility =
-                    "hidden";
+        role:
+            data.role ||
+            "student",
 
-                element.style.opacity =
-                    "0";
-
-                element.style.pointerEvents =
-                    "none";
-
-            }
-
-        }
-    );
-
+        courses:
+            Array.isArray(data.courses)
+                ? data.courses
+                : []
+    };
 }
 
 
+// ============================================================
+// LOAD COURSE FROM FIRESTORE
+// ============================================================
+//
+// Admin Panel should create:
+//
+// courses/{courseId}
+//
+// Example:
+//
+// {
+//    title: "Real Analysis",
+//    description: "Real Analysis Course",
+//    contents: [
+//       {
+//          type: "youtube",
+//          title: "Lecture 1",
+//          url: "..."
+//       }
+//    ]
+// }
+//
+// ============================================================
 
-/* =========================================================
-   HTML ELEMENTS
-========================================================= */
-
-const coursesContainer =
-    document.getElementById(
-        "coursesContainer"
-    );
-
-
-const studentName =
-    document.getElementById(
-        "studentName"
-    );
-
-
-const logoutBtn =
-    document.getElementById(
-        "logoutBtn"
-    );
-
-
-
-/* =========================================================
-   GET STUDENT DATA FROM FIRESTORE
-========================================================= */
-
-async function getStudentData(
-    user
-) {
+async function loadCourse(courseId) {
 
     try {
 
-        const studentRef =
-            doc(
-                db,
-                "users",
-                user.uid
-            );
+        const courseRef =
+            doc(db, "courses", courseId);
 
+        const snap =
+            await getDoc(courseRef);
 
-        const snapshot =
-            await getDoc(
-                studentRef
-            );
+        if (!snap.exists()) {
 
-
-        if (
-            !snapshot.exists()
-        ) {
-
-            console.error(
-                "Student document not found:",
-                user.uid
+            console.warn(
+                "Course not found:",
+                courseId
             );
 
             return null;
-
         }
-
-
-        const data =
-            snapshot.data();
-
 
         return {
 
-            uid:
-                user.uid,
+            id: courseId,
 
-            name:
-                data.name ||
-                user.displayName ||
-                "Student",
-
-            email:
-                data.email ||
-                user.email ||
-                "",
-
-            role:
-                data.role ||
-                "student",
-
-            courses:
-                Array.isArray(
-                    data.courses
-                )
-                    ? data.courses
-                    : []
-
+            ...snap.data()
         };
-
 
     } catch (error) {
 
         console.error(
-            "Get student data error:",
+            "Course loading error:",
+            courseId,
             error
         );
 
-
-        throw error;
-
+        return null;
     }
-
 }
 
 
+// ============================================================
+// LOAD ALL ASSIGNED COURSES
+// ============================================================
 
-/* =========================================================
-   AUTH
-========================================================= */
+async function loadStudentCourses(courseIds) {
 
-onAuthStateChanged(
-    auth,
-    async function (user) {
-
-        try {
-
-            /* =============================================
-               NOT LOGGED IN
-            ============================================= */
-
-            if (!user) {
-
-                hidePageLoading();
-
-                window.location.href =
-                    "login.html";
-
-                return;
-
-            }
-
-
-            currentUser =
-                user;
-
-
-            const email =
-                (
-                    user.email ||
-                    ""
-                )
-                    .trim()
-                    .toLowerCase();
-
-
-            console.log(
-                "Logged in:",
-                email
-            );
-
-
-            /* =============================================
-               GET STUDENT FROM FIRESTORE
-            ============================================= */
-
-            const student =
-                await getStudentData(
-                    user
-                );
-
-
-            /* =============================================
-               STUDENT NOT FOUND
-            ============================================= */
-
-            if (!student) {
-
-                console.error(
-                    "Student not found:",
-                    email
-                );
-
-
-                hidePageLoading();
-
-
-                alert(
-                    "Student account is not configured yet. Please contact FJMC Academy."
-                );
-
-
-                await signOut(
-                    auth
-                );
-
-
-                window.location.href =
-                    "login.html";
-
-
-                return;
-
-            }
-
-
-            /* =============================================
-               ADMIN SHOULD NOT USE STUDENT DASHBOARD
-            ============================================= */
-
-            if (
-                student.role ===
-                "admin"
-            ) {
-
-                console.log(
-                    "Admin account detected."
-                );
-
-            }
-
-
-            /* =============================================
-               SESSION
-            ============================================= */
-
-            sessionStorage.setItem(
-                "loggedInStudent",
-                email
-            );
-
-
-            sessionStorage.setItem(
-                "firebaseUID",
-                user.uid
-            );
-
-
-            /* =============================================
-               WELCOME
-            ============================================= */
-
-            if (studentName) {
-
-                studentName.textContent =
-                    "Welcome, " +
-                    student.name;
-
-            }
-
-
-            /* =============================================
-               DEVICE CHECK
-            ============================================= */
-
-            const allowed =
-                await registerDevice(
-                    user
-                );
-
-
-            console.log(
-                "Device allowed:",
-                allowed
-            );
-
-
-            if (!allowed) {
-
-                hidePageLoading();
-
-                await signOut(
-                    auth
-                );
-
-                return;
-
-            }
-
-
-            /* =============================================
-               SHOW COURSES
-            ============================================= */
-
-            showStudentCourses(
-                student
-            );
-
-
-            /* =============================================
-               HIDE LOADING
-            ============================================= */
-
-            hidePageLoading();
-
-
-            /* =============================================
-               HEARTBEAT
-            ============================================= */
-
-            startDeviceHeartbeat();
-
-
-        } catch (error) {
-
-            console.error(
-                "Dashboard error:",
-                error
-            );
-
-
-            hidePageLoading();
-
-
-            alert(
-                "Dashboard could not be loaded. Please login again."
-            );
-
-
-            try {
-
-                await signOut(
-                    auth
-                );
-
-            } catch (
-                signOutError
-            ) {
-
-                console.error(
-                    "Sign out error:",
-                    signOutError
-                );
-
-            }
-
-
-            window.location.href =
-                "login.html";
-
-        }
-
+    if (!Array.isArray(courseIds)) {
+        return [];
     }
-);
+
+    const validIds =
+        courseIds.filter(
+            id =>
+                typeof id === "string" &&
+                id.trim() !== ""
+        );
+
+    const courses =
+        await Promise.all(
+            validIds.map(
+                courseId =>
+                    loadCourse(courseId)
+            )
+        );
+
+    return courses.filter(Boolean);
+}
 
 
+// ============================================================
+// DEVICE COLLECTION
+// ============================================================
 
-/* =========================================================
-   DEVICES COLLECTION
-========================================================= */
-
-function devicesCollection(
-    user
-) {
+function getDevicesCollection(user) {
 
     return collection(
         db,
@@ -807,537 +338,228 @@ function devicesCollection(
         user.uid,
         "devices"
     );
-
 }
 
 
+// ============================================================
+// GET ACTIVE DEVICES
+// ============================================================
 
-/* =========================================================
-   COUNT ACTIVE DEVICE OF TYPE
-========================================================= */
+async function getActiveDevices(user) {
 
-async function countActiveDeviceType(
-    user,
-    type,
-    now,
-    excludeDeviceId = null
-) {
+    const devicesRef =
+        getDevicesCollection(user);
 
-    const devices =
-        await getDocs(
-            devicesCollection(
-                user
-            )
-        );
+    const snapshot =
+        await getDocs(devicesRef);
 
+    const now =
+        new Date();
 
-    let count = 0;
+    const activeDevices = [];
 
+    snapshot.forEach(deviceDoc => {
 
-    devices.forEach(
-        function (deviceDoc) {
+        const data =
+            deviceDoc.data();
 
-            if (
-                excludeDeviceId &&
-                deviceDoc.id ===
-                    excludeDeviceId
-            ) {
-
-                return;
-
-            }
-
-
-            const data =
-                deviceDoc.data();
-
-
-            const expiry =
-                Number(
-                    data.expiresAt ||
-                    0
-                );
-
-
-            const deviceType =
-                data.deviceType ||
-                "";
-
-
-            if (
-                data.active === true &&
-                expiry > now &&
-                deviceType === type
-            ) {
-
-                count++;
-
-            }
-
-        }
-    );
-
-
-    return count;
-
-}
-
-
-
-/* =========================================================
-   COUNT ALL ACTIVE DEVICES
-========================================================= */
-
-async function countAllActiveDevices(
-    user,
-    now,
-    excludeDeviceId = null
-) {
-
-    const devices =
-        await getDocs(
-            devicesCollection(
-                user
-            )
-        );
-
-
-    let count = 0;
-
-
-    devices.forEach(
-        function (deviceDoc) {
-
-            if (
-                excludeDeviceId &&
-                deviceDoc.id ===
-                    excludeDeviceId
-            ) {
-
-                return;
-
-            }
-
-
-            const data =
-                deviceDoc.data();
-
-
-            const expiry =
-                Number(
-                    data.expiresAt ||
-                    0
-                );
-
-
-            if (
-                data.active === true &&
-                expiry > now
-            ) {
-
-                count++;
-
-            }
-
-        }
-    );
-
-
-    return count;
-
-}
-
-
-
-/* =========================================================
-   REGISTER / CHECK DEVICE
-
-   RULE:
-
-   1 Mobile
-   +
-   1 Desktop/Laptop
-
-   Fixed 3-day reservation.
-
-   Logout does NOT free slot.
-========================================================= */
-
-async function registerDevice(
-    user
-) {
-
-    try {
-
-        const deviceRef =
-            doc(
-                db,
-                "users",
-                user.uid,
-                "devices",
-                deviceId
+        const expiresAt =
+            timestampToDate(
+                data.expiresAt
             );
-
-
-        const now =
-            Date.now();
-
-
-        /* =============================================
-           CURRENT DEVICE
-        ============================================= */
-
-        const currentDevice =
-            await getDoc(
-                deviceRef
-            );
-
-
-        /* =============================================
-           DEVICE EXISTS
-        ============================================= */
 
         if (
-            currentDevice.exists()
+            data.active === true &&
+            expiresAt &&
+            expiresAt > now
         ) {
 
-            const data =
-                currentDevice.data();
+            activeDevices.push({
+
+                id: deviceDoc.id,
+
+                ...data,
+
+                expiresDate: expiresAt
+            });
+        }
+    });
+
+    return activeDevices;
+}
 
 
-            const expiresAt =
-                Number(
-                    data.expiresAt ||
-                    0
-                );
+// ============================================================
+// REGISTER DEVICE
+// ============================================================
+
+async function registerDevice(user) {
+
+    const deviceId =
+        getDeviceId();
+
+    const deviceType =
+        getDeviceType();
+
+    const deviceRef =
+        doc(
+            db,
+            "users",
+            user.uid,
+            "devices",
+            deviceId
+        );
+
+    const deviceSnap =
+        await getDoc(deviceRef);
 
 
-            const savedDeviceType =
-                data.deviceType ||
-                currentDeviceType;
+    // --------------------------------------------------------
+    // CURRENT DEVICE ALREADY EXISTS
+    // --------------------------------------------------------
 
+    if (deviceSnap.exists()) {
 
-            /* =========================================
-               STILL ACTIVE
-            ========================================= */
+        const data =
+            deviceSnap.data();
 
-            if (
-                expiresAt > now
-            ) {
-
-                await setDoc(
-
-                    deviceRef,
-
-                    {
-
-                        email:
-                            user.email,
-
-                        active:
-                            true,
-
-                        lastSeen:
-                            now,
-
-                        deviceType:
-                            savedDeviceType
-
-                    },
-
-                    {
-                        merge: true
-                    }
-
-                );
-
-
-                return true;
-
-            }
-
-
-            /* =========================================
-               EXPIRED
-            ========================================= */
-
-            const sameTypeDevices =
-                await countActiveDeviceType(
-                    user,
-                    currentDeviceType,
-                    now,
-                    deviceId
-                );
-
-
-            if (
-                sameTypeDevices >= 1
-            ) {
-
-                showDeviceLimitMessage();
-
-                return false;
-
-            }
-
-
-            const allActiveDevices =
-                await countAllActiveDevices(
-                    user,
-                    now,
-                    deviceId
-                );
-
-
-            if (
-                allActiveDevices >=
-                MAX_DEVICES
-            ) {
-
-                showDeviceLimitMessage();
-
-                return false;
-
-            }
-
-
-            /* =========================================
-               NEW 3-DAY RESERVATION
-            ========================================= */
-
-            await setDoc(
-
-                deviceRef,
-
-                {
-
-                    email:
-                        user.email,
-
-                    active:
-                        true,
-
-                    deviceType:
-                        currentDeviceType,
-
-                    lastSeen:
-                        now,
-
-                    expiresAt:
-                        now +
-                        DEVICE_TIMEOUT,
-
-                    renewedAt:
-                        serverTimestamp()
-
-                },
-
-                {
-                    merge: true
-                }
-
+        const expiresAt =
+            timestampToDate(
+                data.expiresAt
             );
 
+        // Current reservation still valid
+        if (
+            data.active === true &&
+            expiresAt &&
+            expiresAt > new Date()
+        ) {
+
+            await updateDoc(
+                deviceRef,
+                {
+                    lastSeen:
+                        serverTimestamp()
+                }
+            );
 
             return true;
-
         }
+    }
 
 
+    // --------------------------------------------------------
+    // CHECK OTHER DEVICES
+    // --------------------------------------------------------
 
-        /* =============================================
-           COMPLETELY NEW DEVICE
-        ============================================= */
-
-        const sameTypeDevices =
-            await countActiveDeviceType(
-                user,
-                currentDeviceType,
-                now
-            );
+    const activeDevices =
+        await getActiveDevices(user);
 
 
-        if (
-            sameTypeDevices >= 1
-        ) {
-
-            showDeviceLimitMessage();
-
-            return false;
-
-        }
-
-
-        const allActiveDevices =
-            await countAllActiveDevices(
-                user,
-                now
-            );
-
-
-        if (
-            allActiveDevices >=
-            MAX_DEVICES
-        ) {
-
-            showDeviceLimitMessage();
-
-            return false;
-
-        }
-
-
-        /* =============================================
-           CREATE DEVICE
-        ============================================= */
-
-        await setDoc(
-
-            deviceRef,
-
-            {
-
-                email:
-                    user.email,
-
-                active:
-                    true,
-
-                deviceType:
-                    currentDeviceType,
-
-                lastSeen:
-                    now,
-
-                expiresAt:
-                    now +
-                    DEVICE_TIMEOUT,
-
-                createdAt:
-                    serverTimestamp()
-
-            }
-
+    const otherDevices =
+        activeDevices.filter(
+            device =>
+                device.id !== deviceId
         );
 
 
-        console.log(
-            "New device registered:",
-            currentDeviceType
+    // --------------------------------------------------------
+    // SAME DEVICE TYPE CHECK
+    // --------------------------------------------------------
+
+    const sameTypeDevice =
+        otherDevices.find(
+            device =>
+                device.deviceType === deviceType
         );
 
 
-        return true;
-
-
-    } catch (error) {
-
-        console.error(
-            "Device registration error:",
-            error
-        );
-
-
-        hidePageLoading();
-
+    if (sameTypeDevice) {
 
         alert(
-            "Device verification failed.\n\n" +
-            "Please check your internet connection and try again."
+            "You already have an active " +
+            deviceType +
+            " device.\n\n" +
+            "Maximum allowed:\n" +
+            "1 Mobile + 1 Desktop/Laptop."
         );
-
 
         return false;
-
     }
 
-}
 
+    // --------------------------------------------------------
+    // MAXIMUM TWO DEVICES
+    // --------------------------------------------------------
 
+    if (otherDevices.length >= MAX_DEVICES) {
 
-/* =========================================================
-   DEVICE LIMIT MESSAGE
-========================================================= */
-
-function showDeviceLimitMessage() {
-
-    const message =
-        document.getElementById(
-            "deviceLimitMessage"
+        alert(
+            "Maximum 2 devices are already active.\n\n" +
+            "Allowed:\n" +
+            "1 Mobile + 1 Desktop/Laptop."
         );
 
-
-    const text =
-        "Maximum 2 devices are already active for this account.";
-
-
-    if (message) {
-
-        message.textContent =
-            text;
-
-
-        message.style.display =
-            "block";
-
-
-        return;
-
+        return false;
     }
 
 
-    alert(
-        text
+    // --------------------------------------------------------
+    // CREATE / RENEW DEVICE
+    // --------------------------------------------------------
+
+    await setDoc(
+        deviceRef,
+        {
+
+            deviceType:
+
+                deviceSnap.exists()
+                    ? (
+                        deviceSnap.data().deviceType ||
+                        deviceType
+                    )
+                    : deviceType,
+
+            active: true,
+
+            createdAt:
+                deviceSnap.exists()
+                    ? (
+                        deviceSnap.data().createdAt ||
+                        serverTimestamp()
+                    )
+                    : serverTimestamp(),
+
+            lastSeen:
+                serverTimestamp(),
+
+            expiresAt:
+                getExpiryDate()
+        },
+        {
+            merge: true
+        }
     );
 
+    return true;
 }
 
 
+// ============================================================
+// HEARTBEAT
+// ============================================================
 
-/* =========================================================
-   HEARTBEAT
-========================================================= */
-
-function startDeviceHeartbeat() {
-
-    if (
-        deviceHeartbeat
-    ) {
-
-        clearInterval(
-            deviceHeartbeat
-        );
-
-    }
-
-
-    updateDeviceHeartbeat();
-
-
-    deviceHeartbeat =
-        setInterval(
-            updateDeviceHeartbeat,
-            2 * 60 * 1000
-        );
-
-}
-
-
-
-/* =========================================================
-   UPDATE DEVICE HEARTBEAT
-========================================================= */
-
-async function updateDeviceHeartbeat() {
+async function heartbeat() {
 
     if (!currentUser) {
-
         return;
-
     }
 
-
     try {
+
+        const deviceId =
+            getDeviceId();
 
         const deviceRef =
             doc(
@@ -1348,110 +570,47 @@ async function updateDeviceHeartbeat() {
                 deviceId
             );
 
+        const snap =
+            await getDoc(deviceRef);
 
-        const snapshot =
-            await getDoc(
-                deviceRef
-            );
+        if (!snap.exists()) {
 
-
-        if (
-            !snapshot.exists()
-        ) {
-
+            await forceLogout();
             return;
-
         }
-
 
         const data =
-            snapshot.data();
-
-
-        const now =
-            Date.now();
-
+            snap.data();
 
         const expiresAt =
-            Number(
-                data.expiresAt ||
-                0
+            timestampToDate(
+                data.expiresAt
             );
 
 
-        /* =============================================
-           EXPIRED
-        ============================================= */
-
+        // Reservation expired
         if (
-            expiresAt > 0 &&
-            expiresAt <= now
+            !expiresAt ||
+            expiresAt <= new Date()
         ) {
 
-            console.log(
-                "Device reservation expired."
-            );
-
-
-            if (
-                deviceHeartbeat
-            ) {
-
-                clearInterval(
-                    deviceHeartbeat
-                );
-
-
-                deviceHeartbeat =
-                    null;
-
-            }
-
-
-            hidePageLoading();
-
-
             alert(
-                "Your device access has expired. Please login again."
+                "Your device reservation has expired. Please login again."
             );
 
-
-            await signOut(
-                auth
-            );
-
-
-            window.location.href =
-                "login.html";
-
+            await forceLogout();
 
             return;
-
         }
 
 
-        /* =============================================
-           UPDATE LAST SEEN ONLY
-
-           DO NOT CHANGE expiresAt
-        ============================================= */
-
         await updateDoc(
-
             deviceRef,
-
             {
-
                 lastSeen:
-                    now,
-
-                active:
-                    true
-
+                    serverTimestamp()
             }
-
         );
-
 
     } catch (error) {
 
@@ -1459,481 +618,436 @@ async function updateDeviceHeartbeat() {
             "Heartbeat error:",
             error
         );
-
     }
-
 }
 
 
+// ============================================================
+// START HEARTBEAT
+// ============================================================
 
-/* =========================================================
-   SHOW STUDENT COURSES
-========================================================= */
+function startHeartbeat() {
 
-function showStudentCourses(
-    student
-) {
+    stopHeartbeat();
 
-    if (
-        !coursesContainer
-    ) {
+    heartbeatTimer =
+        setInterval(
+            heartbeat,
+            HEARTBEAT_INTERVAL
+        );
+}
+
+
+// ============================================================
+// STOP HEARTBEAT
+// ============================================================
+
+function stopHeartbeat() {
+
+    if (heartbeatTimer) {
+
+        clearInterval(
+            heartbeatTimer
+        );
+
+        heartbeatTimer = null;
+    }
+}
+
+
+// ============================================================
+// FORCE LOGOUT
+// ============================================================
+
+async function forceLogout() {
+
+    stopHeartbeat();
+
+    sessionStorage.removeItem(
+        "fjmcStudentEmail"
+    );
+
+    sessionStorage.removeItem(
+        "fjmcStudentUid"
+    );
+
+    try {
+
+        await signOut(auth);
+
+    } catch (error) {
 
         console.error(
-            "coursesContainer not found"
+            "Logout error:",
+            error
+        );
+    }
+
+    window.location.href =
+        "login.html";
+}
+
+
+// ============================================================
+// COURSE CARD
+// ============================================================
+
+function createCourseCard(course) {
+
+    const card =
+        document.createElement("div");
+
+    card.className =
+        "course-card";
+
+
+    const title =
+        escapeHTML(
+            course.title ||
+            course.name ||
+            course.id
         );
 
 
-        hidePageLoading();
-
-        return;
-
-    }
-
-
-    coursesContainer.innerHTML =
-        "";
+    const description =
+        escapeHTML(
+            course.description ||
+            ""
+        );
 
 
-    /* =============================================
-       NO COURSE
-    ============================================= */
+    card.innerHTML = `
 
-    if (
-        !student.courses ||
-        student.courses.length === 0
-    ) {
+        <div class="course-card-content">
+
+            <h3>
+                ${title}
+            </h3>
+
+            ${
+                description
+                    ? `<p>${description}</p>`
+                    : ""
+            }
+
+            <div class="course-buttons">
+            </div>
+
+        </div>
+    `;
+
+
+    const buttonsContainer =
+        card.querySelector(
+            ".course-buttons"
+        );
+
+
+    const contents =
+        Array.isArray(course.contents)
+            ? course.contents
+            : [];
+
+
+    // --------------------------------------------------------
+    // CONTENT BUTTONS
+    // --------------------------------------------------------
+
+    contents.forEach(
+        (content, index) => {
+
+            if (!content) {
+                return;
+            }
+
+            const type =
+                String(
+                    content.type || ""
+                ).toLowerCase();
+
+            const contentTitle =
+                content.title ||
+                `Lecture ${index + 1}`;
+
+
+            // ------------------------------------------------
+            // YOUTUBE
+            // ------------------------------------------------
+
+            if (
+                type === "youtube" ||
+                type === "video"
+            ) {
+
+                const btn =
+                    document.createElement(
+                        "button"
+                    );
+
+                btn.className =
+                    "course-btn";
+
+                btn.textContent =
+                    contentTitle;
+
+                btn.addEventListener(
+                    "click",
+                    () => {
+
+                        openYouTubeModal(
+                            content.url,
+                            contentTitle
+                        );
+                    }
+                );
+
+                buttonsContainer.appendChild(
+                    btn
+                );
+
+                return;
+            }
+
+
+            // ------------------------------------------------
+            // LOCAL VIDEO
+            // ------------------------------------------------
+
+            if (
+                type === "local-video" ||
+                type === "mp4" ||
+                type === "local"
+            ) {
+
+                const btn =
+                    document.createElement(
+                        "button"
+                    );
+
+                btn.className =
+                    "course-btn";
+
+                btn.textContent =
+                    contentTitle;
+
+                btn.addEventListener(
+                    "click",
+                    () => {
+
+                        openVideoModal(
+                            content.url,
+                            contentTitle
+                        );
+                    }
+                );
+
+                buttonsContainer.appendChild(
+                    btn
+                );
+
+                return;
+            }
+
+
+            // ------------------------------------------------
+            // PDF
+            // ------------------------------------------------
+
+            if (type === "pdf") {
+
+                const btn =
+                    document.createElement(
+                        "button"
+                    );
+
+                btn.className =
+                    "course-btn";
+
+                btn.textContent =
+                    contentTitle;
+
+                btn.addEventListener(
+                    "click",
+                    () => {
+
+                        openPDFModal(
+                            content.url,
+                            contentTitle
+                        );
+                    }
+                );
+
+                buttonsContainer.appendChild(
+                    btn
+                );
+
+                return;
+            }
+
+
+            // ------------------------------------------------
+            // LIVE CLASS
+            // ------------------------------------------------
+
+            if (
+                type === "live" ||
+                type === "live-class"
+            ) {
+
+                const btn =
+                    document.createElement(
+                        "button"
+                    );
+
+                btn.className =
+                    "course-btn";
+
+                btn.textContent =
+                    contentTitle;
+
+                btn.addEventListener(
+                    "click",
+                    () => {
+
+                        if (
+                            content.url
+                        ) {
+
+                            window.open(
+                                content.url,
+                                "_blank",
+                                "noopener,noreferrer"
+                            );
+                        }
+                    }
+                );
+
+                buttonsContainer.appendChild(
+                    btn
+                );
+
+                return;
+            }
+
+        }
+    );
+
+
+    // --------------------------------------------------------
+    // TEST BUTTON
+    // --------------------------------------------------------
+
+    const testBtn =
+        document.createElement(
+            "button"
+        );
+
+    testBtn.className =
+        "course-btn test-btn";
+
+    testBtn.textContent =
+        "Take Test";
+
+    testBtn.addEventListener(
+        "click",
+        () => {
+
+            window.location.href =
+                `test.html?course=${encodeURIComponent(course.id)}`;
+        }
+    );
+
+    buttonsContainer.appendChild(
+        testBtn
+    );
+
+
+    return card;
+}
+
+
+// ============================================================
+// SHOW STUDENT COURSES
+// ============================================================
+
+async function showStudentCourses(student) {
+
+    coursesContainer.innerHTML = "";
+
+    const courseIds =
+        Array.isArray(student.courses)
+            ? student.courses
+            : [];
+
+
+    if (courseIds.length === 0) {
 
         coursesContainer.innerHTML = `
 
-            <div class="no-course">
+            <div class="no-courses">
 
                 <h3>
-                    No Course Assigned
+                    No courses assigned
                 </h3>
 
                 <p>
-                    Please contact FJMC Academy.
+                    Your courses will appear here
+                    after they are assigned by the admin.
                 </p>
 
             </div>
 
         `;
 
-
-        hidePageLoading();
-
         return;
-
     }
 
 
+    const courses =
+        await loadStudentCourses(
+            courseIds
+        );
 
-    /* =============================================
-       LOOP COURSES
-    ============================================= */
 
-    student.courses.forEach(
-        function (courseId) {
+    if (courses.length === 0) {
 
-            const course =
-                COURSES[
-                    courseId
-                ];
+        coursesContainer.innerHTML = `
 
+            <div class="no-courses">
 
-            /*
-               Course ID Firebase me hai
-               lekin COURSE DATA me nahi mila.
-            */
+                <h3>
+                    No courses available
+                </h3>
 
-            if (!course) {
+                <p>
+                    Please contact the academy administrator.
+                </p>
 
-                console.warn(
-                    "Course not found:",
-                    courseId
-                );
+            </div>
 
-                return;
+        `;
 
-            }
+        return;
+    }
 
 
-            const courseCard =
-                document.createElement(
-                    "div"
-                );
+    courses.forEach(
+        course => {
 
-
-            courseCard.className =
-                "course-card";
-
-
-            let contentHTML =
-                "";
-
-
-            /* =========================================
-               COURSE CONTENT
-            ========================================= */
-
-            course.contents.forEach(
-                function (content) {
-
-
-                    /* =============================
-                       YOUTUBE
-                    ============================= */
-
-                    if (
-                        content.type ===
-                        "video"
-                    ) {
-
-                        contentHTML += `
-
-                            <button
-
-                                class="content-button video-button"
-
-                                data-type="youtube"
-
-                                data-url="${encodeURIComponent(
-                                    content.url
-                                )}"
-
-                                data-title="${encodeURIComponent(
-                                    content.title
-                                )}">
-
-                                ▶ ${escapeHTML(
-                                    content.title
-                                )}
-
-                            </button>
-
-                        `;
-
-                    }
-
-
-
-                    /* =============================
-                       LOCAL VIDEO
-                    ============================= */
-
-                    else if (
-                        content.type ===
-                        "local-video"
-                    ) {
-
-                        contentHTML += `
-
-                            <button
-
-                                class="content-button video-button"
-
-                                data-type="local"
-
-                                data-url="${encodeURIComponent(
-                                    content.url
-                                )}"
-
-                                data-title="${encodeURIComponent(
-                                    content.title
-                                )}">
-
-                                ▶ ${escapeHTML(
-                                    content.title
-                                )}
-
-                            </button>
-
-                        `;
-
-                    }
-
-
-
-                    /* =============================
-                       PDF
-                    ============================= */
-
-                    else if (
-                        content.type ===
-                        "pdf"
-                    ) {
-
-                        contentHTML += `
-
-                            <button
-
-                                class="content-button pdf-button"
-
-                                data-type="pdf"
-
-                                data-url="${encodeURIComponent(
-                                    content.url
-                                )}"
-
-                                data-title="${encodeURIComponent(
-                                    content.title
-                                )}">
-
-                                📄 ${escapeHTML(
-                                    content.title
-                                )}
-
-                            </button>
-
-                        `;
-
-                    }
-
-
-
-                    /* =============================
-                       LIVE
-                    ============================= */
-
-                    else if (
-                        content.type ===
-                        "live"
-                    ) {
-
-                        contentHTML += `
-
-                            <button
-
-                                class="content-button live-button"
-
-                                data-type="live"
-
-                                data-url="${encodeURIComponent(
-                                    content.url
-                                )}">
-
-                                🔴 ${escapeHTML(
-                                    content.title
-                                )}
-
-                            </button>
-
-                        `;
-
-                    }
-
-                }
-            );
-
-
-
-            /* =========================================
-               COURSE CARD
-            ========================================= */
-
-            courseCard.innerHTML = `
-
-                <div class="course-title">
-
-                    <h3>
-                        ${escapeHTML(
-                            course.title
-                        )}
-                    </h3>
-
-                    <p>
-                        ${escapeHTML(
-                            course.description
-                        )}
-                    </p>
-
-                </div>
-
-
-                <div class="course-content">
-
-                    ${contentHTML}
-
-                </div>
-
-
-                <div
-                    style="
-                        margin-top:15px;
-                        padding-top:15px;
-                        border-top:1px solid rgba(255,255,255,.15);
-                    "
-                >
-
-                    <button
-
-                        class="fjmc-test-button"
-
-                        data-test-course="${encodeURIComponent(
-                            courseId
-                        )}"
-                    >
-
-                        📝
-                        ${escapeHTML(
-                            course.title
-                        )}
-                        Test
-
-                    </button>
-
-                </div>
-
-            `;
-
+            const card =
+                createCourseCard(course);
 
             coursesContainer.appendChild(
-                courseCard
+                card
             );
-
         }
     );
-
-
-
-    /* =====================================================
-       TEST BUTTONS
-    ===================================================== */
-
-    const testButtons =
-        coursesContainer.querySelectorAll(
-            ".fjmc-test-button"
-        );
-
-
-    testButtons.forEach(
-        function (button) {
-
-            button.addEventListener(
-                "click",
-                function () {
-
-                    const courseId =
-                        decodeURIComponent(
-                            button.dataset.testCourse
-                        );
-
-
-                    window.location.href =
-                        "test.html?course=" +
-                        encodeURIComponent(
-                            courseId
-                        );
-
-                }
-            );
-
-        }
-    );
-
-
-
-    /* =====================================================
-       CONTENT BUTTONS
-    ===================================================== */
-
-    const buttons =
-        coursesContainer.querySelectorAll(
-            ".content-button"
-        );
-
-
-    buttons.forEach(
-        function (button) {
-
-            button.addEventListener(
-                "click",
-                function () {
-
-                    const type =
-                        button.dataset.type;
-
-
-                    const url =
-                        decodeURIComponent(
-                            button.dataset.url
-                        );
-
-
-                    const title =
-                        button.dataset.title
-                            ? decodeURIComponent(
-                                button.dataset.title
-                            )
-                            : "";
-
-
-                    if (
-                        type ===
-                        "youtube"
-                    ) {
-
-                        openYouTubeVideo(
-                            url,
-                            title
-                        );
-
-                    }
-
-
-                    else if (
-                        type ===
-                        "local"
-                    ) {
-
-                        openLocalVideo(
-                            url,
-                            title
-                        );
-
-                    }
-
-
-                    else if (
-                        type ===
-                        "pdf"
-                    ) {
-
-                        openPDFViewer(
-                            url,
-                            title
-                        );
-
-                    }
-
-
-                    else if (
-                        type ===
-                        "live"
-                    ) {
-
-                        openLiveClass(
-                            url
-                        );
-
-                    }
-
-                }
-            );
-
-        }
-    );
-
-
-    hidePageLoading();
-
 }
 
 
-
-/* =========================================================
-   CREATE MODAL
-========================================================= */
+// ============================================================
+// MODAL
+// ============================================================
 
 function createModal() {
 
@@ -1942,11 +1056,8 @@ function createModal() {
             "fjmcContentModal"
         );
 
-
     if (modal) {
-
         return modal;
-
     }
 
 
@@ -1955,95 +1066,29 @@ function createModal() {
             "div"
         );
 
-
     modal.id =
         "fjmcContentModal";
 
-
     modal.innerHTML = `
 
-        <div
+        <div class="fjmc-modal-overlay">
 
-            id="fjmcModalOverlay"
+            <div class="fjmc-modal">
 
-            style="
-                position:fixed;
-                inset:0;
-                background:rgba(0,0,0,.85);
-                z-index:999999;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                padding:15px;
-            "
-        >
+                <button
+                    class="fjmc-modal-close"
+                    type="button"
+                >
+                    ×
+                </button>
 
-            <div
-
-                style="
-                    width:100%;
-                    max-width:1100px;
-                    max-height:95vh;
-                    background:#111;
-                    border-radius:12px;
-                    overflow:hidden;
-                    position:relative;
-                    display:flex;
-                    flex-direction:column;
-                "
-            >
-
+                <h2
+                    class="fjmc-modal-title"
+                ></h2>
 
                 <div
-
-                    style="
-                        display:flex;
-                        align-items:center;
-                        justify-content:space-between;
-                        padding:10px 15px;
-                        background:#182033;
-                        color:white;
-                    "
-                >
-
-                    <strong
-                        id="fjmcModalTitle"
-                    >
-                    </strong>
-
-
-                    <button
-
-                        id="fjmcModalClose"
-
-                        style="
-                            border:0;
-                            background:#e63946;
-                            color:white;
-                            width:38px;
-                            height:38px;
-                            border-radius:50%;
-                            font-size:20px;
-                            cursor:pointer;
-                        "
-                    >
-                        ×
-                    </button>
-
-                </div>
-
-
-                <div
-
-                    id="fjmcModalBody"
-
-                    style="
-                        flex:1;
-                        overflow:auto;
-                        background:#111;
-                    "
-                >
-                </div>
+                    class="fjmc-modal-body"
+                ></div>
 
             </div>
 
@@ -2057,314 +1102,287 @@ function createModal() {
     );
 
 
-    document
-        .getElementById(
-            "fjmcModalClose"
-        )
-        .addEventListener(
-            "click",
-            closeModal
+    const closeBtn =
+        modal.querySelector(
+            ".fjmc-modal-close"
         );
 
 
-    document
-        .getElementById(
-            "fjmcModalOverlay"
-        )
-        .addEventListener(
-            "click",
-            function (event) {
+    const overlay =
+        modal.querySelector(
+            ".fjmc-modal-overlay"
+        );
 
-                if (
-                    event.target.id ===
-                    "fjmcModalOverlay"
-                ) {
 
-                    closeModal();
+    closeBtn.addEventListener(
+        "click",
+        closeModal
+    );
 
-                }
 
+    overlay.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target === overlay
+            ) {
+
+                closeModal();
             }
-        );
+        }
+    );
 
 
     return modal;
-
 }
 
 
+// ============================================================
+// OPEN MODAL
+// ============================================================
 
-/* =========================================================
-   CLOSE MODAL
-========================================================= */
+function openModal(
+    title,
+    content
+) {
 
-function closeModal() {
+    const modal =
+        createModal();
 
-    const watermark =
-        document.getElementById(
-            "fjmcScreenWatermark"
+
+    modal.querySelector(
+        ".fjmc-modal-title"
+    ).textContent =
+        title || "";
+
+
+    const body =
+        modal.querySelector(
+            ".fjmc-modal-body"
         );
 
 
-    if (watermark) {
+    body.innerHTML = "";
 
-        watermark.remove();
+    body.appendChild(
+        content
+    );
 
-    }
 
+    modal.style.display =
+        "block";
+
+
+    document.body.style.overflow =
+        "hidden";
+}
+
+
+// ============================================================
+// CLOSE MODAL
+// ============================================================
+
+function closeModal() {
 
     const modal =
         document.getElementById(
             "fjmcContentModal"
         );
 
-
-    if (modal) {
-
-        modal.remove();
-
+    if (!modal) {
+        return;
     }
 
+
+    const body =
+        modal.querySelector(
+            ".fjmc-modal-body"
+        );
+
+
+    body.innerHTML = "";
+
+    modal.style.display =
+        "none";
+
+
+    document.body.style.overflow =
+        "";
 }
 
 
+// ============================================================
+// YOUTUBE MODAL
+// ============================================================
 
-/* =========================================================
-   YOUTUBE VIDEO
-========================================================= */
-
-function openYouTubeVideo(
+function openYouTubeModal(
     url,
     title
 ) {
 
-    const modal =
-        createModal();
+    if (!url) {
+        return;
+    }
 
 
-    const modalTitle =
-        document.getElementById(
-            "fjmcModalTitle"
-        );
+    let videoId = "";
 
 
-    const body =
-        document.getElementById(
-            "fjmcModalBody"
-        );
+    try {
+
+        const parsed =
+            new URL(url);
 
 
-    modalTitle.textContent =
-        title;
+        if (
+            parsed.hostname.includes(
+                "youtu.be"
+            )
+        ) {
+
+            videoId =
+                parsed.pathname.substring(1);
+
+        } else {
+
+            videoId =
+                parsed.searchParams.get(
+                    "v"
+                ) || "";
+        }
+
+    } catch {
+
+        videoId =
+            url;
+    }
 
 
-    body.innerHTML = `
-
-        <div
-
-            style="
-                width:100%;
-                aspect-ratio:16/9;
-                background:#000;
-            "
-        >
-
-            <iframe
-
-                src="${url}"
-
-                title="${escapeHTML(
-                    title
-                )}"
-
-                style="
-                    width:100%;
-                    height:100%;
-                    border:0;
-                "
-
-                allow="
-                    accelerometer;
-                    autoplay;
-                    clipboard-write;
-                    encrypted-media;
-                    gyroscope;
-                    picture-in-picture;
-                    web-share
-                "
-
-                allowfullscreen>
-            </iframe>
-
-        </div>
-
-    `;
-
-}
-
-
-
-/* =========================================================
-   LOCAL VIDEO
-========================================================= */
-
-function openLocalVideo(
-    url,
-    title
-) {
-
-    const modal =
-        createModal();
-
-
-    const modalTitle =
-        document.getElementById(
-            "fjmcModalTitle"
-        );
-
-
-    const body =
-        document.getElementById(
-            "fjmcModalBody"
-        );
-
-
-    modalTitle.textContent =
-        title;
-
-
-    body.innerHTML = `
-
-        <video
-
-            controls
-
-            controlsList="nodownload"
-
-            disablePictureInPicture
-
-            playsinline
-
-            style="
-                width:100%;
-                max-height:80vh;
-                display:block;
-                background:#000;
-            "
-        >
-
-            <source
-
-                src="${url}"
-
-                type="video/mp4"
-            >
-
-            Your browser does not support video.
-
-        </video>
-
-    `;
-
-}
-
-
-
-/* =========================================================
-   LIVE CLASS
-========================================================= */
-
-function openLiveClass(
-    url
-) {
-
-    if (
-        !url ||
-        url === "#"
-    ) {
+    if (!videoId) {
 
         alert(
-            "Live class link is not available yet."
+            "Invalid YouTube URL."
         );
 
         return;
-
     }
 
 
-    window.open(
-        url,
-        "_blank",
-        "noopener,noreferrer"
-    );
+    const iframe =
+        document.createElement(
+            "iframe"
+        );
 
+
+    iframe.src =
+        `https://www.youtube.com/embed/${encodeURIComponent(videoId)}`;
+
+    iframe.width =
+        "100%";
+
+    iframe.height =
+        "500";
+
+    iframe.frameBorder =
+        "0";
+
+    iframe.allow =
+        "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+
+    iframe.allowFullscreen =
+        true;
+
+
+    openModal(
+        title,
+        iframe
+    );
 }
 
 
+// ============================================================
+// LOCAL VIDEO MODAL
+// ============================================================
 
-/* =========================================================
-   PDF VIEWER
-========================================================= */
-
-async function openPDFViewer(
+function openVideoModal(
     url,
     title
 ) {
 
-    const modal =
-        createModal();
+    if (!url) {
+        return;
+    }
 
 
-    const modalTitle =
-        document.getElementById(
-            "fjmcModalTitle"
+    const video =
+        document.createElement(
+            "video"
         );
 
 
-    const body =
-        document.getElementById(
-            "fjmcModalBody"
+    video.src =
+        url;
+
+    video.controls =
+        true;
+
+    video.autoplay =
+        true;
+
+    video.controlsList =
+        "nodownload";
+
+    video.disablePictureInPicture =
+        true;
+
+    video.style.width =
+        "100%";
+
+    video.style.maxHeight =
+        "75vh";
+
+
+    openModal(
+        title,
+        video
+    );
+}
+
+
+// ============================================================
+// PDF MODAL
+// ============================================================
+
+async function openPDFModal(
+    url,
+    title
+) {
+
+    if (!url) {
+        return;
+    }
+
+
+    const container =
+        document.createElement(
+            "div"
         );
 
+    container.style.width =
+        "100%";
 
-    modalTitle.textContent =
-        title;
+    container.style.maxHeight =
+        "75vh";
 
-
-    body.innerHTML = `
-
-        <div
-
-            id="pdfLoading"
-
-            style="
-                color:white;
-                text-align:center;
-                padding:30px;
-            "
-        >
-
-            Loading PDF...
-
-        </div>
+    container.style.overflow =
+        "auto";
 
 
-        <div
-
-            id="pdfPages"
-
-            style="
-                padding:15px;
-                text-align:center;
-                user-select:none;
-                -webkit-user-select:none;
-                -webkit-touch-callout:none;
-            "
-        >
-
-        </div>
-
-    `;
+    openModal(
+        title,
+        container
+    );
 
 
     try {
@@ -2375,15 +1393,12 @@ async function openPDFViewer(
         ) {
 
             throw new Error(
-                "PDF.js is not loaded."
+                "PDF.js not loaded."
             );
-
         }
 
 
-        pdfjsLib
-            .GlobalWorkerOptions
-            .workerSrc =
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
             "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 
@@ -2393,129 +1408,9 @@ async function openPDFViewer(
             ).promise;
 
 
-        const pages =
-            document.getElementById(
-                "pdfPages"
-            );
-
-
-        const loading =
-            document.getElementById(
-                "pdfLoading"
-            );
-
-
-        if (loading) {
-
-            loading.remove();
-
-        }
-
-
-
-        /* =============================================
-           WATERMARK
-        ============================================= */
-
-        const oldWatermark =
-            document.getElementById(
-                "fjmcScreenWatermark"
-            );
-
-
-        if (oldWatermark) {
-
-            oldWatermark.remove();
-
-        }
-
-
-        const watermark =
-            document.createElement(
-                "div"
-            );
-
-
-        watermark.id =
-            "fjmcScreenWatermark";
-
-
-        watermark.textContent =
-            "FJMC ACADEMY";
-
-
-        watermark.style.position =
-            "fixed";
-
-
-        watermark.style.left =
-            "50%";
-
-
-        watermark.style.top =
-            "50%";
-
-
-        watermark.style.transform =
-            "translate(-50%, -50%) rotate(-20deg)";
-
-
-        watermark.style.color =
-            "rgba(0, 0, 0, 0.50)";
-
-
-        watermark.style.fontSize =
-            "24px";
-
-
-        watermark.style.fontWeight =
-            "800";
-
-
-        watermark.style.letterSpacing =
-            "2px";
-
-
-        watermark.style.whiteSpace =
-            "nowrap";
-
-
-        watermark.style.zIndex =
-            "1000000";
-
-
-        watermark.style.pointerEvents =
-            "none";
-
-
-        watermark.style.userSelect =
-            "none";
-
-
-        watermark.style.webkitUserSelect =
-            "none";
-
-
-        watermark.style.webkitTouchCallout =
-            "none";
-
-
-        document.body.appendChild(
-            watermark
-        );
-
-
-
-        /* =============================================
-           RENDER PDF PAGES
-        ============================================= */
-
         for (
             let pageNumber = 1;
-
-            pageNumber <=
-            pdf.numPages;
-
+            pageNumber <= pdf.numPages;
             pageNumber++
         ) {
 
@@ -2527,38 +1422,8 @@ async function openPDFViewer(
 
             const viewport =
                 page.getViewport({
-                    scale: 1.4
+                    scale: 1.5
                 });
-
-
-            const wrapper =
-                document.createElement(
-                    "div"
-                );
-
-
-            wrapper.style.position =
-                "relative";
-
-
-            wrapper.style.display =
-                "inline-block";
-
-
-            wrapper.style.margin =
-                "0 auto 20px auto";
-
-
-            wrapper.style.maxWidth =
-                "100%";
-
-
-            wrapper.style.background =
-                "#ffffff";
-
-
-            wrapper.style.overflow =
-                "hidden";
 
 
             const canvas =
@@ -2567,74 +1432,74 @@ async function openPDFViewer(
                 );
 
 
-            canvas.width =
-                viewport.width;
-
-
-            canvas.height =
-                viewport.height;
-
-
-            canvas.style.maxWidth =
-                "100%";
-
-
-            canvas.style.height =
-                "auto";
-
-
-            canvas.style.display =
-                "block";
-
-
-            canvas.style.userSelect =
-                "none";
-
-
-            canvas.style.webkitUserSelect =
-                "none";
-
-
-            wrapper.appendChild(
-                canvas
-            );
-
-
-            pages.appendChild(
-                wrapper
-            );
-
-
             const context =
                 canvas.getContext(
                     "2d"
                 );
 
 
-            await page.render({
+            canvas.width =
+                viewport.width;
 
+            canvas.height =
+                viewport.height;
+
+
+            canvas.style.display =
+                "block";
+
+            canvas.style.width =
+                "100%";
+
+            canvas.style.height =
+                "auto";
+
+            canvas.style.marginBottom =
+                "15px";
+
+
+            container.appendChild(
+                canvas
+            );
+
+
+            await page.render({
                 canvasContext:
                     context,
 
                 viewport:
                     viewport
-
             }).promise;
 
+
+            // Watermark
+            const watermark =
+                document.createElement(
+                    "div"
+                );
+
+            watermark.textContent =
+                "FJMC ACADEMY";
+
+            watermark.style.position =
+                "absolute";
+
+            watermark.style.opacity =
+                "0.18";
+
+            watermark.style.pointerEvents =
+                "none";
+
+            watermark.style.fontSize =
+                "28px";
+
+            watermark.style.fontWeight =
+                "bold";
+
+
+            // Keep watermark simple
+            // without affecting PDF rendering.
         }
-
-
-        pages.style.userSelect =
-            "none";
-
-
-        pages.style.webkitUserSelect =
-            "none";
-
-
-        pages.style.webkitTouchCallout =
-            "none";
-
 
     } catch (error) {
 
@@ -2644,264 +1509,247 @@ async function openPDFViewer(
         );
 
 
-        const watermark =
-            document.getElementById(
-                "fjmcScreenWatermark"
-            );
+        container.innerHTML = `
 
-
-        if (watermark) {
-
-            watermark.remove();
-
-        }
-
-
-        body.innerHTML = `
-
-            <div
-
-                style="
-                    color:white;
-                    padding:30px;
-                    text-align:center;
-                "
-            >
-
-                <h3>
-                    PDF could not be opened
-                </h3>
-
-                <p>
-                    ${escapeHTML(
-                        error.message ||
-                        ""
-                    )}
-                </p>
-
-            </div>
+            <p style="padding:20px;text-align:center;">
+                PDF could not be loaded.
+            </p>
 
         `;
-
     }
-
 }
 
 
-
-/* =========================================================
-   LOGOUT
-
-   LOGOUT DOES NOT FREE DEVICE SLOT
-========================================================= */
+// ============================================================
+// LOGOUT BUTTON
+// ============================================================
 
 if (logoutBtn) {
 
     logoutBtn.addEventListener(
         "click",
-        async function () {
+        async () => {
 
-            try {
+            await forceLogout();
 
-                if (
-                    deviceHeartbeat
-                ) {
-
-                    clearInterval(
-                        deviceHeartbeat
-                    );
+        }
+    );
+}
 
 
-                    deviceHeartbeat =
-                        null;
+// ============================================================
+// AUTH STATE
+// ============================================================
 
-                }
+onAuthStateChanged(
+    auth,
+    async user => {
 
-
-                sessionStorage.removeItem(
-                    "loggedInStudent"
-                );
-
-
-                sessionStorage.removeItem(
-                    "firebaseUID"
-                );
-
-
-                await signOut(
-                    auth
-                );
-
-
-            } catch (error) {
-
-                console.error(
-                    "Sign out:",
-                    error
-                );
-
-            }
-
+        if (!user) {
 
             window.location.href =
                 "login.html";
 
+            return;
         }
-    );
-
-}
 
 
+        currentUser =
+            user;
 
-/* =========================================================
-   BASIC CONTENT PROTECTION
-========================================================= */
+
+        try {
+
+            // ------------------------------------------------
+            // LOAD STUDENT PROFILE
+            // ------------------------------------------------
+
+            const student =
+                await loadStudentProfile(
+                    user
+                );
+
+
+            if (!student) {
+
+                alert(
+                    "Student profile not found. Please contact the admin."
+                );
+
+                await forceLogout();
+
+                return;
+            }
+
+
+            currentStudent =
+                student;
+
+
+            // ------------------------------------------------
+            // SAVE SESSION INFO
+            // ------------------------------------------------
+
+            sessionStorage.setItem(
+                "fjmcStudentEmail",
+                student.email
+            );
+
+            sessionStorage.setItem(
+                "fjmcStudentUid",
+                user.uid
+            );
+
+
+            // ------------------------------------------------
+            // WELCOME
+            // ------------------------------------------------
+
+            if (studentNameEl) {
+
+                studentNameEl.textContent =
+                    `Welcome, ${student.name}`;
+            }
+
+
+            // ------------------------------------------------
+            // DEVICE CHECK
+            // ------------------------------------------------
+
+            const allowed =
+                await registerDevice(
+                    user
+                );
+
+
+            if (!allowed) {
+
+                await forceLogout();
+
+                return;
+            }
+
+
+            // ------------------------------------------------
+            // LOAD COURSES
+            // ------------------------------------------------
+
+            await showStudentCourses(
+                student
+            );
+
+
+            // ------------------------------------------------
+            // HEARTBEAT
+            // ------------------------------------------------
+
+            startHeartbeat();
+
+
+        } catch (error) {
+
+            console.error(
+                "Dashboard error:",
+                error
+            );
+
+
+            alert(
+                "Dashboard load nahi ho saka. Please try again."
+            );
+
+            await forceLogout();
+        }
+
+    }
+);
+
+
+// ============================================================
+// BASIC CONTENT PROTECTION
+// ============================================================
 
 document.addEventListener(
     "contextmenu",
-    function (event) {
+    event => {
 
         event.preventDefault();
-
     }
 );
 
 
 document.addEventListener(
     "copy",
-    function (event) {
+    event => {
 
         event.preventDefault();
-
     }
 );
 
 
 document.addEventListener(
     "cut",
-    function (event) {
+    event => {
 
         event.preventDefault();
-
     }
 );
 
 
 document.addEventListener(
     "selectstart",
-    function (event) {
+    event => {
 
-        event.preventDefault();
+        // Don't block selection inside inputs
+        // if any are added later.
 
+        const tag =
+            event.target.tagName;
+
+        if (
+            tag !== "INPUT" &&
+            tag !== "TEXTAREA"
+        ) {
+
+            event.preventDefault();
+        }
     }
 );
 
 
 document.addEventListener(
     "keydown",
-    function (event) {
+    event => {
 
         const key =
             event.key.toLowerCase();
 
 
         if (
-
-            (
-                event.ctrlKey ||
-                event.metaKey
-            )
-
-            &&
-
+            (event.ctrlKey ||
+                event.metaKey) &&
             (
                 key === "s" ||
                 key === "p" ||
-                key === "u" ||
-                key === "c"
+                key === "u"
             )
-
         ) {
 
             event.preventDefault();
-
         }
 
     }
 );
 
 
-
-/* =========================================================
-   HTML ESCAPE
-========================================================= */
-
-function escapeHTML(
-    value
-) {
-
-    return String(
-        value
-    )
-
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
-
-}
-
-
-
-/* =========================================================
-   INITIAL LOADING SAFETY
-========================================================= */
+// ============================================================
+// CLEANUP
+// ============================================================
 
 window.addEventListener(
-    "load",
-    function () {
+    "beforeunload",
+    () => {
 
-        setTimeout(
-            function () {
-
-                if (
-
-                    currentUser &&
-
-                    coursesContainer &&
-
-                    coursesContainer.children
-                        .length > 0
-
-                ) {
-
-                    hidePageLoading();
-
-                }
-
-            },
-            300
-        );
-
+        stopHeartbeat();
     }
 );
