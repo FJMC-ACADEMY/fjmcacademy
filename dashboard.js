@@ -393,7 +393,7 @@ const COURSES = {
                 type: "video",
                 title: "Batch 2 - Lecture 1",
                 url:
-                    "https://www.youtube.com/embed/dQw4w9WgXcQ"
+                    "https://youtu.be/hhjuLjGMxgw"
             },
 
             {
