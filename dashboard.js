@@ -407,7 +407,7 @@ const COURSES = {
                 type: "pdf",
                 title: "Batch 2 Chapter 3 PDF",
                 url:
-                    "ch03.pdf"
+                    "7. Strings.pdf"
             },
 
             {
